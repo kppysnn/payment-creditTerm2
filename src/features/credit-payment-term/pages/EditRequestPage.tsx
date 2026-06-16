@@ -1,0 +1,123 @@
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useCurrentUser } from '../../../app/UserContext'
+import { getRequestById, saveDraft, resubmitRequest, submitRequest } from '../services/creditTermService'
+import type { Request, QuotationItem, PaymentInstallment, SaleType, PaymentCondition } from '../types/request'
+import type { RequestCustomerInfo } from '../types/customer'
+import { RequestFormStepper } from '../components/RequestFormStepper'
+import { calcGrossProfit, calcMarginPercent, calcInstallmentAmount } from '../utils/calculations'
+import { generateId } from '../data/mockRequests'
+import { canEditRequest } from '../utils/permissions'
+import { Alert } from '../../../components/ui/Alert'
+
+function numVal(v: unknown): number { return Number(v) || 0 }
+
+function buildPatch(data: Record<string, unknown>, user: { id: string; name: string; email: string }): Partial<Request> {
+  const saleType = String(data.saleType || '') as SaleType
+  const showHw = saleType === 'hardware' || saleType === 'mixed'
+  const showSw = saleType === 'software_installation' || saleType === 'mixed'
+
+  const customerType = String(data.customerType || '') as 'new' | 'existing' | 'reseller'
+  let customerInfo: RequestCustomerInfo
+  if (customerType === 'new') customerInfo = { type: 'new', data: data.newCustomer as never }
+  else if (customerType === 'existing') customerInfo = { type: 'existing', data: { ...(data.existingCustomer as never), customerId: String(data.existingCustomerId ?? '') } }
+  else customerInfo = { type: 'reseller', data: data.reseller as never }
+
+  const items: QuotationItem[] = []
+  if (showHw) {
+    const hwItems = (data.hardwareItems as Array<{ name: string; description: string; sellingPrice: number | ''; cost: number | ''; remark: string }>) ?? []
+    hwItems.forEach(h => {
+      const sp = numVal(h.sellingPrice); const cost = numVal(h.cost); const gp = calcGrossProfit(sp, cost)
+      items.push({ itemId: generateId('item'), type: 'hardware', name: h.name, description: h.description, sellingPrice: sp, cost, grossProfit: gp, marginPercent: calcMarginPercent(sp, gp), remark: h.remark })
+    })
+  }
+  if (showSw) {
+    const swSp = numVal(data.softwareSellingPrice); const swCost = numVal(data.softwareCost); const swGp = calcGrossProfit(swSp, swCost)
+    if (swSp > 0) items.push({ itemId: generateId('item'), type: 'software', name: String(data.softwareName || ''), description: String(data.softwareDescription || ''), sellingPrice: swSp, cost: swCost, grossProfit: swGp, marginPercent: calcMarginPercent(swSp, swGp), remark: String(data.softwareRemark || '') })
+    const instSp = numVal(data.installationSellingPrice); const instCost = numVal(data.installationCost); const instGp = calcGrossProfit(instSp, instCost)
+    if (instSp > 0) items.push({ itemId: generateId('item'), type: 'installation', name: 'Installation', description: String(data.installationDescription || ''), sellingPrice: instSp, cost: instCost, grossProfit: instGp, marginPercent: calcMarginPercent(instSp, instGp), remark: String(data.installationRemark || '') })
+  }
+
+  const totalSelling = items.reduce((s, i) => s + i.sellingPrice, 0)
+  const totalCost = items.reduce((s, i) => s + i.cost, 0)
+  const grossProfit = totalSelling - totalCost
+  const marginPercent = calcMarginPercent(totalSelling, grossProfit)
+  const installmentCount = numVal(data.installmentCount) || 1
+  const rawInst = (data.installments as Array<{ installmentPercent: number | ''; creditTermDays: number | ''; paymentCondition: string; creditTermReason: string; remark: string }>) ?? []
+  const installments: PaymentInstallment[] = rawInst.slice(0, installmentCount).map((row, i) => ({
+    installmentNo: i + 1, installmentPercent: numVal(row.installmentPercent),
+    installmentAmount: calcInstallmentAmount(totalSelling, numVal(row.installmentPercent)),
+    creditTermDays: numVal(row.creditTermDays), paymentCondition: row.paymentCondition as PaymentCondition,
+    creditTermReason: row.creditTermReason, remark: row.remark ?? '',
+  }))
+  const maxCreditTerm = installments.reduce((m, i) => Math.max(m, i.creditTermDays), 0)
+
+  return {
+    proposalNo: String(data.proposalNo || ''),
+    quotationNo: String(data.quotationNo || ''),
+    projectName: String(data.projectName || ''),
+    saleType, requestPurpose: String(data.requestPurpose || ''), remark: String(data.remark || ''),
+    customerInfo, quotationItems: items, installmentCount,
+    paymentTermReason: String(data.paymentTermReason || ''),
+    creditTermReason: String(data.overallCreditTermReason || ''),
+    installments,
+    financial: { totalSelling, totalCost, grossProfit, marginPercent, maxCreditTerm },
+  }
+}
+
+export function EditRequestPage() {
+  const { id } = useParams<{ id: string }>()
+  const { currentUser } = useCurrentUser()
+  const navigate = useNavigate()
+  const [req, setReq] = useState<Request | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!id) return
+    getRequestById(id).then(r => { setReq(r ?? null); setLoading(false) })
+  }, [id])
+
+  if (loading) return <div style={{ padding: 48, textAlign: 'center', color: '#A0AEC0' }}>กำลังโหลด...</div>
+  if (!req) return <div style={{ padding: 48, textAlign: 'center', color: '#A0AEC0' }}>ไม่พบคำขอ</div>
+  if (!canEditRequest(currentUser, req)) return (
+    <Alert type="error">คุณไม่มีสิทธิ์แก้ไขคำขอนี้</Alert>
+  )
+
+  const isResubmit = req.status === 'rejected'
+
+  async function handleSaveDraft(data: Record<string, unknown>) {
+    if (!id) return
+    const patch = buildPatch(data, currentUser)
+    await saveDraft(id, patch, currentUser)
+    navigate(`/requests/${id}`)
+  }
+
+  async function handleSubmit(data: Record<string, unknown>) {
+    if (!id) return
+    if (isResubmit) {
+      const patch = buildPatch(data, currentUser)
+      await resubmitRequest(id, patch, currentUser)
+    } else {
+      const patch = buildPatch(data, currentUser)
+      await saveDraft(id, patch, currentUser)
+      await submitRequest(id, currentUser)
+    }
+    navigate(`/requests/${id}`)
+  }
+
+  return (
+    <div>
+      <h1 style={{ margin: '0 0 24px', fontSize: 22, fontWeight: 700 }}>
+        {isResubmit ? 'แก้ไขและส่งขออนุมัติอีกครั้ง' : 'แก้ไขคำขอ'} — {req.requestNo}
+      </h1>
+      <RequestFormStepper
+        initialRequest={req}
+        currentUser={currentUser}
+        onSaveDraft={handleSaveDraft}
+        onSubmit={handleSubmit}
+        onResubmit={handleSubmit}
+        isResubmit={isResubmit}
+      />
+    </div>
+  )
+}
