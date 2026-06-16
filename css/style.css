@@ -295,8 +295,8 @@ ul, ol { list-style: none; }
 .btn-primary {
   background: var(--gradient-primary);
   color: #F8F9FA;
-  border-color: rgba(0,64,129,0.40);
-  box-shadow: 0 1px 2px rgba(0,64,129,0.10);
+  border-color: transparent;
+  box-shadow: none;
 }
 .btn-primary:hover:not(:disabled) {
   box-shadow: var(--shadow-hover);
@@ -389,13 +389,21 @@ ul, ol { list-style: none; }
 table.data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
 .data-table thead { background: var(--surface-2); border-bottom: 1px solid var(--border); }
 .data-table th { padding: 12px 16px; text-align: left; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-secondary); white-space: nowrap; }
-.data-table td { padding: 14px 16px; color: var(--body-text); border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table td { padding: 14px 16px; color: var(--body-text); border-bottom: 1px solid var(--border); vertical-align: middle; height: 64px; }
+.data-table.compact-table td { height: 54px; }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tbody tr { transition: background var(--transition); }
 .data-table tbody tr:hover { background: var(--surface-2); }
 .td-actions { display: flex; align-items: center; gap: 6px; }
 .td-bold { font-weight: 600; color: var(--ink); }
 .td-mono { font-size: 0.8rem; color: var(--text-secondary); letter-spacing: .02em; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.request-row td { min-height: 64px; }
+.request-customer-cell,
+.request-type-cell { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-height: 42px; }
+.request-customer-cell strong,
+.request-type-cell span { color: var(--ink); font-weight: 600; }
+.request-customer-cell span,
+.request-type-cell small { color: var(--text-muted); font-size: 0.75rem; line-height: 1.35; }
 
 /* Filter Bar */
 .filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -475,6 +483,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .quick-form-summary { position: sticky; top: calc(var(--topbar-h) + 20px); }
 .quick-form-section { display: flex; flex-direction: column; gap: 18px; }
 .quick-summary-body { display: flex; flex-direction: column; gap: 14px; }
+.quick-total-grid { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .quick-form-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 .readonly-pill {
   min-height: 40px;
@@ -487,6 +496,41 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   color: var(--text-secondary);
 }
 .radio-card.compact { min-width: 210px; }
+.quote-price-card,
+.quote-detail-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--surface);
+}
+.quote-price-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.quote-price-total {
+  padding: 7px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--teal-100);
+  color: var(--navy);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.quote-grand-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(0,64,129,0.18);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.quote-grand-total span { color: var(--text-secondary); font-size: 0.84rem; font-weight: 600; }
+.quote-grand-total strong { color: var(--navy); font-size: 1.1rem; }
 .installment-table .data-table th,
 .installment-table .data-table td { padding: 10px 12px; }
 .installment-table .input-group .form-control { min-width: 76px; }
@@ -735,6 +779,10 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   .radio-card.compact { min-width: 100%; }
   .quick-form-section { gap: 14px; }
   .installment-table .data-table { min-width: 680px; }
+  .quote-price-head,
+  .quote-grand-total { align-items: flex-start; flex-direction: column; }
+  .quote-price-total,
+  .quote-grand-total strong { width: 100%; text-align: left; }
 }
 @media (max-width: 480px) {
   .stat-grid { grid-template-columns: 1fr; }

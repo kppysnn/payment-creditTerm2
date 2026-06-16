@@ -28,7 +28,7 @@ PCT.Pages.Requests = {
             <select class="form-control filter-select" id="req-type-filter">
               <option value="">ประเภทคำขอทั้งหมด</option>
               <option value="hardware">Hardware</option>
-              <option value="software_installation">Software & Installation</option>
+              <option value="hardware_software_installation">Hardware + Software & Installation</option>
               <option value="credit_term">วงเงินเครดิต</option>
               <option value="payment_term">เงื่อนไขชำระเงิน</option>
               <option value="both">ทั้งสองรายการ</option>
@@ -60,6 +60,8 @@ PCT.Pages.Requests = {
     if (search) reqs = reqs.filter(r =>
       r.requestNo.toLowerCase().includes(search) ||
       (r.quotationRef || '').toLowerCase().includes(search) ||
+      (r.quotationRefs?.hardware || '').toLowerCase().includes(search) ||
+      (r.quotationRefs?.softwareInstallation || '').toLowerCase().includes(search) ||
       r.customerName.toLowerCase().includes(search) ||
       (r.endCustomerName || '').toLowerCase().includes(search)
     );
@@ -77,11 +79,24 @@ PCT.Pages.Requests = {
 
     const rows = page.map(r => {
       const canCancel = r.status === 'pending' && (r.requestedBy === user.id || user.role === 'admin');
+      const quoteText = r.quotationRefs?.softwareInstallation
+        ? `${r.quotationRefs.hardware} / ${r.quotationRefs.softwareInstallation}`
+        : (r.quotationRef || r.quotationRefs?.hardware || '');
       return `
-        <tr>
+        <tr class="request-row">
           <td><span class="td-mono">${PCT.Utils.escapeHtml(r.requestNo)}</span></td>
-          <td class="td-bold">${PCT.Utils.escapeHtml(r.customerName)}${r.endCustomerName ? `<br><span class="text-xs text-muted">ปลายทาง: ${PCT.Utils.escapeHtml(r.endCustomerName)}</span>` : `<br><span class="text-xs text-muted">${PCT.Utils.escapeHtml(r.customerCode)}</span>`}</td>
-          <td>${PCT.REQUEST_TYPE_LABELS[r.type] || r.type}</td>
+          <td>
+            <div class="request-customer-cell">
+              <strong>${PCT.Utils.escapeHtml(r.customerName)}</strong>
+              <span>${r.endCustomerName ? `ปลายทาง: ${PCT.Utils.escapeHtml(r.endCustomerName)}` : PCT.Utils.escapeHtml(r.customerCode || '—')}</span>
+            </div>
+          </td>
+          <td>
+            <div class="request-type-cell">
+              <span>${PCT.REQUEST_TYPE_LABELS[r.type] || r.type}</span>
+              ${quoteText ? `<small class="td-mono">${PCT.Utils.escapeHtml(quoteText)}</small>` : ''}
+            </div>
+          </td>
           <td>${r.salePrice ? PCT.Utils.formatCurrency(r.salePrice) : r.creditAmount ? PCT.Utils.formatCurrency(r.creditAmount) : r.paymentTermDays ? r.paymentTermDays+' วัน' : '—'}</td>
           <td>${PCT.Utils.statusBadge(r.status)}</td>
           <td class="text-secondary text-sm">${PCT.Utils.formatDate(r.createdAt)}</td>
@@ -96,7 +111,7 @@ PCT.Pages.Requests = {
       <div class="table-container" style="border:none;border-radius:0">
         <table class="data-table">
           <thead><tr>
-            <th>เลขที่คำขอ</th><th>ลูกค้า</th><th>ประเภท</th><th>วงเงิน/เทอม</th><th>สถานะ</th><th>วันที่สร้าง</th><th></th>
+            <th>เลขที่คำขอ</th><th>ลูกค้า</th><th>ประเภท / Quotation</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่สร้าง</th><th></th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>

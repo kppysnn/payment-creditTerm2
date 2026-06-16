@@ -48,7 +48,8 @@ PCT.REQUEST_TYPE_LABELS = {
   credit_term:  'วงเงินเครดิต',
   both:         'ทั้งสองรายการ',
   hardware:     'Hardware',
-  software_installation: 'Software & Installation'
+  software_installation: 'Software & Installation',
+  hardware_software_installation: 'Hardware + Software & Installation'
 };
 
 PCT.PAYMENT_METHOD_LABELS = {

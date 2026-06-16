@@ -14,7 +14,7 @@ PCT.Pages.RequestDetail = {
     const canCancel   = user.role === 'sales'       && (req.status === 'draft' || req.status === 'revision_needed') && req.requestedBy === user.id;
     const canResubmit = user.role === 'sales'       && req.status === 'revision_needed' && req.requestedBy === user.id;
 
-    const isSimpleSale = req.type === 'hardware' || req.type === 'software_installation';
+    const isSimpleSale = req.type === 'hardware' || req.type === 'software_installation' || req.type === 'hardware_software_installation';
 
     /* Category labels */
     const catLabels = { hardware:'Hardware', software:'Software', installation:'Installation', maintenance:'Maintenance' };
@@ -24,33 +24,55 @@ PCT.Pages.RequestDetail = {
         <td class="td-bold">งวด ${row.installmentNo}</td>
         <td>${row.percent}%</td>
         <td>${row.creditDays || 0} วัน</td>
-        <td>${PCT.Utils.escapeHtml(row.creditReason || '—')}</td>
       </tr>`).join('');
 
+    const quotationRefs = req.quotationRefs || {
+      hardware: req.quotationRef || '',
+      softwareInstallation: req.type === 'software_installation' ? req.quotationRef : ''
+    };
+    const hasSoftwareInstall = req.type === 'software_installation' || req.type === 'hardware_software_installation';
     const simpleSaleTerms = isSimpleSale ? `
-      <div class="section-label">${req.type === 'hardware' ? 'Quotation-1 (Hardware)' : 'Quotation-2 (Software & Installation)'}</div>
+      <div class="section-label">Quotation Summary</div>
       <div class="info-grid mb-4">
         <div><div class="info-item-label">เลข Proposal</div><div class="info-item-value td-mono">${PCT.Utils.escapeHtml(req.proposalNo || '—')}</div></div>
-        <div><div class="info-item-label">เลข Quotation</div><div class="info-item-value td-mono" style="color:var(--navy);font-weight:700">${PCT.Utils.escapeHtml(req.quotationRef || '—')}</div></div>
+        <div><div class="info-item-label">เลข Quotation</div><div class="info-item-value td-mono" style="color:var(--navy);font-weight:700">${PCT.Utils.escapeHtml(quotationRefs.softwareInstallation ? `${quotationRefs.hardware} / ${quotationRefs.softwareInstallation}` : (quotationRefs.hardware || '—'))}</div></div>
         <div><div class="info-item-label">ขายรวม</div><div class="info-item-value" style="font-size:1.1rem;color:var(--navy);font-weight:700">${PCT.Utils.formatCurrency(req.salePrice || req.dealValue)}</div></div>
         <div><div class="info-item-label">ต้นทุนรวม</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.costPrice)}</div></div>
       </div>
-      ${req.type === 'hardware' ? `
+      <div class="quote-detail-card mb-4">
+        <div class="quote-price-head">
+          <div>
+            <div class="section-label">Quotation No. -1</div>
+            <div class="td-mono">${PCT.Utils.escapeHtml(quotationRefs.hardware || req.quotationRef || '—')}</div>
+          </div>
+          <div class="quote-price-total">รวม ${PCT.Utils.formatCurrency(req.quotation1Sale || req.hardwareSalePrice || req.salePrice || 0)}</div>
+        </div>
         <div class="info-grid mb-4">
-          <div><div class="info-item-label">ราคาขาย HW</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.hardwareSalePrice || req.salePrice)}</div></div>
-          <div><div class="info-item-label">ราคาต้นทุน HW</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.hardwareCostPrice || req.costPrice)}</div></div>
-        </div>` : `
+          <div><div class="info-item-label">ราคาขาย Hardware</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.hardwareSalePrice || req.salePrice || 0)}</div></div>
+          <div><div class="info-item-label">ราคาทุน Hardware</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.hardwareCostPrice || req.costPrice || 0)}</div></div>
+        </div>
+      </div>
+      ${hasSoftwareInstall ? `
+      <div class="quote-detail-card mb-4">
+        <div class="quote-price-head">
+          <div>
+            <div class="section-label">Quotation No. -2</div>
+            <div class="td-mono">${PCT.Utils.escapeHtml(quotationRefs.softwareInstallation || req.quotationRef || '—')}</div>
+          </div>
+          <div class="quote-price-total">รวม ${PCT.Utils.formatCurrency(req.quotation2Sale || ((req.softwareSalePrice || 0) + (req.installationSalePrice || 0)))}</div>
+        </div>
         <div class="info-grid mb-4">
-          <div><div class="info-item-label">ราคาขาย SW</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.softwareSalePrice)}</div></div>
-          <div><div class="info-item-label">ราคาต้นทุน SW</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.softwareCostPrice)}</div></div>
-          <div><div class="info-item-label">ราคาขาย Install.</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.installationSalePrice)}</div></div>
-          <div><div class="info-item-label">ราคาต้นทุน Install.</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.installationCostPrice)}</div></div>
-        </div>`}
+          <div><div class="info-item-label">ราคาขาย Software</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.softwareSalePrice)}</div></div>
+          <div><div class="info-item-label">ราคาทุน Software</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.softwareCostPrice)}</div></div>
+          <div><div class="info-item-label">ราคาขาย Installation</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.installationSalePrice)}</div></div>
+          <div><div class="info-item-label">ราคาทุน Installation</div><div class="info-item-value">${PCT.Utils.formatCurrency(req.installationCostPrice)}</div></div>
+        </div>
+      </div>` : ''}
       <div class="section-label">งวดชำระ</div>
       ${installmentRows ? `
         <div class="table-container" style="border-radius:var(--radius);overflow:hidden">
           <table class="data-table">
-            <thead><tr><th>งวด</th><th>%</th><th>Credit</th><th>เพราะอะไร</th></tr></thead>
+            <thead><tr><th>งวด</th><th>%</th><th>Credit</th></tr></thead>
             <tbody>${installmentRows}</tbody>
           </table>
         </div>` : `<div class="info-item-value">${req.installmentCount || 1} งวด</div>`}` : '';

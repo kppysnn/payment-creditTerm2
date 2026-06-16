@@ -88,13 +88,13 @@ PCT.Pages.Reports = {
     }));
 
     /* Type bar */
-    const types = { hardware:0, software_installation:0, credit_term:0, payment_term:0, both:0 };
+    const types = { hardware:0, hardware_software_installation:0, software_installation:0, credit_term:0, payment_term:0, both:0 };
     reqs.forEach(r => { if (types[r.type]!==undefined) types[r.type]++; });
     this._charts.push(new Chart(document.getElementById('chart-type'), {
       type: 'bar',
       data: {
-        labels: ['Hardware','Software & Installation','วงเงินเครดิต','เงื่อนไขชำระ','ทั้งสองรายการ'],
-        datasets: [{ label:'จำนวนคำขอ', data:[types.hardware,types.software_installation,types.credit_term,types.payment_term,types.both],
+        labels: ['Hardware','Hardware + Software & Installation','วงเงินเครดิต','เงื่อนไขชำระ','ทั้งสองรายการ'],
+        datasets: [{ label:'จำนวนคำขอ', data:[types.hardware,(types.hardware_software_installation + types.software_installation),types.credit_term,types.payment_term,types.both],
           backgroundColor:[COLORS.teal,COLORS.navy,'rgba(0,64,129,0.45)',COLORS.slate,'rgba(102,197,197,0.45)'], borderRadius:6 }]
       },
       options: this._barOpts()
