@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCurrentUser } from '../../../app/UserContext'
 import { getRequests } from '../services/creditTermService'
 import type { RequestListItem } from '../types/request'
@@ -56,6 +56,7 @@ function StatCard({ label, count, icon, color, bg }: { label: string; count: num
 
 export function DashboardPage() {
   const { currentUser } = useCurrentUser()
+  const navigate = useNavigate()
   const [requests, setRequests] = useState<RequestListItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -191,7 +192,7 @@ export function DashboardPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr style={{ background: '#F2F6F8', borderBottom: '1px solid #D0D6DF' }}>
-                  {['Request No.', 'Project', 'ลูกค้า', 'Total Selling', 'Max Credit', 'สถานะ', 'อัปเดต', ''].map(h => (
+                  {['Request No.', 'Project', 'ลูกค้า', 'Total Selling', 'Max Credit', 'สถานะ', 'อัปเดต'].map(h => (
                     <th key={h} style={{
                       padding: '10px 14px',
                       textAlign: 'left',
@@ -209,8 +210,9 @@ export function DashboardPage() {
                 {recent.map(req => (
                   <tr
                     key={req.id}
+                    onClick={() => navigate(`/requests/${req.id}`)}
                     className="data-row"
-                    style={{ borderBottom: '1px solid #D0D6DF', transition: 'background 0.1s' }}
+                    style={{ borderBottom: '1px solid #D0D6DF', transition: 'background 0.1s', cursor: 'pointer' }}
                   >
                     <td style={{ padding: '11px 14px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#004081', fontWeight: 600, whiteSpace: 'nowrap' }}>{req.requestNo}</td>
                     <td style={{ padding: '11px 14px', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#001122' }}>{req.projectName}</td>
@@ -221,11 +223,6 @@ export function DashboardPage() {
                     </td>
                     <td style={{ padding: '11px 14px' }}><StatusBadge status={req.status} size="sm" /></td>
                     <td style={{ padding: '11px 14px', color: '#929EB4', fontSize: 12, whiteSpace: 'nowrap' }}>{formatDate(req.updatedAt)}</td>
-                    <td style={{ padding: '11px 14px' }}>
-                      <Link to={`/requests/${req.id}`} style={{ textDecoration: 'none' }}>
-                        <Button variant="ghost" size="sm">ดู</Button>
-                      </Link>
-                    </td>
                   </tr>
                 ))}
               </tbody>
