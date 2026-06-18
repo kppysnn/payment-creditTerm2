@@ -513,7 +513,7 @@ export function RequestFormStepper({
       {/* ─── Section 4: งวดชำระ ─── */}
       <Card title="งวดชำระและ Credit Term">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 18, alignItems: 'end' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, alignItems: 'start' }}>
             <FormGroup label="Credit Term" required error={errors.creditTermDays}>
               {creditTermIsCustom ? (
                 <Input
@@ -547,7 +547,7 @@ export function RequestFormStepper({
 
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: '#001122', marginBottom: 5 }}>จำนวนงวด</div>
-              <div style={{ display: 'inline-grid', gridTemplateColumns: '38px 92px 38px', alignItems: 'center', border: '1px solid #D0D6DF', borderRadius: 8, overflow: 'hidden', background: '#fff', height: 38 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '38px minmax(0, 1fr) 38px', alignItems: 'center', border: '1px solid #D0D6DF', borderRadius: 8, overflow: 'hidden', background: '#fff', height: 38, width: '100%', boxSizing: 'border-box' }}>
                 <button
                   type="button"
                   disabled={installmentCount <= 1}
