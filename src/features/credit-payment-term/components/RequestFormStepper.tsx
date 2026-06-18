@@ -3,10 +3,10 @@ import type { Request } from '../types/request'
 import type { CurrentUser } from '../types/user'
 import type { Customer, CustomerType } from '../types/customer'
 import { CUSTOMER_TYPE_LABELS } from '../types/customer'
-import { PAYMENT_CONDITION_LABELS, type SaleType, type PaymentCondition } from '../types/request'
+import { type SaleType, type PaymentCondition } from '../types/request'
 import { Card } from '../../../components/ui/Card'
 import { Button } from '../../../components/ui/Button'
-import { FormGroup, Input, Select } from '../../../components/ui/FormField'
+import { FormGroup, Input } from '../../../components/ui/FormField'
 import { Alert } from '../../../components/ui/Alert'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
 import { formatCreditTerm } from '../utils/formatters'
@@ -29,6 +29,24 @@ const SALE_TYPES = [
   { value: 'hardware_software_installation', label: 'แยก Quotation' },
 ]
 const CUSTOMER_TYPES: CustomerType[] = ['new', 'existing', 'reseller']
+
+const INSTALLMENT_PRESETS: Record<number, Array<{ label: string; percents: number[] }>> = {
+  2: [
+    { label: '50 / 50', percents: [50, 50] },
+    { label: '30 / 70', percents: [30, 70] },
+    { label: '40 / 60', percents: [40, 60] },
+    { label: '70 / 30', percents: [70, 30] },
+  ],
+  3: [
+    { label: '30 / 30 / 40', percents: [30, 30, 40] },
+    { label: '33 / 33 / 34', percents: [33, 33, 34] },
+    { label: '25 / 50 / 25', percents: [25, 50, 25] },
+  ],
+  4: [
+    { label: '25 / 25 / 25 / 25', percents: [25, 25, 25, 25] },
+    { label: '30 / 30 / 30 / 10', percents: [30, 30, 30, 10] },
+  ],
+}
 
 function numVal(v: unknown): number { return Number(v) || 0 }
 
@@ -80,7 +98,6 @@ export function RequestFormStepper({
   const instSelling = numVal(fd.installationSellingPrice)
   const instCost    = numVal(fd.installationCost)
   const totalSelling = hwSelling + (showSw ? swSelling + instSelling : 0)
-  const totalCost    = hwCost    + (showSw ? swCost    + instCost    : 0)
 
   const totalPct = calcTotalInstallmentPercent(installments.slice(0, installmentCount))
   const pctOk = Math.abs(totalPct - 100) < 0.01
@@ -125,6 +142,14 @@ export function RequestFormStepper({
     update({ installments: updated })
   }
 
+  function applyPreset(percents: number[]) {
+    const updated = percents.map((p, idx) => ({
+      ...(installments[idx] || { creditTermDays: 0, paymentCondition: 'on_delivery' as PaymentCondition }),
+      installmentPercent: p,
+    }))
+    update({ installments: updated, installmentCount: percents.length })
+  }
+
   function validate(): boolean {
     const e: Record<string, string> = {}
     if (!String(fd.proposalNo || '').trim()) e.proposalNo = 'กรุณาระบุ'
@@ -140,7 +165,6 @@ export function RequestFormStepper({
     if (numVal(fd.hardwareSellingPrice) <= 0) e.hwSell = 'กรุณาระบุราคาขาย Hardware'
     installments.slice(0, installmentCount).forEach((row, i) => {
       if (!row.installmentPercent) e[`inst${i}.pct`] = 'ระบุ%'
-      if (!row.paymentCondition) e[`inst${i}.cond`] = 'เลือก'
     })
     if (!pctOk && installmentCount > 0) e.totalPct = `รวม ${totalPct.toFixed(1)}% ≠ 100%`
     setErrors(e)
@@ -255,12 +279,6 @@ export function RequestFormStepper({
             {errors.saleType && <div style={{ fontSize: 12, color: '#F3554F', marginTop: 5 }}>{errors.saleType}</div>}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 8, fontSize: 13 }}>
-            <span style={{ color: '#929EB4', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sales</span>
-            <span style={{ fontWeight: 600, color: '#001122', marginLeft: 4 }}>{String(fd.salesName || '')}</span>
-            <span style={{ color: '#929EB4' }}>·</span>
-            <span style={{ color: '#586782' }}>{String(fd.salesEmail || '')}</span>
-          </div>
         </div>
       </Card>
 
@@ -446,20 +464,6 @@ export function RequestFormStepper({
             </>
           )}
 
-          {/* Grand total */}
-          {totalSelling > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '0 16px', marginTop: 12, paddingTop: 12, borderTop: '2px solid #D0D6DF' }}>
-              <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 600, textTransform: 'uppercase' }}>รวมทั้งหมด</div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 11, color: '#929EB4', marginBottom: 2 }}>ราคาขาย</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#004081', fontFamily: 'JetBrains Mono, monospace' }}>{formatCurrency(totalSelling)}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 11, color: '#929EB4', marginBottom: 2 }}>ราคาทุน</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#586782', fontFamily: 'JetBrains Mono, monospace' }}>{totalCost > 0 ? formatCurrency(totalCost) : '—'}</div>
-              </div>
-            </div>
-          )}
         </div>
       </Card>
 
@@ -481,6 +485,32 @@ export function RequestFormStepper({
             </div>
           </div>
 
+          {/* Preset split suggestions */}
+          {installmentCount >= 2 && (INSTALLMENT_PRESETS[installmentCount] ?? []).length > 0 && (
+            <div>
+              <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>แนะนำสัดส่วน</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {(INSTALLMENT_PRESETS[installmentCount] ?? []).map(p => {
+                  const curPcts = installments.slice(0, installmentCount).map(r => numVal(r.installmentPercent))
+                  const isActive = p.percents.every((v, idx) => v === curPcts[idx])
+                  return (
+                    <button key={p.label} type="button" onClick={() => applyPreset(p.percents)}
+                      style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.1s',
+                        border: `1.5px solid ${isActive ? '#004081' : '#D0D6DF'}`,
+                        background: isActive ? '#004081' : '#fff',
+                        color: isActive ? '#fff' : '#586782' }}
+                    >{p.label}</button>
+                  )
+                })}
+                <button type="button"
+                  onClick={() => { installments.slice(0, installmentCount).forEach((_, i) => updateInst(i, 'installmentPercent', '')) }}
+                  style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    border: '1.5px dashed #D0D6DF', background: '#FAFBFC', color: '#929EB4' }}
+                >ระบุเอง</button>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {installments.slice(0, installmentCount).map((row, i) => {
               const pct = numVal(row.installmentPercent)
@@ -488,8 +518,8 @@ export function RequestFormStepper({
               const q2Amt = showSw && (swSelling + instSelling) > 0 && pct > 0 ? calcInstallmentAmount(swSelling + instSelling, pct) : 0
               const totalAmt = q1Amt + q2Amt
               return (
-                <div key={i} style={{ background: '#FAFBFC', border: `1px solid ${(errors[`inst${i}.pct`] || errors[`inst${i}.cond`]) ? '#F3554F' : '#D0D6DF'}`, borderRadius: 10, overflow: 'hidden' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '28px 80px 1fr 1fr auto', gap: '0 10px', alignItems: 'center', padding: '10px 14px' }}>
+                <div key={i} style={{ background: '#FAFBFC', border: `1px solid ${errors[`inst${i}.pct`] ? '#F3554F' : '#D0D6DF'}`, borderRadius: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '28px 80px 1fr auto', gap: '0 10px', alignItems: 'center', padding: '10px 14px' }}>
                     <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
                     <FormGroup error={errors[`inst${i}.pct`]}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -510,37 +540,28 @@ export function RequestFormStepper({
                         )}
                       </div>
                     </FormGroup>
-                    <FormGroup error={errors[`inst${i}.cond`]}>
-                      <Select value={row.paymentCondition} onChange={e => updateInst(i, 'paymentCondition', e.target.value)} error={errors[`inst${i}.cond`]}>
-                        <option value="">— เงื่อนไข —</option>
-                        {(Object.entries(PAYMENT_CONDITION_LABELS) as [PaymentCondition, string][]).map(([k, v]) => (
-                          <option key={k} value={k}>{v}</option>
-                        ))}
-                      </Select>
-                    </FormGroup>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 100 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 110 }}>
                       {showSw && q1Amt > 0 && <div style={{ fontSize: 11, color: '#586782' }}>Q1 <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: '#004081' }}>{formatCurrency(q1Amt)}</span></div>}
                       {showSw && q2Amt > 0 && <div style={{ fontSize: 11, color: '#586782' }}>Q2 <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: '#004081' }}>{formatCurrency(q2Amt)}</span></div>}
                       {totalAmt > 0 && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: showSw ? 12 : 13, fontWeight: 700, color: '#004081', borderTop: showSw ? '1px solid #D0D6DF' : 'none', paddingTop: showSw ? 2 : 0 }}>{formatCurrency(totalAmt)}</div>}
                     </div>
                   </div>
-                  {/* Preset % chips */}
-                  <div style={{ display: 'flex', gap: 6, padding: '6px 14px 10px', flexWrap: 'wrap' }}>
-                    {[10, 20, 25, 30, 40, 50, 60, 70, 75, 100].map(p => (
-                      <button key={p} type="button"
-                        onClick={() => updateInst(i, 'installmentPercent', p)}
-                        style={{
-                          padding: '2px 9px', borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: 'pointer', transition: 'all 0.1s',
-                          border: `1px solid ${pct === p ? '#004081' : '#D0D6DF'}`,
-                          background: pct === p ? '#004081' : '#fff',
-                          color: pct === p ? '#fff' : '#586782',
-                        }}
-                      >{p}%</button>
-                    ))}
-                  </div>
                 </div>
               )
             })}
+          </div>
+
+          {/* 100% progress bar */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+              <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>รวมสัดส่วนงวดทั้งหมด</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#66C5C5' : '#F3554F' }}>
+                {totalPct.toFixed(0)}%{pctOk ? ' ✓' : ' ≠ 100%'}
+              </span>
+            </div>
+            <div style={{ height: 7, background: '#E2E8F0', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(totalPct, 100)}%`, background: pctOk ? '#66C5C5' : '#F3554F', borderRadius: 4, transition: 'width 0.3s' }} />
+            </div>
           </div>
 
           {/* Grand total summary — Q1/Q2 breakdown */}
@@ -563,9 +584,6 @@ export function RequestFormStepper({
                 <div style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#004081', fontSize: showSw ? 16 : 14 }}>{formatCurrency(totalSelling)}</div>
               </div>
             </div>
-          )}
-          {!pctOk && installmentCount > 0 && (
-            <div style={{ fontSize: 12, color: '#F3554F' }}>⚠ รวม {totalPct.toFixed(1)}% ≠ 100% — กรุณาตรวจสอบ</div>
           )}
         </div>
       </Card>
