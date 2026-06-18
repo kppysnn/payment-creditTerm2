@@ -77,6 +77,7 @@ export function RequestFormStepper({
   const [submitLoading, setSubmitLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [customPercentRows, setCustomPercentRows] = useState<Record<number, boolean>>({})
+  const [customCreditTerm, setCustomCreditTerm] = useState(false)
 
   const fd = formData
   const saleType = String(fd.saleType || '') as SaleType
@@ -117,7 +118,8 @@ export function RequestFormStepper({
   const pctOk = Math.abs(totalPct - 100) < 0.01
   const pctDelta = totalPct - 100
   const creditTermDays = numVal(fd.creditTermDays)
-  const creditTermPresetValue = CREDIT_TERM_PRESETS.includes(creditTermDays) ? String(creditTermDays) : 'custom'
+  const creditTermIsCustom = customCreditTerm || (fd.creditTermDays !== '' && !CREDIT_TERM_PRESETS.includes(creditTermDays))
+  const creditTermPresetValue = fd.creditTermDays === '' ? '' : (CREDIT_TERM_PRESETS.includes(creditTermDays) ? String(creditTermDays) : 'custom')
 
   function update(patch: Record<string, unknown>) {
     setFormData(prev => ({ ...prev, ...patch }))
@@ -141,6 +143,7 @@ export function RequestFormStepper({
       existingCustomer: { companyName: c.companyName, taxId: c.taxId ?? '', defaultCreditTerm: c.defaultCreditTerm ?? 0, contactPerson: c.contactPerson ?? '', contactPhone: c.contactPhone ?? '' },
       creditTermDays: c.defaultCreditTerm ?? 0,
     })
+    setCustomCreditTerm(false)
     setExistingDropdownOpen(false)
     setExistingResults([])
   }
@@ -162,6 +165,7 @@ export function RequestFormStepper({
       reseller: { ...rs, resellerId: c.id, resellerCompanyName: c.companyName, defaultCreditTerm: c.defaultCreditTerm ?? 0 },
       creditTermDays: c.defaultCreditTerm ?? 0,
     })
+    setCustomCreditTerm(false)
     setResellerDropdownOpen(false)
     setResellerResults([])
   }
@@ -180,6 +184,15 @@ export function RequestFormStepper({
     }))
     setCustomPercentRows({})
     update({ installmentCount: percents.length, installments: updated })
+  }
+
+  function applyCustomInstallments() {
+    const updated = Array.from({ length: installmentCount }, (_, idx) => ({
+      ...(installments[idx] || { creditTermDays: 0, paymentCondition: 'on_delivery' as PaymentCondition }),
+      installmentPercent: '' as '',
+    }))
+    setCustomPercentRows(Object.fromEntries(Array.from({ length: installmentCount }, (_, idx) => [idx, true])))
+    update({ installments: updated })
   }
 
   function validate(): boolean {
@@ -221,15 +234,6 @@ export function RequestFormStepper({
   }
 
   /* ── Shared styles ── */
-  const radioCard = (active: boolean, color = '#004081') => ({
-    display: 'flex', alignItems: 'center', gap: 10,
-    padding: '10px 14px',
-    border: `2px solid ${active ? color : '#D0D6DF'}`,
-    borderRadius: 10, cursor: 'pointer',
-    background: active ? `${color}12` : '#fff',
-    transition: 'all 0.15s',
-  } as React.CSSProperties)
-
   const comboDropdown = (
     results: Customer[],
     visible: boolean,
@@ -330,20 +334,20 @@ export function RequestFormStepper({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, borderLeft: '1px solid #D0D6DF', paddingLeft: 28, minWidth: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.08em' }}>ข้อมูลลูกค้า</div>
 
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#586782', marginBottom: 8 }}>ประเภทลูกค้า <span style={{ color: '#F3554F' }}>*</span></div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {CUSTOMER_TYPES.map(type => (
-                <label key={type} style={{ flex: 1, ...radioCard(customerType === type, '#66C5C5') }}>
-                  <input type="radio" name="customerType" value={type} checked={customerType === type}
-                    onChange={() => { update({ customerType: type }); setExistingDropdownOpen(false); setResellerDropdownOpen(false) }}
-                    style={{ accentColor: '#66C5C5', flexShrink: 0 }} />
-                  <span style={{ fontWeight: 600, fontSize: 13, color: customerType === type ? '#004081' : '#001122' }}>
-                    {CUSTOMER_TYPE_LABELS[type]}
-                  </span>
-                </label>
-              ))}
-            </div>
-            {errors.customerType && <div style={{ fontSize: 12, color: '#F3554F', marginTop: 5 }}>{errors.customerType}</div>}
+            <FormGroup label="ประเภทลูกค้า" required error={errors.customerType}>
+              <Select
+                value={customerType}
+                onChange={e => {
+                  update({ customerType: e.target.value })
+                  setExistingDropdownOpen(false)
+                  setResellerDropdownOpen(false)
+                }}
+                error={errors.customerType}
+              >
+                <option value="">— เลือกประเภทลูกค้า —</option>
+                {CUSTOMER_TYPES.map(type => <option key={type} value={type}>{CUSTOMER_TYPE_LABELS[type]}</option>)}
+              </Select>
+            </FormGroup>
 
             {/* ลูกค้าใหม่ */}
             {customerType === 'new' && (
@@ -509,27 +513,30 @@ export function RequestFormStepper({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ maxWidth: 220 }}>
             <FormGroup label="Credit Term" required error={errors.creditTermDays}>
-              <Select
-                value={creditTermPresetValue}
-                onChange={e => {
-                  update({ creditTermDays: e.target.value === 'custom' ? '' : Number(e.target.value) })
-                }}
-                error={errors.creditTermDays}
-                style={selectStyle}
-              >
-                {CREDIT_TERM_PRESETS.map(days => <option key={days} value={days}>{days} วัน</option>)}
-                <option value="custom">ระบุเอง</option>
-              </Select>
-              {creditTermPresetValue === 'custom' && (
+              {creditTermIsCustom ? (
                 <Input
                   type="number"
                   min="0"
                   value={String(fd.creditTermDays ?? '')}
                   onChange={e => update({ creditTermDays: e.target.value !== '' ? Number(e.target.value) : '' })}
-                  placeholder="ระบุจำนวนวัน"
+                  placeholder="ระบุเอง"
                   error={errors.creditTermDays}
-                  style={{ marginTop: 6 }}
                 />
+              ) : (
+                <Select
+                  value={creditTermPresetValue}
+                  onChange={e => {
+                    const isCustom = e.target.value === 'custom'
+                    setCustomCreditTerm(isCustom)
+                    update({ creditTermDays: isCustom || e.target.value === '' ? '' : Number(e.target.value) })
+                  }}
+                  error={errors.creditTermDays}
+                  style={selectStyle}
+                >
+                  <option value="">— เลือกวัน —</option>
+                  {CREDIT_TERM_PRESETS.map(days => <option key={days} value={days}>{days} วัน</option>)}
+                  <option value="custom">ระบุเอง</option>
+                </Select>
               )}
               {fd.creditTermDays !== '' && fd.creditTermDays !== undefined && (
                 <span style={{ fontSize: 11, color: '#66C5C5', marginTop: 2, fontWeight: 600 }}>{formatCreditTerm(creditTermDays)}</span>
@@ -569,9 +576,7 @@ export function RequestFormStepper({
                 )
               })}
               <button type="button"
-                onClick={() => {
-                  setCustomPercentRows(Object.fromEntries(Array.from({ length: installmentCount }, (_, idx) => [idx, true])))
-                }}
+                onClick={applyCustomInstallments}
                 style={{ padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer',
                   border: '1.5px dashed #586782',
                   background: Object.values(customPercentRows).some(Boolean) ? '#586782' : '#fff',
@@ -596,26 +601,7 @@ export function RequestFormStepper({
                     <span style={{ fontSize: 11, color: '#929EB4', fontWeight: 600 }}>งวดที่ {i + 1}</span>
                   </div>
                   <FormGroup error={errors[`inst${i}.pct`]}>
-                    <Select
-                      value={pctSelectValue}
-                      onChange={e => {
-                        const isCustom = e.target.value === 'custom'
-                        setCustomPercentRows(prev => ({ ...prev, [i]: isCustom }))
-                        updateInst(i, 'installmentPercent', isCustom || e.target.value === '' ? '' : Number(e.target.value))
-                      }}
-                      error={errors[`inst${i}.pct`]}
-                      style={selectStyle}
-                    >
-                      <option value="">— เลือก % —</option>
-                      {INSTALLMENT_PERCENT_PRESETS.map(percent => <option key={percent} value={percent}>{percent}%</option>)}
-                      <option value="custom">ระบุเอง</option>
-                    </Select>
-                    {row.installmentPercent === '' && !customPercentRows[i] && suggestedPct > 0 && (
-                      <div style={{ marginTop: 4, fontSize: 10, color: '#929EB4', fontWeight: 600 }}>
-                        แนะนำ {suggestedPct}%
-                      </div>
-                    )}
-                    {pctIsCustom && (
+                    {pctIsCustom ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
                         <Input type="number" min="1" max="100" value={row.installmentPercent}
                           onChange={e => updateInst(i, 'installmentPercent', e.target.value ? Number(e.target.value) : '')}
@@ -623,6 +609,28 @@ export function RequestFormStepper({
                           style={{ textAlign: 'right', flex: 1 }} error={errors[`inst${i}.pct`]} />
                         <span style={{ color: '#586782', fontSize: 12, fontWeight: 600 }}>%</span>
                       </div>
+                    ) : (
+                      <>
+                        <Select
+                          value={pctSelectValue}
+                          onChange={e => {
+                            const isCustom = e.target.value === 'custom'
+                            setCustomPercentRows(prev => ({ ...prev, [i]: isCustom }))
+                            updateInst(i, 'installmentPercent', isCustom || e.target.value === '' ? '' : Number(e.target.value))
+                          }}
+                          error={errors[`inst${i}.pct`]}
+                          style={selectStyle}
+                        >
+                          <option value="">— เลือก % —</option>
+                          {INSTALLMENT_PERCENT_PRESETS.map(percent => <option key={percent} value={percent}>{percent}%</option>)}
+                          <option value="custom">ระบุเอง</option>
+                        </Select>
+                        {row.installmentPercent === '' && suggestedPct > 0 && (
+                          <div style={{ marginTop: 4, fontSize: 10, color: '#929EB4', fontWeight: 600 }}>
+                            แนะนำ {suggestedPct}%
+                          </div>
+                        )}
+                      </>
                     )}
                   </FormGroup>
                   {totalAmt > 0 && (
