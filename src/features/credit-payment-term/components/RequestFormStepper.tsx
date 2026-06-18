@@ -141,6 +141,10 @@ export function RequestFormStepper({
   ]
   const completedSections = sectionStatuses.filter(section => section.missing.length === 0).length
   const readyToSubmit = completedSections === sectionStatuses.length
+  const readinessCompleted = readyToSubmit ? 5 : completedSections
+  const readinessMissingText = sectionStatuses
+    .flatMap(section => section.missing.map(item => `${section.no}.${item}`))
+    .join(', ')
 
   function update(patch: Record<string, unknown>) {
     setFormData(prev => ({ ...prev, ...patch }))
@@ -322,7 +326,6 @@ export function RequestFormStepper({
       {formatCurrency(value)}
     </span>
   )
-  const readinessText = (missing: string[]) => missing.length === 0 ? 'เรียบร้อย' : `ยังขาด: ${missing.join(', ')}`
   const quotationHeader = (quotationNo: string, groupLabel: string, color: string) => (
     <div style={{ background: color, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
       <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 800, color: '#fff' }}>
@@ -770,43 +773,22 @@ export function RequestFormStepper({
 
       {/* ─── Section 5: ตรวจความพร้อมและส่ง ─── */}
       <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 14, padding: '20px 24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 14 }}>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#001122' }}>5. ตรวจความพร้อมและส่ง</div>
-            <div style={{ marginTop: 4, fontSize: 12, color: '#586782' }}>
-              {readyToSubmit ? 'ข้อมูลหลักครบแล้ว พร้อมส่งขออนุมัติ' : `พร้อมแล้ว ${completedSections}/${sectionStatuses.length} ส่วน`}
-            </div>
-          </div>
-          <div style={{ minWidth: 86, textAlign: 'right', fontSize: 20, fontWeight: 800, color: readyToSubmit ? '#008A7A' : '#F3554F', fontFamily: 'JetBrains Mono, monospace' }}>
-            {completedSections}/{sectionStatuses.length}
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 8, marginBottom: 14 }}>
-          {sectionStatuses.map(section => {
-            const done = section.missing.length === 0
-            return (
-              <div key={section.no} style={{ border: `1px solid ${done ? '#BFE7DF' : '#F6C3C0'}`, borderRadius: 8, padding: '9px 10px', background: done ? '#F2FBF8' : '#FFF8F7', minHeight: 74 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
-                  <span style={{ width: 20, height: 20, borderRadius: '50%', background: done ? '#66C5C5' : '#F3554F', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>
-                    {section.no}
-                  </span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#001122', lineHeight: 1.25 }}>{section.title}</span>
-                </div>
-                <div style={{ fontSize: 11, lineHeight: 1.35, color: done ? '#008A7A' : '#B8322C', fontWeight: 600 }}>
-                  {readinessText(section.missing)}
-                </div>
-              </div>
-            )
-          })}
-        </div>
         {submitError && <div style={{ marginBottom: 12, fontSize: 12, color: '#F3554F' }}>{submitError}</div>}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+          <div style={{ fontSize: 11, color: readyToSubmit ? '#008A7A' : '#929EB4', lineHeight: 1.4, minWidth: 0 }}>
+            <span style={{ fontWeight: 800, fontFamily: 'JetBrains Mono, monospace' }}>5. พร้อม {readinessCompleted}/5</span>
+            {!readyToSubmit && readinessMissingText && (
+              <span style={{ color: '#B8322C' }}> · ขาด: {readinessMissingText}</span>
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, flexShrink: 0 }}>
           <Button variant="ghost" icon={<Save size={15} />} onClick={handleDraft} loading={draftLoading} disabled={submitLoading}>
             บันทึกแบบร่าง
           </Button>
           <Button icon={<Send size={15} />} onClick={handleSubmit} loading={submitLoading} disabled={draftLoading}>
             {isResubmit ? 'ส่งขออนุมัติอีกครั้ง' : 'ส่งขออนุมัติ'}
           </Button>
+          </div>
         </div>
       </div>
 
