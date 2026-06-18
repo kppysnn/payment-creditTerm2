@@ -41,10 +41,13 @@ const INSTALLMENT_PRESETS: Record<number, Array<{ label: string; percents: numbe
     { label: '30 / 30 / 40', percents: [30, 30, 40] },
     { label: '33 / 33 / 34', percents: [33, 33, 34] },
     { label: '25 / 50 / 25', percents: [25, 50, 25] },
+    { label: '20 / 30 / 50', percents: [20, 30, 50] },
   ],
   4: [
     { label: '25 / 25 / 25 / 25', percents: [25, 25, 25, 25] },
     { label: '30 / 30 / 30 / 10', percents: [30, 30, 30, 10] },
+    { label: '40 / 20 / 20 / 20', percents: [40, 20, 20, 20] },
+    { label: '20 / 20 / 30 / 30', percents: [20, 20, 30, 30] },
   ],
 }
 
@@ -98,6 +101,10 @@ export function RequestFormStepper({
   const instSelling = numVal(fd.installationSellingPrice)
   const instCost    = numVal(fd.installationCost)
   const totalSelling = hwSelling + (showSw ? swSelling + instSelling : 0)
+  const totalCost    = hwCost    + (showSw ? swCost    + instCost    : 0)
+
+  const curPcts = installments.slice(0, installmentCount).map(r => numVal(r.installmentPercent))
+  const isCustomPreset = installmentCount < 2 ? false : !(INSTALLMENT_PRESETS[installmentCount] ?? []).some(p => p.percents.every((v, idx) => v === curPcts[idx]))
 
   const totalPct = calcTotalInstallmentPercent(installments.slice(0, installmentCount))
   const pctOk = Math.abs(totalPct - 100) < 0.01
@@ -153,7 +160,6 @@ export function RequestFormStepper({
   function validate(): boolean {
     const e: Record<string, string> = {}
     if (!String(fd.proposalNo || '').trim()) e.proposalNo = 'กรุณาระบุ'
-    if (!String(fd.projectName || '').trim()) e.projectName = 'กรุณาระบุ'
     if (!saleType) e.saleType = 'กรุณาเลือก'
     if (!customerType) e.customerType = 'กรุณาเลือก'
     if (customerType === 'new' && !nc?.companyName?.trim()) e['new.companyName'] = 'กรุณาระบุชื่อบริษัท'
@@ -256,14 +262,9 @@ export function RequestFormStepper({
       {/* ─── Section 1: ข้อมูลคำขอ ─── */}
       <Card title="ข้อมูลคำขอ">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 20px' }}>
-            <FormGroup label="Proposal No." required error={errors.proposalNo}>
-              <Input value={String(fd.proposalNo || '')} onChange={e => update({ proposalNo: e.target.value })} placeholder="PRO-2026-001" error={errors.proposalNo} />
-            </FormGroup>
-            <FormGroup label="ชื่อโปรเจกต์" required error={errors.projectName}>
-              <Input value={String(fd.projectName || '')} onChange={e => update({ projectName: e.target.value })} placeholder="ชื่อโปรเจกต์หรืองานที่ขาย" error={errors.projectName} />
-            </FormGroup>
-          </div>
+          <FormGroup label="Proposal No." required error={errors.proposalNo}>
+            <Input value={String(fd.proposalNo || '')} onChange={e => update({ proposalNo: e.target.value })} placeholder="PRO-2026-001" error={errors.proposalNo} />
+          </FormGroup>
 
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#586782', marginBottom: 8 }}>ประเภทการขาย <span style={{ color: '#F3554F' }}>*</span></div>
@@ -332,7 +333,7 @@ export function RequestFormStepper({
                       value={String(ec.companyName ?? '')}
                       onChange={e => onExistingType(e.target.value)}
                       onFocus={async () => {
-                        const r = await searchCustomers(String(ec.companyName ?? ''))
+                        const r = await searchCustomers('')
                         setExistingResults(r); setExistingDropdownOpen(r.length > 0)
                       }}
                       onBlur={() => setTimeout(() => setExistingDropdownOpen(false), 150)}
@@ -382,7 +383,7 @@ export function RequestFormStepper({
                         value={rs.resellerCompanyName ?? ''}
                         onChange={e => onResellerType(e.target.value)}
                         onFocus={async () => {
-                          const r = await searchCustomers(rs.resellerCompanyName ?? '')
+                          const r = await searchCustomers('')
                           setResellerResults(r); setResellerDropdownOpen(r.length > 0)
                         }}
                         onBlur={() => setTimeout(() => setResellerDropdownOpen(false), 150)}
@@ -436,32 +437,51 @@ export function RequestFormStepper({
 
       {/* ─── Section 3: ราคา ─── */}
       <Card title="ราคาขายและต้นทุน">
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
           {/* Hardware group */}
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Hardware</div>
-          {priceRow('Hardware', 'hardwareSellingPrice', 'hardwareCost')}
-          {hwSelling > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '0 16px', padding: '8px 0', borderBottom: '1px solid #E2E8F0' }}>
-              <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 600, textTransform: 'uppercase' }}>รวม HW</div>
-              <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#004081', fontFamily: 'JetBrains Mono, monospace' }}>{formatCurrency(hwSelling)}</div>
-              <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#586782', fontFamily: 'JetBrains Mono, monospace' }}>{hwCost > 0 ? formatCurrency(hwCost) : '—'}</div>
+          <div style={{ border: '1px solid #D0D6DF', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ background: '#002B5C', padding: '7px 14px' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Hardware</span>
             </div>
-          )}
+            <div style={{ padding: '0 14px' }}>
+              {priceRow('Hardware', 'hardwareSellingPrice', 'hardwareCost')}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: '#F2F6F8', borderTop: '1px solid #E2E8F0' }}>
+              <span style={{ fontSize: 11, color: '#586782', fontWeight: 600, textTransform: 'uppercase' }}>รวม Hardware</span>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#004081', fontSize: 14 }}>{hwSelling > 0 ? formatCurrency(hwSelling) : '—'}</span>
+            </div>
+          </div>
 
           {/* Software & Installation group */}
           {showSw && (
-            <>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 20, marginBottom: 4 }}>Software &amp; Installation</div>
-              {priceRow('Software', 'softwareSellingPrice', 'softwareCost')}
-              {priceRow('Installation', 'installationSellingPrice', 'installationCost')}
-              {(swSelling + instSelling) > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '0 16px', padding: '8px 0', borderBottom: '1px solid #E2E8F0' }}>
-                  <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 600, textTransform: 'uppercase' }}>รวม SW/Inst</div>
-                  <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#004081', fontFamily: 'JetBrains Mono, monospace' }}>{formatCurrency(swSelling + instSelling)}</div>
-                  <div style={{ textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#586782', fontFamily: 'JetBrains Mono, monospace' }}>{(swCost + instCost) > 0 ? formatCurrency(swCost + instCost) : '—'}</div>
-                </div>
-              )}
-            </>
+            <div style={{ border: '1px solid #D0D6DF', borderRadius: 10, overflow: 'hidden' }}>
+              <div style={{ background: '#3D5580', padding: '7px 14px' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Software &amp; Installation</span>
+              </div>
+              <div style={{ padding: '0 14px' }}>
+                {priceRow('Software', 'softwareSellingPrice', 'softwareCost')}
+                {priceRow('Installation', 'installationSellingPrice', 'installationCost')}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: '#F2F6F8', borderTop: '1px solid #E2E8F0' }}>
+                <span style={{ fontSize: 11, color: '#586782', fontWeight: 600, textTransform: 'uppercase' }}>รวม SW &amp; Inst</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#3D5580', fontSize: 14 }}>{(swSelling + instSelling) > 0 ? formatCurrency(swSelling + instSelling) : '—'}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Summary card */}
+          {(totalSelling > 0 || totalCost > 0) && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
+              <div style={{ padding: '12px 16px', background: '#004081', borderRadius: 10, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>ราคาขายรวม</div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#fff', fontSize: 16 }}>{totalSelling > 0 ? formatCurrency(totalSelling) : '—'}</div>
+              </div>
+              <div style={{ padding: '12px 16px', background: '#F2F6F8', border: '1px solid #D0D6DF', borderRadius: 10, textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>ราคาทุนรวม</div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#586782', fontSize: 16 }}>{totalCost > 0 ? formatCurrency(totalCost) : '—'}</div>
+              </div>
+            </div>
           )}
 
         </div>
@@ -491,7 +511,6 @@ export function RequestFormStepper({
               <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>แนะนำสัดส่วน</div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {(INSTALLMENT_PRESETS[installmentCount] ?? []).map(p => {
-                  const curPcts = installments.slice(0, installmentCount).map(r => numVal(r.installmentPercent))
                   const isActive = p.percents.every((v, idx) => v === curPcts[idx])
                   return (
                     <button key={p.label} type="button" onClick={() => applyPreset(p.percents)}
@@ -503,49 +522,53 @@ export function RequestFormStepper({
                   )
                 })}
                 <button type="button"
-                  onClick={() => { installments.slice(0, installmentCount).forEach((_, i) => updateInst(i, 'installmentPercent', '')) }}
-                  style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                    border: '1.5px dashed #D0D6DF', background: '#FAFBFC', color: '#929EB4' }}
+                  onClick={() => {
+                    const cleared = installments.slice(0, installmentCount).map(row => ({ ...row, installmentPercent: '' as '' }))
+                    update({ installments: cleared })
+                  }}
+                  style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.1s',
+                    border: `1.5px ${isCustomPreset ? 'solid #586782' : 'dashed #D0D6DF'}`,
+                    background: isCustomPreset ? '#586782' : '#FAFBFC',
+                    color: isCustomPreset ? '#fff' : '#929EB4' }}
                 >ระบุเอง</button>
               </div>
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${installmentCount}, 1fr)`, gap: 8 }}>
             {installments.slice(0, installmentCount).map((row, i) => {
               const pct = numVal(row.installmentPercent)
-              const q1Amt = hwSelling > 0 && pct > 0 ? calcInstallmentAmount(hwSelling, pct) : 0
-              const q2Amt = showSw && (swSelling + instSelling) > 0 && pct > 0 ? calcInstallmentAmount(swSelling + instSelling, pct) : 0
-              const totalAmt = q1Amt + q2Amt
+              const totalAmt = totalSelling > 0 && pct > 0 ? calcInstallmentAmount(totalSelling, pct) : 0
               return (
-                <div key={i} style={{ background: '#FAFBFC', border: `1px solid ${errors[`inst${i}.pct`] ? '#F3554F' : '#D0D6DF'}`, borderRadius: 10 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '28px 80px 1fr auto', gap: '0 10px', alignItems: 'center', padding: '10px 14px' }}>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-                    <FormGroup error={errors[`inst${i}.pct`]}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <Input type="number" min="1" max="100" value={row.installmentPercent}
-                          onChange={e => updateInst(i, 'installmentPercent', e.target.value ? Number(e.target.value) : '')}
-                          style={{ textAlign: 'right', width: 56 }} error={errors[`inst${i}.pct`]} />
-                        <span style={{ color: '#586782', fontSize: 13, fontWeight: 600 }}>%</span>
-                      </div>
-                    </FormGroup>
-                    <FormGroup>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Input type="number" min="0" value={row.creditTermDays}
-                          onChange={e => updateInst(i, 'creditTermDays', e.target.value !== '' ? Number(e.target.value) : 0)}
-                          placeholder="0 = COD" style={{ width: 80, textAlign: 'right' }} />
-                        <span style={{ color: '#586782', fontSize: 12, whiteSpace: 'nowrap' }}>วัน</span>
-                        {numVal(row.creditTermDays) > 0 && (
-                          <span style={{ fontSize: 11, color: '#66C5C5', fontWeight: 600 }}>{formatCreditTerm(numVal(row.creditTermDays))}</span>
-                        )}
-                      </div>
-                    </FormGroup>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 110 }}>
-                      {showSw && q1Amt > 0 && <div style={{ fontSize: 11, color: '#586782' }}>Q1 <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: '#004081' }}>{formatCurrency(q1Amt)}</span></div>}
-                      {showSw && q2Amt > 0 && <div style={{ fontSize: 11, color: '#586782' }}>Q2 <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: '#004081' }}>{formatCurrency(q2Amt)}</span></div>}
-                      {totalAmt > 0 && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: showSw ? 12 : 13, fontWeight: 700, color: '#004081', borderTop: showSw ? '1px solid #D0D6DF' : 'none', paddingTop: showSw ? 2 : 0 }}>{formatCurrency(totalAmt)}</div>}
-                    </div>
+                <div key={i} style={{ background: '#FAFBFC', border: `1px solid ${errors[`inst${i}.pct`] ? '#F3554F' : '#D0D6DF'}`, borderRadius: 10, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                    <span style={{ fontSize: 11, color: '#929EB4', fontWeight: 600 }}>งวดที่ {i + 1}</span>
                   </div>
+                  <FormGroup error={errors[`inst${i}.pct`]}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Input type="number" min="1" max="100" value={row.installmentPercent}
+                        onChange={e => updateInst(i, 'installmentPercent', e.target.value ? Number(e.target.value) : '')}
+                        style={{ textAlign: 'right', flex: 1 }} error={errors[`inst${i}.pct`]} />
+                      <span style={{ color: '#586782', fontSize: 12, fontWeight: 600 }}>%</span>
+                    </div>
+                  </FormGroup>
+                  <FormGroup>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Input type="number" min="0" value={row.creditTermDays}
+                        onChange={e => updateInst(i, 'creditTermDays', e.target.value !== '' ? Number(e.target.value) : 0)}
+                        placeholder="0" style={{ flex: 1, textAlign: 'right' }} />
+                      <span style={{ color: '#586782', fontSize: 11, whiteSpace: 'nowrap' }}>วัน</span>
+                    </div>
+                  </FormGroup>
+                  {numVal(row.creditTermDays) > 0 && (
+                    <div style={{ fontSize: 10, color: '#66C5C5', fontWeight: 600 }}>{formatCreditTerm(numVal(row.creditTermDays))}</div>
+                  )}
+                  {totalAmt > 0 && (
+                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700, color: '#004081', textAlign: 'right', paddingTop: 8, borderTop: '1px solid #E2E8F0', marginTop: 'auto' }}>
+                      {formatCurrency(totalAmt)}
+                    </div>
+                  )}
                 </div>
               )
             })}
