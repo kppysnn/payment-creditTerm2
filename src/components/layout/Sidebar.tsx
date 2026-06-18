@@ -63,15 +63,15 @@ export function Sidebar() {
             <span style={{ color: '#fff', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em' }}>CT</span>
           </div>
           <div>
-            <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: 13, lineHeight: 1.25 }}>Credit & Payment</div>
-            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, marginTop: 1 }}>Approval System</div>
+            <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: 13, lineHeight: 1.25, fontFamily: "'Poppins', system-ui, sans-serif" }}>Credit & Payment</div>
+            <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, marginTop: 1, fontFamily: "'Poppins', system-ui, sans-serif" }}>Approval System</div>
           </div>
         </div>
       </div>
 
       {/* Nav section label */}
       <div style={{ padding: '20px 20px 8px' }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: "'Noto Sans Thai', 'Poppins', system-ui, sans-serif" }}>
           เมนู
         </span>
       </div>
@@ -90,10 +90,11 @@ export function Sidebar() {
               borderRadius: 8,
               marginBottom: 2,
               textDecoration: 'none',
-              color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.65)',
+              color: '#FFFFFF',
               background: isActive ? 'rgba(102,197,197,0.15)' : 'transparent',
               fontSize: 14,
               fontWeight: isActive ? 600 : 400,
+              fontFamily: "'Noto Sans Thai', 'Poppins', system-ui, sans-serif",
               transition: 'background 0.15s, color 0.15s',
               borderLeft: isActive ? '3px solid #66C5C5' : '3px solid transparent',
               boxSizing: 'border-box',
@@ -142,10 +143,10 @@ export function Sidebar() {
             {currentUser.name.charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: 13, color: '#FFFFFF', fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Noto Sans Thai', 'Poppins', system-ui, sans-serif" }}>
               {currentUser.name}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Poppins', system-ui, sans-serif" }}>
               {currentUser.email}
             </div>
           </div>
