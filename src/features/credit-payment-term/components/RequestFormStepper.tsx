@@ -462,7 +462,7 @@ export function RequestFormStepper({
                       <Input
                         value={rs.endCustomerCompanyName ?? ''}
                         onChange={e => update({ reseller: { ...rs, endCustomerCompanyName: e.target.value } })}
-                        placeholder="ชื่อบริษัทที่ Reseller จะนำสินค้าไปขายต่อ..."
+                        placeholder="ใส่ชื่อบริษัทปลายทาง"
                         error={errors['res.endCustomerCompanyName']}
                       />
                     </FormGroup>
