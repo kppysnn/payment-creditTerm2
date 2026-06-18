@@ -100,18 +100,11 @@ export function Sidebar() {
               boxSizing: 'border-box',
             })}
             onMouseEnter={e => {
-              const el = e.currentTarget
-              if (!el.dataset.active) {
-                el.style.background = 'rgba(255,255,255,0.07)'
-                el.style.color = 'rgba(255,255,255,0.9)'
-              }
+              e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
             }}
             onMouseLeave={e => {
-              const el = e.currentTarget
-              if (!el.dataset.active) {
-                el.style.background = ''
-                el.style.color = ''
-              }
+              const isActive = e.currentTarget.getAttribute('aria-current') === 'page'
+              e.currentTarget.style.background = isActive ? 'rgba(102,197,197,0.15)' : 'transparent'
             }}
           >
             <span style={{ opacity: 0.9, display: 'flex', alignItems: 'center' }}>{item.icon}</span>
