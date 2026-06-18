@@ -55,18 +55,21 @@ const INSTALLMENT_PRESETS: Record<number, Array<{ label: string; percents: numbe
 
 function numVal(v: unknown): number { return Number(v) || 0 }
 
-/* ── Pill button styles ── */
-function pillBtn(active: boolean): React.CSSProperties {
+/* ── Segment button styles (type selectors) ── */
+function segBtn(active: boolean): React.CSSProperties {
   return {
-    padding: '7px 18px',
-    borderRadius: 9999,
+    padding: '8px 20px',
+    borderRadius: 8,
     fontSize: 13,
     fontWeight: 600,
     cursor: 'pointer',
     border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
-    background: '#fff',
+    background: active
+      ? 'linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)'
+      : '#fff',
     color: active ? '#004081' : '#929EB4',
-    transition: 'border-color 0.15s, color 0.15s',
+    transition: 'border-color 0.15s, color 0.15s, background 0.15s',
+    boxShadow: active ? '0 1px 4px rgba(102,197,197,0.18)' : 'none',
   }
 }
 
@@ -292,8 +295,8 @@ export function RequestFormStepper({
     </span>
   )
 
-  const quotationHeader = (quotationNo: string, groupLabel: string, color: string) => (
-    <div style={{ background: color, padding: '11px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+  const quotationHeader = (quotationNo: string, groupLabel: string, gradient: string) => (
+    <div style={{ background: gradient, padding: '11px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
       <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 800, color: '#fff' }}>
         {quotationNo}
       </span>
@@ -455,7 +458,7 @@ export function RequestFormStepper({
               const pctErrRowKey = `${prefix}Inst${i}.pct`
               return (
                 <div key={i} style={{
-                  background: errors[pctErrRowKey] ? '#FEF2F2' : '#F2F6F8',
+                  background: errors[pctErrRowKey] ? '#FEF2F2' : 'linear-gradient(135deg, #EEF5FB 0%, #EFF9F9 100%)',
                   borderRadius: 8,
                   padding: '10px 12px',
                   display: 'flex', flexDirection: 'column', gap: 8,
@@ -521,9 +524,9 @@ export function RequestFormStepper({
   }
 
   /* ── Quotation card wrapper ── */
-  const quotationCard = (quotationNo: string, label: string, headerColor: string, body: React.ReactNode) => (
-    <div style={{ borderRadius: 14, overflow: 'hidden', background: '#fff', boxShadow: '0 2px 10px rgba(0,64,129,0.07)' }}>
-      {quotationHeader(quotationNo, label, headerColor)}
+  const quotationCard = (quotationNo: string, label: string, headerGradient: string, body: React.ReactNode) => (
+    <div style={{ borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(180deg, #ffffff 0%, #F7FBFE 100%)', boxShadow: '0 2px 12px rgba(0,64,129,0.08)' }}>
+      {quotationHeader(quotationNo, label, headerGradient)}
       {body}
     </div>
   )
@@ -553,7 +556,7 @@ export function RequestFormStepper({
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               {SALE_TYPES.map(t => (
-                <button key={t.value} type="button" onClick={() => update({ saleType: t.value })} style={pillBtn(saleType === t.value)}>
+                <button key={t.value} type="button" onClick={() => update({ saleType: t.value })} style={segBtn(saleType === t.value)}>
                   {t.label}
                 </button>
               ))}
@@ -574,7 +577,7 @@ export function RequestFormStepper({
               {CUSTOMER_TYPES.map(type => (
                 <button key={type} type="button"
                   onClick={() => { update({ customerType: type }); setExistingDropdownOpen(false); setResellerDropdownOpen(false) }}
-                  style={pillBtn(customerType === type)}>
+                  style={segBtn(customerType === type)}>
                   {CUSTOMER_TYPE_LABELS[type]}
                 </button>
               ))}
@@ -682,12 +685,12 @@ export function RequestFormStepper({
       </Card>
 
       {/* ─── Quotation cards (always 2 blocks) ─── */}
-      {quotationCard(hwQuotationNo, 'Hardware', '#002B5C', (
+      {quotationCard(hwQuotationNo, 'Hardware', 'linear-gradient(135deg, #001D3D 0%, #004081 100%)', (
         <>
           <div style={{ padding: '4px 16px 0' }}>
             {priceRow('Hardware', 'hardwareSellingPrice', 'hardwareCost')}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 16px', fontSize: 13, background: '#F8F9FA' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 16px', fontSize: 13, background: 'linear-gradient(90deg, #EEF5FB 0%, #EFF9F9 100%)' }}>
             <span style={{ color: '#586782', fontWeight: 600 }}>รวม Hardware</span>
             {plainAmount(hwSelling)}
           </div>
@@ -695,13 +698,13 @@ export function RequestFormStepper({
         </>
       ))}
 
-      {quotationCard(swQuotationNo, 'Software & Installation', '#3D5580', (
+      {quotationCard(swQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #2B3D5C 0%, #4A6490 100%)', (
         <>
           <div style={{ padding: '4px 16px 0' }}>
             {priceRow('Software', 'softwareSellingPrice', 'softwareCost')}
             {priceRow('Installation', 'installationSellingPrice', 'installationCost')}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 16px', fontSize: 13, background: '#F8F9FA' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 16px', fontSize: 13, background: 'linear-gradient(90deg, #EEF3FB 0%, #EEF6FA 100%)' }}>
             <span style={{ color: '#586782', fontWeight: 600 }}>รวม Software &amp; Installation</span>
             {plainAmount(serviceSelling, '#3D5580')}
           </div>
@@ -732,7 +735,7 @@ export function RequestFormStepper({
             </tr>
           </tbody>
           <tfoot>
-            <tr style={{ borderTop: '1.5px solid #D0D6DF', background: '#F8F9FA' }}>
+            <tr style={{ borderTop: '1.5px solid #D0D6DF', background: 'linear-gradient(90deg, #EEF5FB 0%, #EFF9F9 100%)' }}>
               <td style={{ padding: '12px 14px', fontWeight: 700, color: '#001122' }}>รวมทั้งหมด</td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(totalSelling, '#004081')}</td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(totalCost, '#929EB4')}</td>
