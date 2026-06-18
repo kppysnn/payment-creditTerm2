@@ -73,14 +73,10 @@ export function RequestFormStepper({
   }, [installmentCount])
 
   /* Totals */
-  const hwSelling  = numVal(fd.hardwareSellingPrice)
-  const hwCost     = numVal(fd.hardwareCost)
-  const swSelling  = numVal(fd.softwareSellingPrice)
-  const swCost     = numVal(fd.softwareCost)
+  const hwSelling   = numVal(fd.hardwareSellingPrice)
+  const swSelling   = numVal(fd.softwareSellingPrice)
   const instSelling = numVal(fd.installationSellingPrice)
-  const instCost    = numVal(fd.installationCost)
   const totalSelling = hwSelling + (showSw ? swSelling + instSelling : 0)
-  const _totalCost   = hwCost   + (showSw ? swCost   + instCost   : 0)
 
   const totalPct = calcTotalInstallmentPercent(installments.slice(0, installmentCount))
   const maxCreditTerm = installments.slice(0, installmentCount).reduce((m, i) => Math.max(m, numVal(i.creditTermDays)), 0)
