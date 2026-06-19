@@ -42,7 +42,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
         style={{
           position: 'relative',
           background: '#fff',
-          borderRadius: 14,
+          borderRadius: 4,
           boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
           width: '100%',
           maxWidth: SIZE_WIDTH[size],
@@ -66,7 +66,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1A202C' }}>{title}</h3>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#718096', padding: 4, borderRadius: 6, display: 'flex' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#718096', padding: 4, borderRadius: 4, display: 'flex' }}
           >
             <X size={18} />
           </button>

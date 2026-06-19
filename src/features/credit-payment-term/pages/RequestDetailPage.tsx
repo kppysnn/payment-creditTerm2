@@ -102,7 +102,7 @@ export function RequestDetailPage() {
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', color: '#001122' }}>{req.requestNo}</h1>
               <StatusBadge status={req.status} />
               {req.version > 1 && (
-                <span style={{ fontSize: 12, padding: '2px 8px', background: 'rgba(0,64,129,0.08)', color: '#004081', borderRadius: 6, fontWeight: 600 }}>v{req.version}</span>
+                <span style={{ fontSize: 12, padding: '2px 8px', background: 'rgba(0,64,129,0.08)', color: '#004081', borderRadius: 4, fontWeight: 600 }}>v{req.version}</span>
               )}
             </div>
             <p style={{ margin: '6px 0 0', color: '#586782', fontSize: 14 }}>
@@ -265,14 +265,14 @@ export function RequestDetailPage() {
                   <div style={{ fontSize: 11, color: '#586782', fontWeight: 600, marginBottom: 4 }}>
                     {req.approvalResult.approvedAt ? 'Approval Comment' : 'Reject Reason'}
                   </div>
-                  <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: req.approvalResult.approvedAt ? '#F0FDF4' : '#FEF2F2', borderRadius: 8, border: `1px solid ${req.approvalResult.approvedAt ? '#86EFAC' : '#FCA5A5'}` }}>
+                  <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: req.approvalResult.approvedAt ? '#F0FDF4' : '#FEF2F2', borderRadius: 4, border: `1px solid ${req.approvalResult.approvedAt ? '#86EFAC' : '#FCA5A5'}` }}>
                     {req.approvalResult.decisionComment}
                   </p>
                 </div>
                 {req.approvalResult.suggestion && (
                   <div style={{ marginTop: 12 }}>
                     <div style={{ fontSize: 11, color: '#586782', fontWeight: 600, marginBottom: 4 }}>ข้อเสนอแนะสำหรับ Sales</div>
-                    <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: '#FFFBEB', borderRadius: 8, border: '1px solid #FCD34D' }}>
+                    <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: '#FFFBEB', borderRadius: 4, border: '1px solid #FCD34D' }}>
                       {req.approvalResult.suggestion}
                     </p>
                   </div>

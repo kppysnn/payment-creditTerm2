@@ -57,7 +57,7 @@ export function RejectModal({ open, request, onClose, onReject }: Props) {
       }
     >
       {request && (
-        <div style={{ marginBottom: 16, padding: '12px 14px', background: '#FEF2F2', borderRadius: 8, border: '1px solid #FCA5A5' }}>
+        <div style={{ marginBottom: 16, padding: '12px 14px', background: '#FEF2F2', borderRadius: 4, border: '1px solid #FCA5A5' }}>
           <div style={{ fontWeight: 600, fontSize: 14, color: '#7F1D1D' }}>{request.requestNo}</div>
           <div style={{ fontSize: 13, color: '#991B1B', marginTop: 3 }}>{request.projectName}</div>
         </div>

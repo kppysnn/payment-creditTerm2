@@ -105,7 +105,7 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
   )
 
   const qBadge = (no: string) => (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'rgba(0,64,129,0.07)', borderRadius: 6, border: '1px solid rgba(0,64,129,0.14)', marginBottom: 10 }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'rgba(0,64,129,0.07)', borderRadius: 4, border: '1px solid rgba(0,64,129,0.14)', marginBottom: 10 }}>
       <span style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Quotation No.</span>
       <span style={{ fontSize: 13, fontWeight: 700, color: '#004081', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace' }}>{no}</span>
     </div>
@@ -118,7 +118,7 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
         {/* Q1 — Hardware */}
         <div>
           {qBadge(q1No)}
-          <div style={{ border: '1px solid #D0D6DF', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
@@ -193,7 +193,7 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
         {showSw && (
           <div>
             {qBadge(q2No)}
-            <div style={{ border: '1px solid #D0D6DF', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
@@ -268,7 +268,7 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
 
         {/* Grand Total */}
         {totalSelling > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: '#D0D6DF', borderRadius: 10, overflow: 'hidden', border: '1px solid #D0D6DF' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: '#D0D6DF', borderRadius: 4, overflow: 'hidden', border: '1px solid #D0D6DF' }}>
             {[
               { label: 'ราคาขายรวม', value: formatCurrency(totalSelling), color: '#001122' },
               { label: 'ต้นทุนรวม', value: formatCurrency(totalCost), color: '#586782' },
@@ -294,7 +294,7 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
             <div style={{ display: 'flex', gap: 6 }}>
               {[1, 2, 3, 4].map(n => (
                 <button key={n} onClick={() => onChange({ installmentCount: n })} style={{
-                  width: 38, height: 38, borderRadius: 8, border: `2px solid ${installmentCount === n ? '#004081' : '#D0D6DF'}`,
+                  width: 38, height: 38, borderRadius: 4, border: `2px solid ${installmentCount === n ? '#004081' : '#D0D6DF'}`,
                   background: installmentCount === n ? '#004081' : '#fff',
                   color: installmentCount === n ? '#fff' : '#586782',
                   fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'all 0.15s',
@@ -308,7 +308,7 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
               const amount = totalSelling > 0 && numVal(row.installmentPercent) > 0
                 ? calcInstallmentAmount(totalSelling, numVal(row.installmentPercent)) : 0
               return (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '28px 80px 1fr 1fr auto', gap: '0 10px', alignItems: 'center', padding: '10px 14px', background: '#FAFBFC', border: `1px solid ${(errors[`inst${i}.pct`] || errors[`inst${i}.cond`]) ? '#F3554F' : '#D0D6DF'}`, borderRadius: 10 }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '28px 80px 1fr 1fr auto', gap: '0 10px', alignItems: 'center', padding: '10px 14px', background: '#FAFBFC', border: `1px solid ${(errors[`inst${i}.pct`] || errors[`inst${i}.cond`]) ? '#F3554F' : '#D0D6DF'}`, borderRadius: 4 }}>
                   <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
                   <FormGroup error={errors[`inst${i}.pct`]}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -350,7 +350,7 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
           </div>
 
           {/* Summary bar */}
-          <div style={{ display: 'flex', gap: 20, padding: '10px 14px', background: pctOk && installmentCount > 0 ? 'rgba(102,197,197,0.08)' : 'rgba(243,85,79,0.06)', border: `1px solid ${pctOk && installmentCount > 0 ? '#66C5C5' : '#F3554F'}`, borderRadius: 8, marginTop: 10, fontSize: 13 }}>
+          <div style={{ display: 'flex', gap: 20, padding: '10px 14px', background: pctOk && installmentCount > 0 ? 'rgba(102,197,197,0.08)' : 'rgba(243,85,79,0.06)', border: `1px solid ${pctOk && installmentCount > 0 ? '#66C5C5' : '#F3554F'}`, borderRadius: 4, marginTop: 10, fontSize: 13 }}>
             <span>รวม: <strong style={{ color: pctOk ? '#66C5C5' : '#F3554F' }}>{totalPct.toFixed(0)}%</strong>{pctOk ? ' ✓' : ' ⚠'}</span>
             <span style={{ color: '#929EB4' }}>·</span>
             <span>Max Credit Term: <strong>{formatCreditTerm(maxCreditTerm)}</strong></span>
