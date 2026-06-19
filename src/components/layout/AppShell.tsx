@@ -1,8 +1,8 @@
-import { Outlet, useLocation, Link } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { RoleSwitcher } from './RoleSwitcher'
 
 const PAGE_TITLES: Record<string, string> = {
-  '/requests': 'Credit & Payment Term Approval',
+  '/requests': 'Payment & Credit Terms',
   '/requests/new': 'สร้างคำขออนุมัติใหม่',
 }
 
@@ -10,7 +10,7 @@ function getPageTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
   if (pathname.endsWith('/edit')) return 'แก้ไขคำขอ'
   if (/^\/requests\/[^/]+$/.test(pathname)) return 'รายละเอียดคำขอ'
-  return 'Credit & Payment Term Approval'
+  return 'Payment & Credit Terms'
 }
 
 export function AppShell() {
@@ -36,20 +36,6 @@ export function AppShell() {
           top: 0,
         }}
       >
-        <Link to="/requests" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          <div style={{
-            width: 34,
-            height: 34,
-            background: 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)',
-            borderRadius: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '-0.02em' }}>CT</span>
-          </div>
-        </Link>
-
         <h1 style={{
           flex: 1,
           margin: 0,
