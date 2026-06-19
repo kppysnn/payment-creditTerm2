@@ -333,7 +333,7 @@ export function RequestFormStepper({
     <div style={{ background: gradient, padding: '11px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
       <span style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
         <span style={{ fontSize: 12, fontWeight: 800, color: '#fff' }}>Quotation No.</span>
-        <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.85)' }}>
+        <span style={{ fontSize: 13, fontWeight: 400, letterSpacing: '0.01em', color: 'rgba(255,255,255,0.85)' }}>
           {quotationNo}
         </span>
       </span>
