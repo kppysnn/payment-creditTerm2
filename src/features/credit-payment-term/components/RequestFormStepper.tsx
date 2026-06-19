@@ -289,7 +289,7 @@ export function RequestFormStepper({
     )
 
   const priceRow = (label: string, spKey: string, costKey: string) => (
-    <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr', gap: '0 16px', alignItems: 'center', padding: '12px 0' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr 1fr', gap: '0 16px', alignItems: 'center', padding: '12px 0' }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: '#001122' }}>{label}</div>
       <FormGroup label="ราคาขาย (THB)" error={spKey === 'hardwareSellingPrice' ? errors.hwSell : undefined}>
         <Input type="text" inputMode="numeric"
@@ -332,7 +332,7 @@ export function RequestFormStepper({
   const quotationHeader = (quotationNo: string, groupLabel: string, gradient: string) => (
     <div style={{ background: gradient, padding: '11px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
       <span style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>Quotation No.</span>
+        <span style={{ fontSize: 11, fontWeight: 800, color: '#fff' }}>Quotation No.</span>
         <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 800, color: '#fff' }}>
           {quotationNo}
         </span>
@@ -619,7 +619,7 @@ export function RequestFormStepper({
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 760, margin: '0 auto' }}>
 
       {isResubmit && initialRequest?.approvalResult && (
         <Alert type="error" title="เหตุผลที่ถูก Reject ครั้งก่อน">
@@ -779,7 +779,7 @@ export function RequestFormStepper({
           <div style={{ padding: '4px 16px 0' }}>
             {priceRow('Hardware', 'hardwareSellingPrice', 'hardwareCost')}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr', gap: '0 16px', alignItems: 'center', padding: '8px 16px', fontSize: 13, background: 'linear-gradient(90deg, #EEF5FB 0%, #EFF9F9 100%)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr 1fr', gap: '0 16px', alignItems: 'center', padding: '8px 16px', fontSize: 13, background: 'linear-gradient(90deg, #EEF5FB 0%, #EFF9F9 100%)' }}>
             <span style={{ color: '#586782', fontWeight: 600 }}>รวม Hardware</span>
             <span style={{ textAlign: 'right' }}>{plainAmount(hwSelling)}</span>
             <span style={{ textAlign: 'right' }}>{plainAmount(hwCost, '#929EB4')}</span>
@@ -794,7 +794,7 @@ export function RequestFormStepper({
             {priceRow('Software', 'softwareSellingPrice', 'softwareCost')}
             {priceRow('Installation', 'installationSellingPrice', 'installationCost')}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr', gap: '0 16px', alignItems: 'center', padding: '8px 16px', fontSize: 13, background: 'linear-gradient(90deg, #EEF3FB 0%, #EEF6FA 100%)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr 1fr', gap: '0 16px', alignItems: 'center', padding: '8px 16px', fontSize: 13, background: 'linear-gradient(90deg, #EEF3FB 0%, #EEF6FA 100%)' }}>
             <span style={{ color: '#586782', fontWeight: 600 }}>รวม Software &amp; Installation</span>
             <span style={{ textAlign: 'right' }}>{plainAmount(serviceSelling, '#3D5580')}</span>
             <span style={{ textAlign: 'right' }}>{plainAmount(serviceCost, '#929EB4')}</span>
@@ -815,12 +815,18 @@ export function RequestFormStepper({
           </thead>
           <tbody>
             <tr>
-              <td style={{ padding: '11px 14px', fontWeight: 500, color: '#505050' }}>{hwQuotationNo} — Hardware</td>
+              <td style={{ padding: '11px 14px' }}>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#001122' }}>{hwQuotationNo}</span>
+                <span style={{ color: '#929EB4', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
+              </td>
               <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hwSelling, '#004081')}</td>
               <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hwCost, '#929EB4')}</td>
             </tr>
             <tr>
-              <td style={{ padding: '11px 14px', fontWeight: 500, color: '#505050' }}>{swQuotationNo} — Software &amp; Installation</td>
+              <td style={{ padding: '11px 14px' }}>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#001122' }}>{swQuotationNo}</span>
+                <span style={{ color: '#929EB4', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
+              </td>
               <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceSelling, '#004081')}</td>
               <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#929EB4')}</td>
             </tr>
