@@ -293,8 +293,8 @@ export function RequestFormStepper({
       <thead>
         <tr>
           <th style={{ width: 120 }} />
-          <th style={{ padding: '0 16px 10px 0', textAlign: 'right', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาขาย (THB)</th>
-          <th style={{ padding: '0 0 10px', textAlign: 'right', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาทุน (THB)</th>
+          <th style={{ padding: '0 16px 4px 0', textAlign: 'right', fontSize: 12, fontWeight: 600, color: '#586782' }}>ราคาขาย (THB)</th>
+          <th style={{ padding: '0 0 4px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: '#586782' }}>ราคาทุน (THB)</th>
         </tr>
       </thead>
       <tbody>
