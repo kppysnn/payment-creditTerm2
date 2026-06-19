@@ -288,36 +288,50 @@ export function RequestFormStepper({
       </div>
     )
 
-  const priceRow = (label: string, spKey: string, costKey: string) => (
-    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '0 16px', alignItems: 'end', padding: '12px 0' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <span style={{ fontSize: 12, visibility: 'hidden' }}>&nbsp;</span>
-        <span style={{ height: 38, display: 'flex', alignItems: 'center', fontSize: 13, fontWeight: 600, color: '#001122' }}>{label}</span>
-      </div>
-      <FormGroup label="ราคาขาย (THB)" error={spKey === 'hardwareSellingPrice' ? errors.hwSell : undefined}>
-        <Input type="text" inputMode="numeric"
-          value={formatThousands(fd[spKey])}
-          onChange={e => {
-            const digits = e.target.value.replace(/\D/g, '')
-            update({ [spKey]: digits ? Number(digits) : '' })
-          }}
-          placeholder="0"
-          style={{ textAlign: 'right' }}
-          error={spKey === 'hardwareSellingPrice' ? errors.hwSell : undefined}
-        />
-      </FormGroup>
-      <FormGroup label="ราคาทุน (THB)">
-        <Input type="text" inputMode="numeric"
-          value={formatThousands(fd[costKey])}
-          onChange={e => {
-            const digits = e.target.value.replace(/\D/g, '')
-            update({ [costKey]: digits ? Number(digits) : '' })
-          }}
-          placeholder="0"
-          style={{ textAlign: 'right' }}
-        />
-      </FormGroup>
-    </div>
+  const priceTable = (rows: Array<{ label: string; spKey: string; costKey: string }>) => (
+    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr>
+          <th style={{ width: 120 }} />
+          <th style={{ padding: '0 16px 8px 0', textAlign: 'left', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาขาย (THB)</th>
+          <th style={{ padding: '0 0 8px', textAlign: 'left', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาทุน (THB)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(({ label, spKey, costKey }) => {
+          const sellError = spKey === 'hardwareSellingPrice' ? errors.hwSell : undefined
+          return (
+            <tr key={spKey}>
+              <td style={{ padding: '8px 0', fontSize: 13, fontWeight: 600, color: '#001122' }}>{label}</td>
+              <td style={{ padding: '8px 16px 8px 0', verticalAlign: 'top' }}>
+                <Input type="text" inputMode="numeric"
+                  value={formatThousands(fd[spKey])}
+                  onChange={e => {
+                    const digits = e.target.value.replace(/\D/g, '')
+                    update({ [spKey]: digits ? Number(digits) : '' })
+                  }}
+                  placeholder="0"
+                  style={{ textAlign: 'right' }}
+                  error={sellError}
+                />
+                {sellError && <div style={{ marginTop: 4, fontSize: 12, color: '#F3554F' }}>{sellError}</div>}
+              </td>
+              <td style={{ padding: '8px 0', verticalAlign: 'top' }}>
+                <Input type="text" inputMode="numeric"
+                  value={formatThousands(fd[costKey])}
+                  onChange={e => {
+                    const digits = e.target.value.replace(/\D/g, '')
+                    update({ [costKey]: digits ? Number(digits) : '' })
+                  }}
+                  placeholder="0"
+                  style={{ textAlign: 'right' }}
+                />
+              </td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
   )
 
   const summaryAmount = (value: number, color = '#001122') => (
@@ -788,7 +802,7 @@ export function RequestFormStepper({
       {quotationCard(hwQuotationNo, 'Hardware', 'linear-gradient(135deg, #001D3D 0%, #004081 100%)', (
         <>
           <div style={{ padding: '4px 16px 0' }}>
-            {priceRow('Hardware', 'hardwareSellingPrice', 'hardwareCost')}
+            {priceTable([{ label: 'Hardware', spKey: 'hardwareSellingPrice', costKey: 'hardwareCost' }])}
           </div>
           {renderPaymentBlock('hw', hwSelling, hwCost, 'Hardware')}
         </>
@@ -797,8 +811,10 @@ export function RequestFormStepper({
       {quotationCard(swQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #2B3D5C 0%, #4A6490 100%)', (
         <>
           <div style={{ padding: '4px 16px 0' }}>
-            {priceRow('Software', 'softwareSellingPrice', 'softwareCost')}
-            {priceRow('Installation', 'installationSellingPrice', 'installationCost')}
+            {priceTable([
+              { label: 'Software', spKey: 'softwareSellingPrice', costKey: 'softwareCost' },
+              { label: 'Installation', spKey: 'installationSellingPrice', costKey: 'installationCost' },
+            ])}
           </div>
           {renderPaymentBlock('sw', serviceSelling, serviceCost, 'Software & Installation')}
         </>
