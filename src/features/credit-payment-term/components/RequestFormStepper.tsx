@@ -35,21 +35,21 @@ const INSTALLMENT_PRESETS: Record<number, Array<{ label: string; percents: numbe
   1: [{ label: '100', percents: [100] }],
   2: [
     { label: '50 / 50', percents: [50, 50] },
+    { label: '60 / 40', percents: [60, 40] },
     { label: '30 / 70', percents: [30, 70] },
-    { label: '40 / 60', percents: [40, 60] },
     { label: '70 / 30', percents: [70, 30] },
   ],
   3: [
+    { label: '30 / 40 / 30', percents: [30, 40, 30] },
+    { label: '50 / 30 / 20', percents: [50, 30, 20] },
     { label: '30 / 30 / 40', percents: [30, 30, 40] },
-    { label: '33 / 33 / 34', percents: [33, 33, 34] },
-    { label: '25 / 50 / 25', percents: [25, 50, 25] },
-    { label: '20 / 30 / 50', percents: [20, 30, 50] },
+    { label: '40 / 30 / 30', percents: [40, 30, 30] },
   ],
   4: [
     { label: '25 / 25 / 25 / 25', percents: [25, 25, 25, 25] },
-    { label: '30 / 30 / 30 / 10', percents: [30, 30, 30, 10] },
     { label: '40 / 20 / 20 / 20', percents: [40, 20, 20, 20] },
-    { label: '20 / 20 / 30 / 30', percents: [20, 20, 30, 30] },
+    { label: '20 / 30 / 30 / 20', percents: [20, 30, 30, 20] },
+    { label: '30 / 20 / 20 / 30', percents: [30, 20, 20, 30] },
   ],
 }
 
