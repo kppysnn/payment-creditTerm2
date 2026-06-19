@@ -11,7 +11,7 @@ import { Alert } from '../../../components/ui/Alert'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
 import { formatCreditTerm } from '../utils/formatters'
 import { searchCustomers } from '../services/customerService'
-import { Save, Send, X } from 'lucide-react'
+import { Save, Send, X, ChevronDown, Check } from 'lucide-react'
 
 interface InstRow { installmentPercent: number | ''; creditTermDays: number | ''; paymentCondition: PaymentCondition | '' }
 
@@ -30,6 +30,7 @@ const SALE_TYPES = [
 ]
 const CUSTOMER_TYPES: CustomerType[] = ['new', 'existing', 'reseller']
 const CREDIT_TERM_PRESETS = [7, 15, 30, 60, 90, 120]
+const CREDIT_TERM_HINTS: Record<number, string> = { 7: '1 สัปดาห์', 15: '15 วัน', 30: '1 เดือน', 60: '2 เดือน', 90: '3 เดือน', 120: '4 เดือน' }
 const INSTALLMENT_PERCENT_PRESETS = [10, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]
 const INSTALLMENT_PRESETS: Record<number, Array<{ label: string; percents: number[] }>> = {
   1: [{ label: '100', percents: [100] }],
@@ -400,26 +401,65 @@ export function RequestFormStepper({
                 }}
                 placeholder={creditTermIsCustom ? 'ระบุเอง' : 'เลือกวัน'}
                 error={errors[ctErrKey]}
-                style={{ paddingRight: 38 }}
+                style={{ paddingRight: 40 }}
               />
               <button type="button" onClick={() => setCtDropOpen(o => !o)}
-                style={{ position: 'absolute', top: 1, right: 1, width: 36, height: 36, border: 'none', borderLeft: '1px solid #D0D6DF', borderRadius: '0 7px 7px 0', background: '#fff', color: '#586782', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
-                aria-label="เลือก Credit Term">˅</button>
+                style={{
+                  position: 'absolute', top: '50%', right: 5,
+                  transform: ctDropOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)',
+                  width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: 'none', borderRadius: 6, background: 'transparent', color: '#586782', cursor: 'pointer',
+                  transition: 'transform 0.15s, background 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                aria-label="เลือก Credit Term">
+                <ChevronDown size={15} />
+              </button>
               {ctDropOpen && (
-                <div style={{ position: 'absolute', zIndex: 5, top: 42, left: 0, width: 200, maxHeight: 220, overflowY: 'auto', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 8, boxShadow: '0 8px 20px rgba(0,64,129,0.14)' }}>
-                  {CREDIT_TERM_PRESETS.map(days => (
-                    <button key={days} type="button"
-                      onMouseDown={e => e.preventDefault()}
-                      onClick={() => { setIsCustomCT(false); setCtDays(days); setCtDropOpen(false) }}
-                      style={{ display: 'block', width: '100%', padding: '9px 12px', border: 'none', borderBottom: '1px solid #F2F6F8', background: numVal(ctDays) === days ? '#EEF8F8' : '#fff', color: '#001122', textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                      {days} วัน
-                    </button>
-                  ))}
+                <div style={{ position: 'absolute', zIndex: 5, top: 44, left: 0, width: 200, maxHeight: 280, overflowY: 'auto', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 10, boxShadow: '0 8px 20px rgba(0,64,129,0.14)', padding: 6 }}>
+                  {CREDIT_TERM_PRESETS.map(days => {
+                    const active = numVal(ctDays) === days && !creditTermIsCustom
+                    return (
+                      <button key={days} type="button"
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => { setIsCustomCT(false); setCtDays(days); setCtDropOpen(false) }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
+                          padding: '8px 10px', marginBottom: 2, border: 'none', borderRadius: 6,
+                          background: active ? 'rgba(102,197,197,0.12)' : 'transparent',
+                          color: active ? '#004081' : '#001122',
+                          textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                          transition: 'background 0.12s',
+                        }}
+                        onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#F2F6F8' }}
+                        onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
+                      >
+                        <span>{days} วัน</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 11, fontWeight: 500, color: '#929EB4' }}>{CREDIT_TERM_HINTS[days]}</span>
+                          {active && <Check size={14} color="#66C5C5" />}
+                        </span>
+                      </button>
+                    )
+                  })}
+                  <div style={{ height: 1, background: '#F2F6F8', margin: '4px 4px 6px' }} />
                   <button type="button"
                     onMouseDown={e => e.preventDefault()}
                     onClick={() => { setIsCustomCT(true); setCtDays(''); setCtDropOpen(false) }}
-                    style={{ display: 'block', width: '100%', padding: '9px 12px', border: 'none', background: creditTermIsCustom ? '#EEF8F8' : '#fff', color: '#001122', textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                    ระบุเอง
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
+                      padding: '8px 10px', border: 'none', borderRadius: 6,
+                      background: creditTermIsCustom ? 'rgba(102,197,197,0.12)' : 'transparent',
+                      color: creditTermIsCustom ? '#004081' : '#586782',
+                      textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      transition: 'background 0.12s',
+                    }}
+                    onMouseEnter={e => { if (!creditTermIsCustom) e.currentTarget.style.background = '#F2F6F8' }}
+                    onMouseLeave={e => { if (!creditTermIsCustom) e.currentTarget.style.background = 'transparent' }}
+                  >
+                    <span>ระบุเอง</span>
+                    {creditTermIsCustom && <Check size={14} color="#66C5C5" />}
                   </button>
                 </div>
               )}
