@@ -2,7 +2,7 @@ import { Outlet, useLocation, Link } from 'react-router-dom'
 import { RoleSwitcher } from './RoleSwitcher'
 
 const PAGE_TITLES: Record<string, string> = {
-  '/requests': 'รายการคำขอ',
+  '/requests': 'Credit & Payment Term Approval',
   '/requests/new': 'สร้างคำขออนุมัติใหม่',
 }
 
@@ -10,7 +10,7 @@ function getPageTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
   if (pathname.endsWith('/edit')) return 'แก้ไขคำขอ'
   if (/^\/requests\/[^/]+$/.test(pathname)) return 'รายละเอียดคำขอ'
-  return 'Credit & Payment Term'
+  return 'Credit & Payment Term Approval'
 }
 
 export function AppShell() {
