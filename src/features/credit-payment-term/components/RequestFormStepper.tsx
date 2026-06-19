@@ -797,7 +797,7 @@ export function RequestFormStepper({
       </Card>
 
       {/* ─── Quotation cards (always 2 blocks) ─── */}
-      {quotationCard(hwQuotationNo, 'Hardware', 'linear-gradient(135deg, #001D3D 0%, #004081 100%)', (
+      {quotationCard(hwQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', (
         <>
           <div style={{ padding: '18px 16px 0' }}>
             {priceTable([{ label: 'Hardware', spKey: 'hardwareSellingPrice', costKey: 'hardwareCost' }])}
@@ -806,7 +806,7 @@ export function RequestFormStepper({
         </>
       ))}
 
-      {quotationCard(swQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #2B3D5C 0%, #4A6490 100%)', (
+      {quotationCard(swQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', (
         <>
           <div style={{ padding: '18px 16px 0' }}>
             {priceTable([

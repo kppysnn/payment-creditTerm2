@@ -10,14 +10,14 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
     border: 'none',
   },
   secondary: {
-    background: '#FFFFFF',
-    color: '#001122',
-    border: '1px solid rgba(0,64,129,0.22)',
+    background: 'linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)',
+    color: '#004081',
+    border: '1.5px solid #66C5C5',
   },
   danger: {
-    background: '#F3554F',
+    background: 'linear-gradient(135deg, #FF8A80 0%, #D32F2F 100%)',
     color: '#FFFFFF',
-    border: '1px solid #F3554F',
+    border: 'none',
   },
   ghost: {
     background: 'transparent',
@@ -25,18 +25,18 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
     border: '1px solid transparent',
   },
   success: {
-    background: '#82C566',
+    background: 'linear-gradient(135deg, #A8DD8C 0%, #4F9A3A 100%)',
     color: '#FFFFFF',
-    border: '1px solid #82C566',
+    border: 'none',
   },
 }
 
 const VARIANT_HOVER: Record<Variant, CSSProperties> = {
   primary:   { filter: 'brightness(1.08)', boxShadow: '0 6px 20px rgba(0,64,129,0.18)', transform: 'translateY(-1px)' },
-  secondary: { background: 'rgba(102,197,197,0.08)', borderColor: '#66C5C5', color: '#004081' },
-  danger:    { filter: 'brightness(0.92)' },
+  secondary: { filter: 'brightness(0.97)', boxShadow: '0 4px 14px rgba(102,197,197,0.22)', transform: 'translateY(-1px)' },
+  danger:    { filter: 'brightness(1.06)', boxShadow: '0 6px 20px rgba(211,47,47,0.22)', transform: 'translateY(-1px)' },
   ghost:     { background: 'rgba(102,197,197,0.10)', color: '#004081' },
-  success:   { filter: 'brightness(0.92)' },
+  success:   { filter: 'brightness(1.06)', boxShadow: '0 6px 20px rgba(79,154,58,0.22)', transform: 'translateY(-1px)' },
 }
 
 const SIZE_STYLES: Record<Size, CSSProperties> = {
@@ -83,7 +83,7 @@ export function Button({
         padding: sz.padding as string,
         fontSize: sz.fontSize,
         fontWeight: 600,
-        borderRadius: 9999,
+        borderRadius: 16,
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.45 : 1,
         transition: 'background 0.15s, box-shadow 0.15s, transform 0.12s, filter 0.15s, border-color 0.15s, color 0.15s',

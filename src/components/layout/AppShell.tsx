@@ -1,5 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom'
-import { Sidebar } from './Sidebar'
+import { Outlet, useLocation, Link } from 'react-router-dom'
 import { RoleSwitcher } from './RoleSwitcher'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -19,47 +18,56 @@ export function AppShell() {
   const pageTitle = getPageTitle(location.pathname)
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F9FA' }}>
-      <Sidebar />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-        {/* Topbar */}
-        <header
-          className="no-print"
-          style={{
-            height: 60,
-            background: '#FFFFFF',
-            borderBottom: '1px solid #D0D6DF',
-            boxShadow: '0 1px 2px rgba(0,64,129,0.04)',
+    <div style={{ minHeight: '100vh', background: '#F8F9FA' }}>
+      {/* Topbar */}
+      <header
+        className="no-print"
+        style={{
+          height: 60,
+          background: '#FFFFFF',
+          borderBottom: '1px solid #D0D6DF',
+          boxShadow: '0 1px 2px rgba(0,64,129,0.04)',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 28px',
+          gap: 16,
+          zIndex: 10,
+          position: 'sticky',
+          top: 0,
+        }}
+      >
+        <Link to="/requests" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <div style={{
+            width: 34,
+            height: 34,
+            background: 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)',
+            borderRadius: 10,
             display: 'flex',
             alignItems: 'center',
-            padding: '0 28px',
-            gap: 16,
-            flexShrink: 0,
-            zIndex: 10,
-            position: 'sticky',
-            top: 0,
-          }}
-        >
-          <h1 style={{
-            flex: 1,
-            margin: 0,
-            fontWeight: 600,
-            fontSize: 18,
-            color: '#001122',
-            letterSpacing: '-0.01em',
+            justifyContent: 'center',
           }}>
-            {pageTitle}
-          </h1>
+            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '-0.02em' }}>CT</span>
+          </div>
+        </Link>
 
-          <RoleSwitcher />
-        </header>
+        <h1 style={{
+          flex: 1,
+          margin: 0,
+          fontWeight: 600,
+          fontSize: 18,
+          color: '#001122',
+          letterSpacing: '-0.01em',
+        }}>
+          {pageTitle}
+        </h1>
 
-        {/* Page content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-          <Outlet />
-        </main>
-      </div>
+        <RoleSwitcher />
+      </header>
+
+      {/* Page content */}
+      <main style={{ padding: '28px 32px' }}>
+        <Outlet />
+      </main>
     </div>
   )
 }
