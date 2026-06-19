@@ -820,7 +820,7 @@ export function RequestFormStepper({
           <input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)}
             style={{ width: 15, height: 15, accentColor: '#004081', cursor: 'pointer' }} />
           <span style={{ fontSize: 13, color: '#586782', fontWeight: 500, lineHeight: 1.5 }}>
-            ข้าพเจ้าขอยืนยันว่าข้อมูลข้างต้นถูกต้องและครบถ้วน
+            ข้อมูลถูกต้อง
           </span>
         </label>
         {submitError && <div style={{ marginBottom: 12, fontSize: 12, color: '#F3554F' }}>{submitError}</div>}

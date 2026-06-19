@@ -73,7 +73,7 @@ export function ApproveModal({ open, request, onClose, onApprove }: Props) {
             onChange={e => { setConfirmed(e.target.checked); setError('') }}
             style={{ marginTop: 2, accentColor: '#66C5C5' }}
           />
-          <span>ข้าพเจ้ายืนยันว่าได้ตรวจสอบข้อมูลครบถ้วนและอนุมัติคำขอนี้แล้ว</span>
+          <span>ยืนยันอนุมัติคำขอนี้</span>
         </label>
 
         {error && !comment.trim() === false && (
