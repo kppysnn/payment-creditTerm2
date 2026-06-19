@@ -6,6 +6,7 @@ import type { Request, QuotationItem, PaymentInstallment, SaleType } from '../ty
 import type { RequestCustomerInfo } from '../types/customer'
 import { calcGrossProfit, calcMarginPercent, calcInstallmentAmount } from '../utils/calculations'
 import { generateId } from '../data/mockRequests'
+import { BackButton } from '../../../components/ui/BackButton'
 
 function numVal(v: unknown): number { return Number(v) || 0 }
 
@@ -116,6 +117,7 @@ export function CreateRequestPage() {
 
   return (
     <div>
+      <BackButton />
       <h1 style={{ margin: '0 0 24px', fontSize: 22, fontWeight: 700 }}>สร้างคำขออนุมัติใหม่</h1>
       <RequestFormStepper
         currentUser={currentUser}

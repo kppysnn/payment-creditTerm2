@@ -9,6 +9,7 @@ import { calcGrossProfit, calcMarginPercent, calcInstallmentAmount } from '../ut
 import { generateId } from '../data/mockRequests'
 import { canEditRequest } from '../utils/permissions'
 import { Alert } from '../../../components/ui/Alert'
+import { BackButton } from '../../../components/ui/BackButton'
 
 function numVal(v: unknown): number { return Number(v) || 0 }
 
@@ -128,6 +129,7 @@ export function EditRequestPage() {
 
   return (
     <div>
+      <BackButton />
       <h1 style={{ margin: '0 0 24px', fontSize: 22, fontWeight: 700 }}>
         {isResubmit ? 'แก้ไขและส่งขออนุมัติอีกครั้ง' : isPendingEdit ? 'แก้ไขคำขอที่รออนุมัติ' : 'แก้ไขคำขอ'} — {req.requestNo}
       </h1>

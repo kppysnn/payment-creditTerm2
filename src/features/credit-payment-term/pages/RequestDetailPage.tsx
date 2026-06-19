@@ -16,7 +16,8 @@ import { RejectModal } from '../../../components/modals/RejectModal'
 import { canApproveRequest, canRejectRequest, canEditRequest, canCancelRequest } from '../utils/permissions'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate, formatDateTime, formatCreditTerm } from '../utils/formatters'
-import { ArrowLeft, Edit, RefreshCw, Printer, Send, Ban, CheckCircle, XCircle } from 'lucide-react'
+import { BackButton } from '../../../components/ui/BackButton'
+import { Edit, RefreshCw, Printer, Send, Ban, CheckCircle, XCircle } from 'lucide-react'
 
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -96,9 +97,7 @@ export function RequestDetailPage() {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#586782', fontSize: 13, display: 'flex', alignItems: 'center', gap: 4, padding: '0 0 8px', fontFamily: 'inherit' }}>
-              <ArrowLeft size={14} /> ย้อนกลับ
-            </button>
+            <BackButton />
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#001122' }}>{req.requestNo}</h1>
               <StatusBadge status={req.status} />
