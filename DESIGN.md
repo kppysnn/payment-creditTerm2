@@ -146,7 +146,9 @@ A two-color signal system on a clean light ground. Teal signals; Navy anchors. E
 
 **The Signal Rule.** Teal is a signal, not a fill. It appears on ≤15% of any screen surface — as hover states, active indicators, focus rings, and accent marks. Teal backgrounds on sections, cards, or large containers are prohibited. Its relative rarity is what makes it communicate.
 
-**The Gradient Restraint Rule.** The teal-to-navy gradient appears on exactly one element per screen: the primary CTA. It does not appear on section backgrounds, headings, badge text, icon fills, or decorative stripes. If a second gradient element is tempting, the design has lost confidence.
+**The Gradient Restraint Rule.** Two gradient registers exist, and they are not interchangeable.
+- **Signal Gradient** — the full teal-to-navy gradient (`linear-gradient(135deg, #66C5C5 0%, #004081 100%)`). Reserved for exactly one element per screen: the primary CTA. Never on section backgrounds, headings, badge text, icon fills, or decorative stripes. If a second Signal Gradient element is tempting, the design has lost confidence.
+- **Wash Gradient** — soft, low-contrast tints where the two stops read as one color from a normal viewing distance (e.g. `linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)` for selected/active control states, `linear-gradient(90deg, #EEF5FB 0%, #EFF9F9 100%)` for subtotal/summary row backgrounds, `linear-gradient(180deg, #ffffff 0%, #F7FBFE 100%)` for card body fills, or a darker navy-toned bar like `linear-gradient(135deg, #001D3D 0%, #004081 100%)` for section-header bars). Wash Gradients are permitted on segmented-control selection states, card section headers, card body backgrounds, and data-row washes — anywhere a flat tint would otherwise sit. A gradient counts as a Wash only while it stays low-contrast; once it's bright or high-contrast enough to read as a signal, it has become a Signal Gradient and the one-per-screen limit applies.
 
 **The Navy Shadow Rule.** No generic black box-shadows (`rgba(0,0,0,0.x)`). Every shadow uses navy tint: small `0 1px 2px rgba(0,64,129,0.04)`, medium `0 4px 14px rgba(0,64,129,0.07)`, large `0 16px 34px rgba(0,64,129,0.10)`.
 
@@ -267,7 +269,7 @@ The primary data display component. Used on every list page.
 - **Do** use EXZY Teal (#66C5C5) exclusively as a signal: hover states, focus rings, active nav indicators, badge accents. Its rarity makes it communicate.
 - **Do** use EXZY Navy (#004081) as the anchor: sidebar, headings of consequence, CTA buttons, footer.
 - **Do** use navy-tinted shadows at all times: `rgba(0,64,129,0.04/0.07/0.10)`. Never `rgba(0,0,0,x)`.
-- **Do** apply the teal-to-navy gradient to exactly one element per screen: the primary CTA button.
+- **Do** apply the Signal Gradient (full teal-to-navy) to exactly one element per screen: the primary CTA button. Wash Gradients (soft, low-contrast tints) may appear more broadly — see the Gradient Restraint Rule.
 - **Do** set Thai body text line-height at minimum 1.65; prefer 1.75. Tone marks stack above Thai letterforms and need room.
 - **Do** use `text-wrap: balance` on h1–h3 and `text-wrap: pretty` on Thai paragraphs.
 - **Do** keep card surfaces white on the `#F8F9FA` background — the contrast provides layer without shadows.
@@ -277,7 +279,7 @@ The primary data display component. Used on every list page.
 - **Do** use WCAG AA contrast as a floor, not a ceiling. Body text (#505050 on #FFFFFF) should clear 4.5:1.
 
 ### Don't:
-- **Don't** use the gradient on section backgrounds, card fills, heading text, icon fills, badges, or decorative stripes. The gradient-everywhere reflex is the fastest way to break the system.
+- **Don't** use the Signal Gradient (teal-to-navy) on section backgrounds, card fills, heading text, icon fills, badges, or decorative stripes — that combination is reserved for the primary CTA. Wash Gradients are fine in those places; the Signal Gradient is not.
 - **Don't** use gradient text (`background-clip: text`). Prohibited. Use a single solid color.
 - **Don't** add a new color to the system without a semantic role. The system has two accent colors and three semantic colors. That is enough.
 - **Don't** use black-tinted shadows. Every shadow uses navy as the shadow color.

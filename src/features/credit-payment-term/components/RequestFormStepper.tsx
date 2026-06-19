@@ -401,7 +401,7 @@ export function RequestFormStepper({
                 style={{ paddingRight: 38 }}
               />
               <button type="button" onClick={() => setCtDropOpen(o => !o)}
-                style={{ position: 'absolute', top: 1, right: 1, width: 36, height: 36, border: 'none', borderLeft: '1px solid #E2E8F0', borderRadius: '0 7px 7px 0', background: '#fff', color: '#4A5568', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
+                style={{ position: 'absolute', top: 1, right: 1, width: 36, height: 36, border: 'none', borderLeft: '1px solid #D0D6DF', borderRadius: '0 7px 7px 0', background: '#fff', color: '#586782', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
                 aria-label="เลือก Credit Term">˅</button>
               {ctDropOpen && (
                 <div style={{ position: 'absolute', zIndex: 5, top: 42, left: 0, width: 200, maxHeight: 220, overflowY: 'auto', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 8, boxShadow: '0 8px 20px rgba(0,64,129,0.14)' }}>
@@ -409,14 +409,14 @@ export function RequestFormStepper({
                     <button key={days} type="button"
                       onMouseDown={e => e.preventDefault()}
                       onClick={() => { setIsCustomCT(false); setCtDays(days); setCtDropOpen(false) }}
-                      style={{ display: 'block', width: '100%', padding: '9px 12px', border: 'none', borderBottom: '1px solid #F2F6F8', background: numVal(ctDays) === days ? '#EEF8F8' : '#fff', color: '#1A202C', textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                      style={{ display: 'block', width: '100%', padding: '9px 12px', border: 'none', borderBottom: '1px solid #F2F6F8', background: numVal(ctDays) === days ? '#EEF8F8' : '#fff', color: '#001122', textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                       {days} วัน
                     </button>
                   ))}
                   <button type="button"
                     onMouseDown={e => e.preventDefault()}
                     onClick={() => { setIsCustomCT(true); setCtDays(''); setCtDropOpen(false) }}
-                    style={{ display: 'block', width: '100%', padding: '9px 12px', border: 'none', background: creditTermIsCustom ? '#EEF8F8' : '#fff', color: '#1A202C', textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    style={{ display: 'block', width: '100%', padding: '9px 12px', border: 'none', background: creditTermIsCustom ? '#EEF8F8' : '#fff', color: '#001122', textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                     ระบุเอง
                   </button>
                 </div>
@@ -551,7 +551,7 @@ export function RequestFormStepper({
 
   /* ── Quotation card wrapper ── */
   const quotationCard = (quotationNo: string, label: string, headerGradient: string, body: React.ReactNode) => (
-    <div style={{ borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(180deg, #ffffff 0%, #F7FBFE 100%)', boxShadow: '0 2px 12px rgba(0,64,129,0.08)' }}>
+    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid #D0D6DF', background: 'linear-gradient(180deg, #ffffff 0%, #F7FBFE 100%)' }}>
       {quotationHeader(quotationNo, label, headerGradient)}
       {body}
     </div>
@@ -773,7 +773,7 @@ export function RequestFormStepper({
       </Card>
 
       {/* ─── Footer ─── */}
-      <div style={{ background: '#fff', borderRadius: 14, padding: '20px 24px', boxShadow: '0 2px 10px rgba(0,64,129,0.07)' }}>
+      <div style={{ background: '#fff', borderRadius: 14, padding: '20px 24px', border: '1px solid #D0D6DF' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, cursor: 'pointer' }}>
           <input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)}
             style={{ width: 15, height: 15, accentColor: '#004081', cursor: 'pointer' }} />
