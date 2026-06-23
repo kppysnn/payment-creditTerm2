@@ -265,14 +265,14 @@ export function RequestDetailPage() {
                   <div style={{ fontSize: 11, color: '#586782', fontWeight: 600, marginBottom: 4 }}>
                     {req.approvalResult.approvedAt ? 'Approval Comment' : 'Reject Reason'}
                   </div>
-                  <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: req.approvalResult.approvedAt ? '#F0FDF4' : '#FEF2F2', borderRadius: 6, border: `1px solid ${req.approvalResult.approvedAt ? '#86EFAC' : '#FCA5A5'}` }}>
+                  <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: req.approvalResult.approvedAt ? '#F0FDF4' : '#FEF2F2', borderRadius: 4, border: `1px solid ${req.approvalResult.approvedAt ? '#86EFAC' : '#FCA5A5'}` }}>
                     {req.approvalResult.decisionComment}
                   </p>
                 </div>
                 {req.approvalResult.suggestion && (
                   <div style={{ marginTop: 12 }}>
                     <div style={{ fontSize: 11, color: '#586782', fontWeight: 600, marginBottom: 4 }}>ข้อเสนอแนะสำหรับ Sales</div>
-                    <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: '#FFFBEB', borderRadius: 6, border: '1px solid #FCD34D' }}>
+                    <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: '#FFFBEB', borderRadius: 4, border: '1px solid #FCD34D' }}>
                       {req.approvalResult.suggestion}
                     </p>
                   </div>

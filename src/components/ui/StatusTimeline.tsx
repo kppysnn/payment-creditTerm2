@@ -84,7 +84,7 @@ export function StatusTimeline({ history }: Props) {
                   padding: '7px 10px',
                   background: '#F2F6F8',
                   border: '1px solid #D0D6DF',
-                  borderRadius: 6,
+                  borderRadius: 4,
                   fontSize: 12,
                   color: '#586782',
                   fontStyle: 'italic',

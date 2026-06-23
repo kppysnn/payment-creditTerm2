@@ -83,7 +83,7 @@ export function Button({
         padding: sz.padding as string,
         fontSize: sz.fontSize,
         fontWeight: 600,
-        borderRadius: 9999,
+        borderRadius: 4,
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.45 : 1,
         transition: 'background 0.15s, box-shadow 0.15s, transform 0.12s, filter 0.15s, border-color 0.15s, color 0.15s',

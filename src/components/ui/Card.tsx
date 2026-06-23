@@ -14,7 +14,7 @@ export function Card({ title, children, style, actions, noPad }: CardProps) {
       style={{
         background: '#FFFFFF',
         border: '1px solid #D0D6DF',
-        borderRadius: 14,
+        borderRadius: 4,
         overflow: 'hidden',
         transition: 'box-shadow 0.15s, transform 0.12s, border-color 0.15s',
         ...style,
