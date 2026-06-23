@@ -2,17 +2,22 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from './Button'
 
-export function BackButton({ style }: { style?: React.CSSProperties } = {}) {
+interface Props {
+  to: string
+  label?: string
+  style?: React.CSSProperties
+}
+
+export function BackButton({ to, label = 'ย้อนกลับ', style }: Props) {
   const navigate = useNavigate()
   return (
     <Button
       variant="secondary"
-      size="sm"
-      icon={<ArrowLeft size={14} />}
-      onClick={() => navigate(-1)}
-      style={{ marginBottom: 14, ...style }}
+      icon={<ArrowLeft size={15} />}
+      onClick={() => navigate(to)}
+      style={style}
     >
-      ย้อนกลับ
+      {label}
     </Button>
   )
 }

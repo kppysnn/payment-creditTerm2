@@ -110,7 +110,7 @@ export function EditRequestPage() {
     if (!id) return
     const patch = buildPatch(data, currentUser)
     await saveDraft(id, patch, currentUser)
-    navigate(`/requests/${id}`)
+    navigate(`/requests/${id}`, { replace: true })
   }
 
   async function handleSubmit(data: Record<string, unknown>) {
@@ -124,13 +124,15 @@ export function EditRequestPage() {
       await saveDraft(id, patch, currentUser)
       await submitRequest(id, currentUser)
     }
-    navigate(`/requests/${id}`)
+    navigate(`/requests/${id}`, { replace: true })
   }
 
   return (
     <div>
+      <div style={{ marginBottom: 20 }}>
+        <BackButton to={`/requests/${id}`} label="กลับไปหน้ารายละเอียดคำขอ" />
+      </div>
       <div style={{ maxWidth: 760, margin: '0 auto 0' }}>
-        <BackButton />
         <h1 style={{ margin: '0 0 24px', fontSize: 22, fontWeight: 700 }}>
           {isResubmit ? 'แก้ไขและส่งขออนุมัติอีกครั้ง' : isPendingEdit ? 'แก้ไขคำขอที่รออนุมัติ' : 'แก้ไขคำขอ'} — {req.requestNo}
         </h1>

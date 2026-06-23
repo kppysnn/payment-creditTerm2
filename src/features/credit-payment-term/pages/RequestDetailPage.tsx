@@ -4,7 +4,7 @@ import { useCurrentUser } from '../../../app/UserContext'
 import { getRequestById, approveRequest, rejectRequest, cancelRequest, submitRequest } from '../services/creditTermService'
 import { exportPDF } from '../services/exportService'
 import type { Request, PaymentInstallment, QuotationItem } from '../types/request'
-import { SALE_TYPE_LABELS, PAYMENT_CONDITION_LABELS } from '../types/request'
+import { SALE_TYPE_LABELS } from '../types/request'
 import { CUSTOMER_TYPE_LABELS } from '../types/customer'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { StatusTimeline } from '../../../components/ui/StatusTimeline'
@@ -61,7 +61,7 @@ export function RequestDetailPage() {
     </span>
   )
 
-  const itemsTable = (items: QuotationItem[]) => (
+  const itemsTable = (items: QuotationItem[], cost: number, selling: number) => (
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
       <tbody>
         {items.map(item => (
@@ -72,6 +72,13 @@ export function RequestDetailPage() {
           </tr>
         ))}
       </tbody>
+      <tfoot>
+        <tr style={{ background: '#F2F6F8', borderTop: '1.5px solid #D0D6DF' }}>
+          <td style={{ padding: '10px 14px', fontWeight: 700, color: '#001122' }}>รวม</td>
+          <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(cost, '#929EB4')}</td>
+          <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(selling, '#004081')}</td>
+        </tr>
+      </tfoot>
     </table>
   )
 
@@ -79,7 +86,7 @@ export function RequestDetailPage() {
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
       <thead>
         <tr style={{ background: '#F2F6F8', borderBottom: '1px solid #D0D6DF' }}>
-          {['งวด', '%', 'Credit Term', 'เงื่อนไขชำระ', 'จำนวนเงิน'].map(h => (
+          {['งวด', '%', 'Credit Term', 'จำนวนเงิน'].map(h => (
             <th key={h} style={{ padding: '8px 12px', textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const }}>{h}</th>
           ))}
         </tr>
@@ -90,7 +97,6 @@ export function RequestDetailPage() {
             <td style={{ padding: '8px 12px', fontWeight: 700 }}>{inst.installmentNo}</td>
             <td style={{ padding: '8px 12px' }}>{inst.installmentPercent}%</td>
             <td style={{ padding: '8px 12px', color: '#586782' }}>{formatCreditTerm(inst.creditTermDays)}</td>
-            <td style={{ padding: '8px 12px', color: '#586782' }}>{PAYMENT_CONDITION_LABELS[inst.paymentCondition]}</td>
             <td style={{ padding: '8px 12px', textAlign: 'right', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace' }}>{formatCurrency(inst.installmentAmount)}</td>
           </tr>
         ))}
@@ -98,17 +104,17 @@ export function RequestDetailPage() {
     </table>
   )
 
-  const quotationBlock = (quotationNo: string, label: string, items: QuotationItem[], installments: PaymentInstallment[]) => (
-    <Card
-      title={label}
-      actions={<span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 12, color: '#929EB4', fontWeight: 600 }}>{quotationNo}</span>}
-      noPad
-    >
-      {itemsTable(items)}
+  const quotationBlock = (quotationNo: string, label: string, items: QuotationItem[], cost: number, selling: number, installments: PaymentInstallment[]) => (
+    <div style={{ borderRadius: 4, overflow: 'hidden', border: '1px solid #D0D6DF', background: '#FFFFFF' }}>
+      <div style={{ background: 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>{label}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{quotationNo}</span>
+      </div>
+      {itemsTable(items, cost, selling)}
       {installments.length > 0 && (
         <div style={{ borderTop: '1px solid #D0D6DF' }}>{installmentTable(installments)}</div>
       )}
-    </Card>
+    </div>
   )
 
   async function handleApprove(comment: string) {
@@ -142,11 +148,13 @@ export function RequestDetailPage() {
 
   return (
     <>
+      <div style={{ marginBottom: 20 }}>
+        <BackButton to="/requests" label="กลับไปหน้ารายการคำขอ" />
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 760, margin: '0 auto' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <BackButton />
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', color: '#001122' }}>{req.requestNo}</h1>
               <StatusBadge status={req.status} />
@@ -238,10 +246,10 @@ export function RequestDetailPage() {
             </Card>
 
             {/* Hardware quotation: items + its own payment schedule */}
-            {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', hardwareItems, req.installments)}
+            {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', hardwareItems, hardwareCost, hardwareSelling, req.installments)}
 
             {/* Software & Installation quotation: items + its own payment schedule */}
-            {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', serviceItems, req.swInstallments ?? [])}
+            {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', serviceItems, serviceCost, serviceSelling, req.swInstallments ?? [])}
 
             {/* Overall total */}
             <Card title="สรุปรวมทั้งหมด" noPad>

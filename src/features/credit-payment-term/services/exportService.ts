@@ -5,7 +5,7 @@
  * html2pdf.js can be wired in here if added to dependencies.
  */
 import type { Request, PaymentInstallment } from '../types/request'
-import { SALE_TYPE_LABELS, PAYMENT_CONDITION_LABELS } from '../types/request'
+import { SALE_TYPE_LABELS } from '../types/request'
 
 export function printRequest(requestId: string): void {
   window.open(`/print/${requestId}`, '_blank')
@@ -120,12 +120,11 @@ function buildQuotationGroup(no: string, title: string, items: Request['quotatio
       </tr>
     </table>
     ${installments.length > 0 ? `<table>
-      <tr><th>งวด</th><th>%</th><th>Credit Term</th><th>เงื่อนไขชำระ</th><th style="text-align:right">จำนวนเงิน</th></tr>
+      <tr><th>งวด</th><th>%</th><th>Credit Term</th><th style="text-align:right">จำนวนเงิน</th></tr>
       ${installments.map(i => `<tr>
         <td>${i.installmentNo}</td>
         <td>${i.installmentPercent}%</td>
         <td>Net ${i.creditTermDays}</td>
-        <td>${PAYMENT_CONDITION_LABELS[i.paymentCondition]}</td>
         <td class="mono" style="text-align:right">${i.installmentAmount.toLocaleString()}</td>
       </tr>`).join('')}
     </table>` : ''}
