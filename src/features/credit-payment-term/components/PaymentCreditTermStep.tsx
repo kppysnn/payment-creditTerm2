@@ -114,7 +114,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
 
         {/* Payment Schedule Table */}
         <div>
-          <div style={{ fontWeight: 600, fontSize: 14, color: '#1E3A5F', marginBottom: 12 }}>
+          <div style={{ fontWeight: 600, fontSize: 14, color: '#004081', marginBottom: 12 }}>
             ตาราง Payment Schedule ({installmentCount} งวด)
           </div>
 
@@ -125,17 +125,17 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
                 key={i}
                 style={{
                   background: '#F7FAFC',
-                  border: `1px solid ${errors[`inst${i}.pct`] || errors[`inst${i}.days`] ? '#FCA5A5' : '#E2E8F0'}`,
+                  border: `1px solid ${errors[`inst${i}.pct`] || errors[`inst${i}.days`] ? '#FCA5A5' : '#D0D6DF'}`,
                   borderRadius: 6,
                   padding: 16,
                   marginBottom: 12,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#1E3A5F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
                     {i + 1}
                   </div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1E3A5F' }}>งวดที่ {i + 1}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#004081' }}>งวดที่ {i + 1}</div>
                   {totalSelling > 0 && numVal(row.installmentPercent) > 0 && (
                     <div style={{ marginLeft: 'auto', fontSize: 15, fontWeight: 700, color: '#16A34A' }}>
                       {formatCurrency(amount)}
@@ -195,7 +195,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
           })}
 
           {/* Total row */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 24, padding: '12px 16px', background: '#EBF0F6', borderRadius: 6, fontSize: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 24, padding: '12px 16px', background: '#F2F6F8', borderRadius: 6, fontSize: 14 }}>
             <div>
               <span style={{ color: '#718096' }}>รวม %: </span>
               <span style={{ fontWeight: 700, color: Math.abs(totalPercent - 100) < 0.01 ? '#16A34A' : '#DC2626' }}>

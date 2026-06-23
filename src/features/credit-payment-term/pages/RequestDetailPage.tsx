@@ -102,7 +102,7 @@ export function RequestDetailPage() {
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', color: '#001122' }}>{req.requestNo}</h1>
               <StatusBadge status={req.status} />
               {req.version > 1 && (
-                <span style={{ fontSize: 12, padding: '2px 8px', background: 'rgba(0,64,129,0.08)', color: '#004081', borderRadius: 6, fontWeight: 600 }}>v{req.version}</span>
+                <span style={{ fontSize: 12, padding: '2px 8px', background: 'rgba(0,64,129,0.08)', color: '#004081', borderRadius: 9999, fontWeight: 600 }}>v{req.version}</span>
               )}
             </div>
             <p style={{ margin: '6px 0 0', color: '#586782', fontSize: 14 }}>

@@ -20,26 +20,28 @@ function StatCard({ label, count, icon, color, bg }: { label: string; count: num
     <div style={{
       background: '#FFFFFF',
       border: '1px solid #D0D6DF',
-      borderRadius: 6,
+      borderRadius: 14,
       padding: '18px 20px',
       display: 'flex',
       flexDirection: 'column',
       gap: 12,
-      transition: 'box-shadow 0.15s, transform 0.12s',
+      transition: 'box-shadow 0.15s, transform 0.12s, border-color 0.15s',
     }}
       onMouseEnter={e => {
         e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,64,129,0.07)'
         e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.borderColor = 'rgba(102,197,197,0.5)'
       }}
       onMouseLeave={e => {
         e.currentTarget.style.boxShadow = ''
         e.currentTarget.style.transform = ''
+        e.currentTarget.style.borderColor = '#D0D6DF'
       }}
     >
       <div style={{
         width: 40,
         height: 40,
-        borderRadius: 6,
+        borderRadius: 10,
         background: bg,
         display: 'flex',
         alignItems: 'center',
@@ -151,7 +153,7 @@ export function RequestListPage() {
       )}
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, padding: '12px 16px' }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 14, padding: '12px 16px' }}>
         <div style={{ flex: 1, minWidth: 200, display: 'flex', gap: 8, alignItems: 'center' }}>
           <Search size={15} style={{ color: '#A0AEC0', flexShrink: 0 }} />
           <Input
@@ -175,7 +177,7 @@ export function RequestListPage() {
       </div>
 
       {/* Table */}
-      <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, overflow: 'hidden' }}>
+      <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 14, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: '#A0AEC0' }}>กำลังโหลด...</div>
         ) : filtered.length === 0 ? (
@@ -221,7 +223,7 @@ export function RequestListPage() {
           </table>
         )}
         {!loading && (
-          <div style={{ padding: '10px 16px', borderTop: '1px solid #D0D6DF', fontSize: 12, color: '#929EB4', background: '#FAFBFC' }}>
+          <div style={{ padding: '10px 16px', borderTop: '1px solid #D0D6DF', fontSize: 12, color: '#929EB4', background: '#F2F6F8' }}>
             แสดง {filtered.length} จาก {requests.length} รายการ
           </div>
         )}

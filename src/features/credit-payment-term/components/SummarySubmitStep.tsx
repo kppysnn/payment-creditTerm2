@@ -146,7 +146,7 @@ export function SummarySubmitStep({ data, currentUser, onBack, onSaveDraft, onSu
             ))}
           </tbody>
           <tfoot>
-            <tr style={{ background: '#FAFBFC', borderTop: '2px solid #D0D6DF' }}>
+            <tr style={{ background: '#F2F6F8', borderTop: '2px solid #D0D6DF' }}>
               <td style={{ padding: '9px 12px', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>รวม Q1</td>
               <td style={{ padding: '9px 12px', textAlign: 'right' }}>{mono(formatCurrency(hwSelling))}</td>
               <td style={{ padding: '9px 12px', textAlign: 'right' }}>{mono(formatCurrency(hwCost))}</td>
@@ -173,7 +173,7 @@ export function SummarySubmitStep({ data, currentUser, onBack, onSaveDraft, onSu
               {instSelling > 0 && <tr><td style={{ padding: '9px 12px', borderBottom: '1px solid #D0D6DF' }}>Installation</td><td style={{ padding: '9px 12px', textAlign: 'right', borderBottom: '1px solid #D0D6DF' }}>{mono(formatCurrency(instSelling))}</td><td style={{ padding: '9px 12px', textAlign: 'right', borderBottom: '1px solid #D0D6DF' }}>{mono(formatCurrency(instCost))}</td><td style={{ padding: '9px 12px', textAlign: 'right', borderBottom: '1px solid #D0D6DF' }}>{mono(formatCurrency(instSelling - instCost), (instSelling - instCost) < 0)}</td></tr>}
             </tbody>
             <tfoot>
-              <tr style={{ background: '#FAFBFC', borderTop: '2px solid #D0D6DF' }}>
+              <tr style={{ background: '#F2F6F8', borderTop: '2px solid #D0D6DF' }}>
                 <td style={{ padding: '9px 12px', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>รวม Q2</td>
                 <td style={{ padding: '9px 12px', textAlign: 'right' }}>{mono(formatCurrency(swSelling + instSelling))}</td>
                 <td style={{ padding: '9px 12px', textAlign: 'right' }}>{mono(formatCurrency(swCost + instCost))}</td>
@@ -185,7 +185,7 @@ export function SummarySubmitStep({ data, currentUser, onBack, onSaveDraft, onSu
       )}
 
       {/* Grand Total */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12, padding: '14px 20px', background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 6 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12, padding: '14px 20px', background: '#F2F6F8', border: '1px solid #D0D6DF', borderRadius: 6 }}>
         {[
           { label: 'ราคาขายรวม', value: formatCurrency(totalSelling), color: '#001122' },
           { label: 'ต้นทุนรวม', value: formatCurrency(totalCost), color: '#586782' },
@@ -223,7 +223,7 @@ export function SummarySubmitStep({ data, currentUser, onBack, onSaveDraft, onSu
             ))}
           </tbody>
           <tfoot>
-            <tr style={{ background: '#FAFBFC', borderTop: '2px solid #D0D6DF' }}>
+            <tr style={{ background: '#F2F6F8', borderTop: '2px solid #D0D6DF' }}>
               <td style={{ padding: '9px 12px' }} />
               <td style={{ padding: '9px 12px', fontWeight: 700, color: pctNotComplete ? '#F3554F' : '#66C5C5' }}>{totalPct.toFixed(0)}%{pctNotComplete ? ' ⚠' : ' ✓'}</td>
               <td style={{ padding: '9px 12px' }}>{mono(formatCurrency(totalSelling))}</td>

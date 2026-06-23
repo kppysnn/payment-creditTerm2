@@ -10,25 +10,37 @@ interface CardProps {
 
 export function Card({ title, children, style, actions, noPad }: CardProps) {
   return (
-    <div style={{
-      background: '#FFFFFF',
-      border: '1px solid #D0D6DF',
-      borderRadius: 14,
-      overflow: 'hidden',
-      transition: 'box-shadow 0.15s, transform 0.12s, border-color 0.15s',
-      ...style,
-    }}>
+    <div
+      style={{
+        background: '#FFFFFF',
+        border: '1px solid #D0D6DF',
+        borderRadius: 14,
+        overflow: 'hidden',
+        transition: 'box-shadow 0.15s, transform 0.12s, border-color 0.15s',
+        ...style,
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,64,129,0.07)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.borderColor = 'rgba(102,197,197,0.5)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = ''
+        e.currentTarget.style.transform = ''
+        e.currentTarget.style.borderColor = '#D0D6DF'
+      }}
+    >
       {(title || actions) && (
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '14px 20px',
-          borderBottom: '1px solid #D0D6DF',
-          background: '#F2F6F8',
+          padding: '12px 20px',
+          borderBottom: '1px solid rgba(0,64,129,0.18)',
+          background: 'linear-gradient(135deg, #001D3D 0%, #004081 100%)',
         }}>
           {title && (
-            <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#001122', letterSpacing: '-0.01em' }}>
+            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#FFFFFF', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
               {title}
             </h3>
           )}

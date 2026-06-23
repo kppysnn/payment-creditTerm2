@@ -26,7 +26,7 @@ export function AppShell() {
           height: 60,
           background: '#FFFFFF',
           borderBottom: '1px solid #D0D6DF',
-          boxShadow: '0 1px 2px rgba(0,64,129,0.04)',
+          boxShadow: '0 1px 2px rgba(0,64,129,0.04), inset 0 3px 0 0 #66C5C5',
           display: 'flex',
           alignItems: 'center',
           padding: '0 28px',
