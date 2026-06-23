@@ -298,7 +298,7 @@ export async function rejectRequest(
   return updated
 }
 
-export async function cancelRequest(id: string, actor: CurrentUser): Promise<Request> {
+export async function cancelRequest(id: string, reason: string, actor: CurrentUser): Promise<Request> {
   await _delay()
   const existing = getMockRequestById(id)
   if (!existing) throw new Error('Request not found')
@@ -314,6 +314,7 @@ export async function cancelRequest(id: string, actor: CurrentUser): Promise<Req
     actorName: actor.name,
     fromStatus: existing.status,
     toStatus: 'cancelled',
+    comment: reason,
     createdAt: now,
   }
   const updated: Request = { ...existing, status: 'cancelled', updatedAt: now, history: [...existing.history, entry] }

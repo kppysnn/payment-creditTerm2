@@ -13,6 +13,7 @@ import { Button } from '../../../components/ui/Button'
 import { Alert } from '../../../components/ui/Alert'
 import { ApproveModal } from '../../../components/modals/ApproveModal'
 import { RejectModal } from '../../../components/modals/RejectModal'
+import { CancelModal } from '../../../components/modals/CancelModal'
 import { canApproveRequest, canRejectRequest, canEditRequest, canCancelRequest } from '../utils/permissions'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate, formatDateTime, formatCreditTerm } from '../utils/formatters'
@@ -27,7 +28,7 @@ export function RequestDetailPage() {
   const [loading, setLoading] = useState(true)
   const [approveOpen, setApproveOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
-  const [cancelLoading, setCancelLoading] = useState(false)
+  const [cancelOpen, setCancelOpen] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
 
   async function loadReq() {
@@ -39,8 +40,8 @@ export function RequestDetailPage() {
 
   useEffect(() => { loadReq() }, [id, currentUser])
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 48, color: '#929EB4' }}>กำลังโหลด...</div>
-  if (!req) return <div style={{ textAlign: 'center', padding: 48, color: '#929EB4' }}>ไม่พบคำขอ</div>
+  if (loading) return <div style={{ textAlign: 'center', padding: 48, color: '#586782' }}>กำลังโหลด...</div>
+  if (!req) return <div style={{ textAlign: 'center', padding: 48, color: '#586782' }}>ไม่พบคำขอ</div>
 
   const customerName =
     req.customerInfo.type === 'existing' ? req.customerInfo.data.companyName :
@@ -66,7 +67,7 @@ export function RequestDetailPage() {
       <thead>
         <tr style={{ background: '#F2F6F8', borderBottom: '1px solid #D0D6DF' }}>
           {['รายการ', 'ราคาทุน', 'ราคาขาย'].map(h => (
-            <th key={h} style={{ padding: '8px 14px', textAlign: h === 'รายการ' ? 'left' : 'right', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>{h}</th>
+            <th key={h} style={{ padding: '8px 14px', textAlign: h === 'รายการ' ? 'left' : 'right', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>{h}</th>
           ))}
         </tr>
       </thead>
@@ -74,7 +75,7 @@ export function RequestDetailPage() {
         {items.map(item => (
           <tr key={item.itemId} style={{ borderBottom: '1px solid #D0D6DF' }}>
             <td style={{ padding: '10px 14px' }}>{item.name}</td>
-            <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(item.cost, '#929EB4')}</td>
+            <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(item.cost, '#586782')}</td>
             <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(item.sellingPrice, '#004081')}</td>
           </tr>
         ))}
@@ -94,17 +95,17 @@ export function RequestDetailPage() {
 
   const totalStrip = (label: string, cost: number, selling: number) => summaryStrip(`รวม ${label}`, (
     <span style={{ display: 'flex', gap: 24 }}>
-      <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
         ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(cost)}</span>
       </span>
-      <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
         ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
       </span>
     </span>
   ))
 
   const installmentStrip = (creditTermDays: number) => summaryStrip('งวดการชำระเงิน', (
-    <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+    <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
       Credit Term <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
     </span>
   ))
@@ -114,7 +115,7 @@ export function RequestDetailPage() {
       <thead>
         <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
           {['งวด', '%', 'จำนวนเงิน'].map(h => (
-            <th key={h} style={{ padding: '8px 14px', textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const }}>{h}</th>
+            <th key={h} style={{ padding: '8px 14px', textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const }}>{h}</th>
           ))}
         </tr>
       </thead>
@@ -161,10 +162,10 @@ export function RequestDetailPage() {
     setRejectOpen(false)
   }
 
-  async function handleCancel() {
-    if (!id || !window.confirm('ยืนยันการยกเลิกคำขอนี้?')) return
-    setCancelLoading(true)
-    await cancelRequest(id, currentUser)
+  async function handleCancel(reason: string) {
+    if (!id) return
+    await cancelRequest(id, reason, currentUser)
+    setCancelOpen(false)
     navigate('/requests')
   }
 
@@ -212,7 +213,7 @@ export function RequestDetailPage() {
               </Link>
             )}
             {canCancelRequest(currentUser, req) && (
-              <Button variant="danger" size="sm" icon={<Ban size={14} />} loading={cancelLoading} onClick={handleCancel}>ยกเลิก</Button>
+              <Button variant="danger" size="sm" icon={<Ban size={14} />} onClick={() => setCancelOpen(true)}>ยกเลิก</Button>
             )}
             {canApproveRequest(currentUser, req) && (
               <Button variant="success" size="sm" icon={<CheckCircle size={14} />} onClick={() => setApproveOpen(true)}>อนุมัติ</Button>
@@ -223,9 +224,13 @@ export function RequestDetailPage() {
           </div>
         </div>
 
-        {/* Rejection info for sales */}
-        {req.status === 'rejected' && req.approvalResult && currentUser.role === 'sales' && (
-          <Alert type="error" title="คำขอถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่">
+        {/* Rejection context — visible to every role, not just sales, so an approver
+            re-deciding a resubmitted request sees why it was rejected last time */}
+        {req.approvalResult?.rejectedAt && (
+          <Alert
+            type="error"
+            title={req.status === 'rejected' ? 'คำขอถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่' : 'เคยถูกปฏิเสธมาก่อน — แก้ไขและส่งใหม่แล้ว'}
+          >
             <div><strong>เหตุผล:</strong> {req.approvalResult.decisionComment}</div>
             {req.approvalResult.suggestion && <div style={{ marginTop: 4 }}><strong>ข้อเสนอแนะ:</strong> {req.approvalResult.suggestion}</div>}
           </Alert>
@@ -286,9 +291,9 @@ export function RequestDetailPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ background: '#F2F6F8', borderBottom: '1px solid #D0D6DF' }}>
-                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>รายการ</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาทุน</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาขาย</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>รายการ</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาทุน</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาขาย</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -296,9 +301,9 @@ export function RequestDetailPage() {
                     <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
                       <td style={{ padding: '11px 14px' }}>
                         <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{hardwareQuotationNo}</span>
-                        <span style={{ color: '#929EB4', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
+                        <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
                       </td>
-                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#929EB4')}</td>
+                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#586782')}</td>
                       <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hardwareSelling, '#004081')}</td>
                     </tr>
                   )}
@@ -306,9 +311,9 @@ export function RequestDetailPage() {
                     <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
                       <td style={{ padding: '11px 14px' }}>
                         <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{serviceQuotationNo}</span>
-                        <span style={{ color: '#929EB4', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
+                        <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
                       </td>
-                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#929EB4')}</td>
+                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782')}</td>
                       <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceSelling, '#004081')}</td>
                     </tr>
                   )}
@@ -316,7 +321,7 @@ export function RequestDetailPage() {
                 <tfoot>
                   <tr style={{ borderTop: '1.5px solid #D0D6DF', background: '#F2F6F8' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 700, color: '#001122' }}>รวมทั้งหมด</td>
-                    <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#929EB4')}</td>
+                    <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#586782')}</td>
                     <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalSelling, '#004081')}</td>
                   </tr>
                 </tfoot>
@@ -360,6 +365,7 @@ export function RequestDetailPage() {
 
       <ApproveModal open={approveOpen} request={req} onClose={() => setApproveOpen(false)} onApprove={handleApprove} />
       <RejectModal open={rejectOpen} request={req} onClose={() => setRejectOpen(false)} onReject={handleReject} />
+      <CancelModal open={cancelOpen} request={req} onClose={() => setCancelOpen(false)} onCancel={handleCancel} />
     </>
   )
 }

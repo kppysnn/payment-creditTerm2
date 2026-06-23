@@ -186,6 +186,12 @@ export const MOCK_REQUESTS: Request[] = [
       maxCreditTerm: 30,
     },
     status: 'pending',
+    approvalResult: {
+      approverEmail: 'approver@company.com',
+      approverName: 'นายประยุทธ์ มั่นคง',
+      rejectedAt: '2026-06-07T11:00:00.000Z',
+      decisionComment: 'ลูกค้าใหม่ credit term 60 วันสูงเกินไป ขอ max 30 วัน',
+    },
     history: [
       {
         historyId: 'h004',

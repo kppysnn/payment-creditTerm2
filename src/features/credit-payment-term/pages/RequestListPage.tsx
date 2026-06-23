@@ -179,9 +179,9 @@ export function RequestListPage() {
       {/* Table */}
       <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#929EB4' }}>กำลังโหลด...</div>
+          <div style={{ textAlign: 'center', padding: '48px 0', color: '#586782' }}>กำลังโหลด...</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#929EB4' }}>ไม่พบคำขอ</div>
+          <div style={{ textAlign: 'center', padding: '48px 0', color: '#586782' }}>ไม่พบคำขอ</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
@@ -201,15 +201,15 @@ export function RequestListPage() {
                 >
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                     <div style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 12, color: '#004081', fontWeight: 700 }}>{req.requestNo}</div>
-                    <div style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 11, color: '#929EB4', marginTop: 2 }}>{req.proposalNo}</div>
+                    <div style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 11, color: '#586782', marginTop: 2 }}>{req.proposalNo}</div>
                   </td>
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', maxWidth: 220 }}>
                     <div style={{ color: '#001122', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.customerName}</div>
-                    <div style={{ color: '#929EB4', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.projectName}</div>
+                    <div style={{ color: '#586782', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.projectName}</div>
                   </td>
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'right', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 13, fontWeight: 700, color: '#001122', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}><StatusBadge status={req.status} size="sm" /></td>
-                  <td style={{ padding: '10px 14px', verticalAlign: 'middle', color: '#929EB4', fontSize: 12, whiteSpace: 'nowrap' }}>{formatDate(req.updatedAt)}</td>
+                  <td style={{ padding: '10px 14px', verticalAlign: 'middle', color: '#586782', fontSize: 12, whiteSpace: 'nowrap' }}>{formatDate(req.updatedAt)}</td>
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
                     <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                       {currentUser.role === 'sales' && (req.status === 'draft' || req.status === 'rejected' || req.status === 'pending') && (
@@ -228,7 +228,7 @@ export function RequestListPage() {
           </table>
         )}
         {!loading && (
-          <div style={{ padding: '10px 16px', borderTop: '1px solid #D0D6DF', fontSize: 12, color: '#929EB4', background: '#F2F6F8' }}>
+          <div style={{ padding: '10px 16px', borderTop: '1px solid #D0D6DF', fontSize: 12, color: '#586782', background: '#F2F6F8' }}>
             แสดง {filtered.length} จาก {requests.length} รายการ
           </div>
         )}

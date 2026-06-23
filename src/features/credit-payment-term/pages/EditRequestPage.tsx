@@ -97,8 +97,8 @@ export function EditRequestPage() {
     getRequestById(id).then(r => { setReq(r ?? null); setLoading(false) })
   }, [id])
 
-  if (loading) return <div style={{ padding: 48, textAlign: 'center', color: '#929EB4' }}>กำลังโหลด...</div>
-  if (!req) return <div style={{ padding: 48, textAlign: 'center', color: '#929EB4' }}>ไม่พบคำขอ</div>
+  if (loading) return <div style={{ padding: 48, textAlign: 'center', color: '#586782' }}>กำลังโหลด...</div>
+  if (!req) return <div style={{ padding: 48, textAlign: 'center', color: '#586782' }}>ไม่พบคำขอ</div>
   if (!canEditRequest(currentUser, req)) return (
     <Alert type="error">คุณไม่มีสิทธิ์แก้ไขคำขอนี้</Alert>
   )

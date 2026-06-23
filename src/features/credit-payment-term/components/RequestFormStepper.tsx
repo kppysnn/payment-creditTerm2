@@ -78,7 +78,7 @@ function segBtn(active: boolean): React.CSSProperties {
     background: active
       ? 'linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)'
       : '#fff',
-    color: active ? '#004081' : '#929EB4',
+    color: active ? '#004081' : '#586782',
     transition: 'border-color 0.15s, color 0.15s, background 0.15s',
     boxShadow: active ? '0 1px 5px rgba(102,197,197,0.2)' : 'none',
     textAlign: 'left',
@@ -258,7 +258,14 @@ export function RequestFormStepper({
   }
 
   async function handleSubmit() {
-    if (!validate()) { setSubmitError('กรุณากรอกข้อมูลให้ครบถ้วน'); return }
+    if (!validate()) {
+      setSubmitError('กรุณากรอกข้อมูลให้ครบถ้วน — เลื่อนไปยังช่องที่ผิดพลาดให้แล้ว')
+      // wait for the error state to commit to the DOM before querying it
+      requestAnimationFrame(() => {
+        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+      return
+    }
     setSubmitLoading(true); setSubmitError('')
     try {
       if (isResubmit && onResubmit) await onResubmit(collectData())
@@ -281,10 +288,10 @@ export function RequestFormStepper({
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
           >
             <div style={{ fontWeight: 600, color: '#001122' }}>{c.companyName}</div>
-            <div style={{ color: '#929EB4', fontSize: 12, marginTop: 2 }}>Net {c.defaultCreditTerm ?? 0} วัน · {c.contactPerson}</div>
+            <div style={{ color: '#586782', fontSize: 12, marginTop: 2 }}>Net {c.defaultCreditTerm ?? 0} วัน · {c.contactPerson}</div>
           </button>
         )) : (
-          <div style={{ padding: '10px 14px', color: '#929EB4', fontSize: 13 }}>ไม่พบข้อมูลลูกค้า</div>
+          <div style={{ padding: '10px 14px', color: '#586782', fontSize: 13 }}>ไม่พบข้อมูลลูกค้า</div>
         )}
       </div>
     )
@@ -462,7 +469,7 @@ export function RequestFormStepper({
                       >
                         <span>{days} วัน</span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 11, fontWeight: 500, color: '#929EB4' }}>{CREDIT_TERM_HINTS[days]}</span>
+                          <span style={{ fontSize: 11, fontWeight: 500, color: '#586782' }}>{CREDIT_TERM_HINTS[days]}</span>
                           {active && <Check size={14} color="#66C5C5" />}
                         </span>
                       </button>
@@ -500,7 +507,7 @@ export function RequestFormStepper({
                     width: 44, height: 38, border: 'none',
                     borderRight: n < 4 ? '1px solid #D0D6DF' : 'none',
                     background: instCount === n ? 'linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)' : '#fff',
-                    color: instCount === n ? '#004081' : '#929EB4',
+                    color: instCount === n ? '#004081' : '#586782',
                     fontSize: 13, fontWeight: 500, cursor: 'pointer',
                     transition: 'background 0.15s, color 0.15s',
                   }}>
@@ -513,7 +520,7 @@ export function RequestFormStepper({
 
         {/* Preset buttons */}
         <div>
-          <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>สัดส่วนที่แนะนำ</div>
+          <div style={{ fontSize: 11, color: '#586782', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>สัดส่วนที่แนะนำ</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {(INSTALLMENT_PRESETS[instCount] ?? []).slice(0, 4).map(preset => {
               const active = preset.percents.every((p, idx) => numVal(insts[idx]?.installmentPercent) === p)
@@ -521,7 +528,7 @@ export function RequestFormStepper({
                 <button key={preset.label} type="button" onClick={() => applyPreset(preset.percents)}
                   style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 500, cursor: 'pointer',
                     border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
-                    background: '#fff', color: active ? '#004081' : '#929EB4' }}>
+                    background: '#fff', color: active ? '#004081' : '#586782' }}>
                   {preset.label}
                 </button>
               )
@@ -529,7 +536,7 @@ export function RequestFormStepper({
             <button type="button" onClick={applyCustom}
               style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 500, cursor: 'pointer',
                 border: Object.values(customPctRows).some(Boolean) ? '1.5px solid #66C5C5' : '1.5px dashed #C7CEDA',
-                background: '#fff', color: Object.values(customPctRows).some(Boolean) ? '#004081' : '#929EB4' }}>
+                background: '#fff', color: Object.values(customPctRows).some(Boolean) ? '#004081' : '#586782' }}>
               ระบุเอง
             </button>
           </div>
@@ -537,7 +544,7 @@ export function RequestFormStepper({
 
         {/* Installment cards */}
         <div>
-          <div style={{ fontSize: 11, color: '#929EB4', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>รายละเอียดงวด</div>
+          <div style={{ fontSize: 11, color: '#586782', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>รายละเอียดงวด</div>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${instCount}, minmax(0, 1fr))`, gap: 8 }}>
             {insts.slice(0, instCount).map((row, i) => {
               const hasAnyFilled = insts.slice(0, instCount).some(r => r.installmentPercent !== '')
@@ -557,7 +564,7 @@ export function RequestFormStepper({
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-                    <span style={{ fontSize: 11, color: '#929EB4', fontWeight: 600 }}>งวดที่ {i + 1}</span>
+                    <span style={{ fontSize: 11, color: '#586782', fontWeight: 600 }}>งวดที่ {i + 1}</span>
                   </div>
                   <FormGroup error={errors[pctErrRowKey]}>
                     {pctIsCustom ? (
@@ -570,7 +577,7 @@ export function RequestFormStepper({
                           <span style={{ color: '#586782', fontSize: 12, fontWeight: 600 }}>%</span>
                         </div>
                         {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
-                          <div style={{ fontSize: 10, color: '#929EB4', fontWeight: 600 }}>แนะนำ {suggestedPct}%</div>
+                          <div style={{ fontSize: 10, color: '#586782', fontWeight: 600 }}>แนะนำ {suggestedPct}%</div>
                         )}
                       </div>
                     ) : (
@@ -587,7 +594,7 @@ export function RequestFormStepper({
                           <option value="custom">ระบุเอง</option>
                         </Select>
                         {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
-                          <div style={{ marginTop: 3, fontSize: 10, color: '#929EB4', fontWeight: 600 }}>แนะนำ {suggestedPct}%</div>
+                          <div style={{ marginTop: 3, fontSize: 10, color: '#586782', fontWeight: 600 }}>แนะนำ {suggestedPct}%</div>
                         )}
                       </>
                     )}
@@ -622,10 +629,10 @@ export function RequestFormStepper({
         }}>
           <span style={{ fontSize: 13, color: '#586782', fontWeight: 700 }}>รวม {summaryLabel}</span>
           <span style={{ display: 'flex', gap: 24 }}>
-            <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+            <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
               ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(costTotal)}</span>
             </span>
-            <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+            <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
               ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(sellingTotal)}</span>
             </span>
           </span>
@@ -729,7 +736,7 @@ export function RequestFormStepper({
                     />
                     {!!ec.companyName && (
                       <button onClick={() => update({ existingCustomerId: '', existingCustomer: { companyName: '', defaultCreditTerm: 0 } })}
-                        style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#929EB4', padding: 2, display: 'flex' }}>
+                        style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#586782', padding: 2, display: 'flex' }}>
                         <X size={14} />
                       </button>
                     )}
@@ -738,7 +745,7 @@ export function RequestFormStepper({
                 </div>
               </FormGroup>
               {!!fd.existingCustomerId && (
-                <div style={{ marginTop: 6, fontSize: 12, color: '#929EB4' }}>Default credit: Net {numVal(ec.defaultCreditTerm)} วัน</div>
+                <div style={{ marginTop: 6, fontSize: 12, color: '#586782' }}>Default credit: Net {numVal(ec.defaultCreditTerm)} วัน</div>
               )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px', marginTop: 12 }}>
                 <FormGroup label="ชื่อผู้ติดต่อ">
@@ -754,7 +761,7 @@ export function RequestFormStepper({
           {customerType === 'reseller' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#929EB4', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Reseller</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Reseller</div>
                 <FormGroup error={errors['res.resellerCompanyName']}>
                   <div style={{ position: 'relative' }}>
                     <div style={{ position: 'relative' }}>
@@ -768,7 +775,7 @@ export function RequestFormStepper({
                       />
                       {rs.resellerCompanyName && (
                         <button onClick={() => update({ reseller: { ...rs, resellerId: '', resellerCompanyName: '', defaultCreditTerm: 0, contactPerson: '', contactPhone: '' } })}
-                          style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#929EB4', padding: 2, display: 'flex' }}>
+                          style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#586782', padding: 2, display: 'flex' }}>
                           <X size={14} />
                         </button>
                       )}
@@ -777,7 +784,7 @@ export function RequestFormStepper({
                   </div>
                 </FormGroup>
                 {rs.resellerId && (
-                  <div style={{ marginTop: 6, fontSize: 12, color: '#929EB4' }}>Default credit: Net {numVal(rs.defaultCreditTerm)} วัน</div>
+                  <div style={{ marginTop: 6, fontSize: 12, color: '#586782' }}>Default credit: Net {numVal(rs.defaultCreditTerm)} วัน</div>
                 )}
               </div>
               <FormGroup label="บริษัทลูกค้าปลายทาง (End Customer)" required error={errors['res.endCustomerCompanyName']}>
@@ -823,33 +830,33 @@ export function RequestFormStepper({
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: '#F2F6F8', borderBottom: '1px solid #D0D6DF' }}>
-              <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>รายการ</th>
-              <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาทุน</th>
-              <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาขาย</th>
+              <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>รายการ</th>
+              <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาทุน</th>
+              <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาขาย</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td style={{ padding: '11px 14px' }}>
                 <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{hwQuotationNo}</span>
-                <span style={{ color: '#929EB4', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
+                <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
               </td>
-              <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hwCost, '#929EB4')}</td>
+              <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hwCost, '#586782')}</td>
               <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hwSelling, '#004081')}</td>
             </tr>
             <tr>
               <td style={{ padding: '11px 14px' }}>
                 <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{swQuotationNo}</span>
-                <span style={{ color: '#929EB4', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
+                <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
               </td>
-              <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#929EB4')}</td>
+              <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782')}</td>
               <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceSelling, '#004081')}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr style={{ borderTop: '1.5px solid #D0D6DF', background: '#F2F6F8' }}>
               <td style={{ padding: '12px 14px', fontWeight: 700, color: '#001122' }}>รวมทั้งหมด</td>
-              <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(totalCost, '#929EB4')}</td>
+              <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(totalCost, '#586782')}</td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(totalSelling, '#004081')}</td>
             </tr>
           </tfoot>

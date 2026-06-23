@@ -19,7 +19,7 @@ export function FormGroup({ label, error, hint, required, children, style }: Bas
         </label>
       )}
       {children}
-      {hint && !error && <span style={{ fontSize: 11, color: '#929EB4' }}>{hint}</span>}
+      {hint && !error && <span style={{ fontSize: 11, color: '#586782' }}>{hint}</span>}
       {error && <span style={{ fontSize: 12, color: '#F3554F' }}>{error}</span>}
     </div>
   )
@@ -63,6 +63,7 @@ export function Input({
     <input
       {...props}
       disabled={disabled}
+      aria-invalid={!!error}
       style={{ ...inputBase, ...(error ? errorStyle : {}), ...(disabled ? disabledStyle : {}), ...style }}
       onFocus={handleFocus}
       onBlur={e => handleBlur(e, error)}
@@ -81,6 +82,7 @@ export function Select({
     <select
       {...props}
       disabled={disabled}
+      aria-invalid={!!error}
       style={{ ...inputBase, paddingRight: 32, appearance: 'none', background: `#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23586782' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center`, ...(error ? errorStyle : {}), ...(disabled ? disabledStyle : {}), ...style }}
     >
       {children}
@@ -99,6 +101,7 @@ export function Textarea({
     <textarea
       {...props}
       disabled={disabled}
+      aria-invalid={!!error}
       rows={rows}
       style={{ ...inputBase, height: 'auto', padding: '8px 12px', resize: 'vertical', ...(error ? errorStyle : {}), ...(disabled ? disabledStyle : {}), ...style }}
       onFocus={handleFocus}

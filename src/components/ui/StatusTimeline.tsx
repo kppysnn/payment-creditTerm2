@@ -66,7 +66,7 @@ export function StatusTimeline({ history }: Props) {
                 <span style={{ fontWeight: 600, fontSize: 13, color: '#001122' }}>
                   {APPROVAL_ACTION_LABELS[entry.action]}
                 </span>
-                <span style={{ fontSize: 11, color: '#929EB4', whiteSpace: 'nowrap', marginTop: 2 }}>
+                <span style={{ fontSize: 11, color: '#586782', whiteSpace: 'nowrap', marginTop: 2 }}>
                   {formatDateTime(entry.createdAt)}
                 </span>
               </div>

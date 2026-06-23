@@ -121,7 +121,7 @@ function buildQuotationGroup(no: string, title: string, gradient: string, items:
     </table>
     ${installments.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#F2F6F8;border:1px solid #D0D6DF;border-top:none">
       <span style="font-size:12px;font-weight:700;color:#001122">งวดการชำระเงิน</span>
-      <span style="font-size:11px;font-weight:600;color:#929EB4">Credit Term <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
+      <span style="font-size:11px;font-weight:600;color:#586782">Credit Term <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
     </div>
     <table>
       <tr><th>งวด</th><th>%</th><th style="text-align:right">จำนวนเงิน</th></tr>
