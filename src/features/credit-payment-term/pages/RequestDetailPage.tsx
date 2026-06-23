@@ -82,29 +82,39 @@ export function RequestDetailPage() {
     </table>
   )
 
-  const totalStrip = (label: string, cost: number, selling: number) => (
+  const summaryStrip = (label: string, right: React.ReactNode) => (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '12px 14px', background: '#F2F6F8', borderTop: '1.5px solid #D0D6DF', borderBottom: '1px solid #D0D6DF',
+      padding: '12px 14px', background: '#F2F6F8', borderTop: '1px solid #D0D6DF', borderBottom: '1px solid #D0D6DF',
     }}>
-      <span style={{ fontSize: 13, color: '#586782', fontWeight: 700 }}>รวม {label}</span>
-      <span style={{ display: 'flex', gap: 24 }}>
-        <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
-          ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(cost)}</span>
-        </span>
-        <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
-          ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
-        </span>
-      </span>
+      <span style={{ fontSize: 13, color: '#001122', fontWeight: 700 }}>{label}</span>
+      {right}
     </div>
   )
+
+  const totalStrip = (label: string, cost: number, selling: number) => summaryStrip(`รวม ${label}`, (
+    <span style={{ display: 'flex', gap: 24 }}>
+      <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+        ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(cost)}</span>
+      </span>
+      <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+        ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
+      </span>
+    </span>
+  ))
+
+  const installmentStrip = (creditTermDays: number) => summaryStrip('งวดการชำระเงิน', (
+    <span style={{ fontSize: 12, color: '#929EB4', fontWeight: 600 }}>
+      Credit Term <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
+    </span>
+  ))
 
   const installmentTable = (installments: PaymentInstallment[]) => (
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
       <thead>
         <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
           {['งวด', '%', 'จำนวนเงิน'].map(h => (
-            <th key={h} style={{ padding: '6px 14px 8px', textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const }}>{h}</th>
+            <th key={h} style={{ padding: '8px 14px', textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', fontWeight: 700, color: '#929EB4', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const }}>{h}</th>
           ))}
         </tr>
       </thead>
@@ -129,13 +139,10 @@ export function RequestDetailPage() {
       {itemsTable(items)}
       {totalStrip(label, cost, selling)}
       {installments.length > 0 && (
-        <div style={{ padding: '12px 14px 16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#929EB4', textTransform: 'uppercase', letterSpacing: '0.06em' }}>งวดการชำระเงิน</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#004081' }}>Credit Term: {formatCreditTerm(creditTermDays)}</span>
-          </div>
+        <>
+          {installmentStrip(creditTermDays)}
           {installmentTable(installments)}
-        </div>
+        </>
       )}
     </div>
   )

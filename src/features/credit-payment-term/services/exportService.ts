@@ -114,14 +114,14 @@ function buildQuotationGroup(no: string, title: string, items: Request['quotatio
         <td>${i.name}</td>
         <td class="mono" style="text-align:right">${i.sellingPrice.toLocaleString()}</td>
       </tr>`).join('')}
-      <tr style="font-weight:700">
+      <tr style="font-weight:700;background:#F2F6F8">
         <td>รวม</td>
         <td class="mono" style="text-align:right">${total.toLocaleString()}</td>
       </tr>
     </table>
-    ${installments.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 4px">
-      <span style="font-size:10px;font-weight:700;color:#586782;text-transform:uppercase;letter-spacing:.05em">งวดการชำระเงิน</span>
-      <span style="font-size:11px;font-weight:700;color:#004081">Credit Term: Net ${installments[0].creditTermDays}</span>
+    ${installments.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#F2F6F8;border:1px solid #D0D6DF;border-top:none">
+      <span style="font-size:12px;font-weight:700;color:#001122">งวดการชำระเงิน</span>
+      <span style="font-size:11px;font-weight:600;color:#929EB4">Credit Term <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
     </div>
     <table>
       <tr><th>งวด</th><th>%</th><th style="text-align:right">จำนวนเงิน</th></tr>
