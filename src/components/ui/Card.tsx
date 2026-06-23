@@ -13,7 +13,7 @@ export function Card({ title, children, style, actions, noPad }: CardProps) {
     <div style={{
       background: '#FFFFFF',
       border: '1px solid #D0D6DF',
-      borderRadius: 4,
+      borderRadius: 14,
       overflow: 'hidden',
       transition: 'box-shadow 0.15s, transform 0.12s, border-color 0.15s',
       ...style,
@@ -25,7 +25,7 @@ export function Card({ title, children, style, actions, noPad }: CardProps) {
           justifyContent: 'space-between',
           padding: '14px 20px',
           borderBottom: '1px solid #D0D6DF',
-          background: '#FAFBFC',
+          background: '#F2F6F8',
         }}>
           {title && (
             <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#001122', letterSpacing: '-0.01em' }}>

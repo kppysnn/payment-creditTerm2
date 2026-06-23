@@ -30,7 +30,7 @@ const inputBase: React.CSSProperties = {
   height: 38,
   padding: '0 12px',
   border: '1px solid #D0D6DF',
-  borderRadius: 4,
+  borderRadius: 6,
   fontSize: 14,
   color: '#505050',
   background: '#fff',

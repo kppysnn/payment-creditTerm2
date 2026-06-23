@@ -185,7 +185,7 @@ export function SummarySubmitStep({ data, currentUser, onBack, onSaveDraft, onSu
       )}
 
       {/* Grand Total */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12, padding: '14px 20px', background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12, padding: '14px 20px', background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 6 }}>
         {[
           { label: 'ราคาขายรวม', value: formatCurrency(totalSelling), color: '#001122' },
           { label: 'ต้นทุนรวม', value: formatCurrency(totalCost), color: '#586782' },

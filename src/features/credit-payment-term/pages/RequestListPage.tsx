@@ -20,7 +20,7 @@ function StatCard({ label, count, icon, color, bg }: { label: string; count: num
     <div style={{
       background: '#FFFFFF',
       border: '1px solid #D0D6DF',
-      borderRadius: 4,
+      borderRadius: 6,
       padding: '18px 20px',
       display: 'flex',
       flexDirection: 'column',
@@ -39,7 +39,7 @@ function StatCard({ label, count, icon, color, bg }: { label: string; count: num
       <div style={{
         width: 40,
         height: 40,
-        borderRadius: 4,
+        borderRadius: 6,
         background: bg,
         display: 'flex',
         alignItems: 'center',
@@ -136,14 +136,14 @@ export function RequestListPage() {
 
       {/* Alerts */}
       {currentUser.role === 'approver' && counts.pending > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 4, border: '1px solid #FCD34D', background: '#FFFBEB', color: '#92400E' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 6, border: '1px solid #FCD34D', background: '#FFFBEB', color: '#92400E' }}>
           <AlertTriangle size={16} style={{ flexShrink: 0 }} />
           <span style={{ fontWeight: 600, fontSize: 13, flex: 1 }}>มี {counts.pending} คำขอรอการพิจารณา</span>
           <Button variant="secondary" size="sm" onClick={() => setSearchParams({ status: 'pending' })}>ดูทั้งหมด</Button>
         </div>
       )}
       {currentUser.role === 'sales' && counts.rejected > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 4, border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#7F1D1D' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 6, border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#7F1D1D' }}>
           <AlertTriangle size={16} style={{ flexShrink: 0 }} />
           <span style={{ fontWeight: 600, fontSize: 13, flex: 1 }}>มี {counts.rejected} คำขอที่ถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่</span>
           <Button variant="secondary" size="sm" onClick={() => setSearchParams({ status: 'rejected' })}>ดูทั้งหมด</Button>
@@ -151,7 +151,7 @@ export function RequestListPage() {
       )}
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, padding: '12px 16px' }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, padding: '12px 16px' }}>
         <div style={{ flex: 1, minWidth: 200, display: 'flex', gap: 8, alignItems: 'center' }}>
           <Search size={15} style={{ color: '#A0AEC0', flexShrink: 0 }} />
           <Input
@@ -175,7 +175,7 @@ export function RequestListPage() {
       </div>
 
       {/* Table */}
-      <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
+      <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: '#A0AEC0' }}>กำลังโหลด...</div>
         ) : filtered.length === 0 ? (

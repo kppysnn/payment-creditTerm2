@@ -70,7 +70,7 @@ function segBtn(active: boolean): React.CSSProperties {
     alignItems: 'center',
     gap: 10,
     padding: '12px 16px',
-    borderRadius: 4,
+    borderRadius: 6,
     fontSize: 13,
     fontWeight: 600,
     cursor: 'pointer',
@@ -272,7 +272,7 @@ export function RequestFormStepper({
 
   const comboDropdown = (results: Customer[], visible: boolean, onSelect: (c: Customer) => void) =>
     visible && (
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflowY: 'auto', maxHeight: 220, marginTop: 6 }}>
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflowY: 'auto', maxHeight: 220, marginTop: 6 }}>
         {results.length > 0 ? results.map(c => (
           <button key={c.id}
             onMouseDown={e => { e.preventDefault(); onSelect(c) }}
@@ -433,7 +433,7 @@ export function RequestFormStepper({
                   position: 'absolute', top: '50%', right: 5,
                   transform: ctDropOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)',
                   width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer',
+                  border: 'none', borderRadius: 6, background: 'transparent', color: '#586782', cursor: 'pointer',
                   transition: 'transform 0.15s, background 0.15s',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
@@ -442,7 +442,7 @@ export function RequestFormStepper({
                 <ChevronDown size={15} />
               </button>
               {ctDropOpen && (
-                <div style={{ position: 'absolute', zIndex: 5, top: 44, left: 0, width: 200, maxHeight: 280, overflowY: 'auto', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, boxShadow: '0 8px 20px rgba(0,64,129,0.14)', padding: 6 }}>
+                <div style={{ position: 'absolute', zIndex: 5, top: 44, left: 0, width: 200, maxHeight: 280, overflowY: 'auto', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, boxShadow: '0 8px 20px rgba(0,64,129,0.14)', padding: 6 }}>
                   {CREDIT_TERM_PRESETS.map(days => {
                     const active = numVal(ctDays) === days && !creditTermIsCustom
                     return (
@@ -451,7 +451,7 @@ export function RequestFormStepper({
                         onClick={() => { setIsCustomCT(false); setCtDays(days); setCtDropOpen(false) }}
                         style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
-                          padding: '8px 10px', marginBottom: 2, border: 'none', borderRadius: 4,
+                          padding: '8px 10px', marginBottom: 2, border: 'none', borderRadius: 6,
                           background: active ? 'rgba(102,197,197,0.12)' : 'transparent',
                           color: active ? '#004081' : '#001122',
                           textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer',
@@ -474,7 +474,7 @@ export function RequestFormStepper({
                     onClick={() => { setIsCustomCT(true); setCtDays(''); setCtDropOpen(false) }}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
-                      padding: '8px 10px', border: 'none', borderRadius: 4,
+                      padding: '8px 10px', border: 'none', borderRadius: 6,
                       background: creditTermIsCustom ? 'rgba(102,197,197,0.12)' : 'transparent',
                       color: creditTermIsCustom ? '#004081' : '#586782',
                       textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer',
@@ -493,7 +493,7 @@ export function RequestFormStepper({
 
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#586782', marginBottom: 5 }}>จำนวนงวด</div>
-            <div style={{ display: 'flex', border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden', height: 38 }}>
+            <div style={{ display: 'flex', border: '1px solid #D0D6DF', borderRadius: 6, overflow: 'hidden', height: 38 }}>
               {[1, 2, 3, 4].map(n => (
                 <button key={n} type="button" onClick={() => changeCount(n)}
                   style={{
@@ -519,7 +519,7 @@ export function RequestFormStepper({
               const active = preset.percents.every((p, idx) => numVal(insts[idx]?.installmentPercent) === p)
               return (
                 <button key={preset.label} type="button" onClick={() => applyPreset(preset.percents)}
-                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  style={{ padding: '5px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
                     border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
                     background: '#fff', color: active ? '#004081' : '#929EB4' }}>
                   {preset.label}
@@ -527,7 +527,7 @@ export function RequestFormStepper({
               )
             })}
             <button type="button" onClick={applyCustom}
-              style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              style={{ padding: '5px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
                 border: Object.values(customPctRows).some(Boolean) ? '1.5px solid #66C5C5' : '1.5px dashed #C7CEDA',
                 background: '#fff', color: Object.values(customPctRows).some(Boolean) ? '#004081' : '#929EB4' }}>
               ระบุเอง
@@ -550,7 +550,7 @@ export function RequestFormStepper({
               return (
                 <div key={i} style={{
                   background: errors[pctErrRowKey] ? '#FEF2F2' : 'linear-gradient(135deg, #EEF5FB 0%, #EFF9F9 100%)',
-                  borderRadius: 4,
+                  borderRadius: 6,
                   padding: '10px 12px',
                   display: 'flex', flexDirection: 'column', gap: 8,
                   ...(errors[pctErrRowKey] ? { outline: '1.5px solid #F3554F' } : {}),
@@ -609,7 +609,7 @@ export function RequestFormStepper({
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>รวมสัดส่วนงวด</span>
             <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#66C5C5' : '#F3554F' }}>{totalPct.toFixed(0)}%</span>
           </div>
-          <div style={{ height: 6, background: '#E2E8F0', borderRadius: 4, overflow: 'hidden' }}>
+          <div style={{ height: 6, background: '#E2E8F0', borderRadius: 6, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${Math.min(Math.max(totalPct, 0), 100)}%`, background: pctOk ? '#66C5C5' : '#F3554F', transition: 'width 0.2s' }} />
           </div>
         </div>
@@ -617,7 +617,7 @@ export function RequestFormStepper({
         {/* Combined selling/cost summary */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginTop: 6, padding: '12px 14px', borderRadius: 4,
+          marginTop: 6, padding: '12px 14px', borderRadius: 6,
           background: prefix === 'hw' ? 'linear-gradient(90deg, #EEF5FB 0%, #EFF9F9 100%)' : 'linear-gradient(90deg, #EEF3FB 0%, #EEF6FA 100%)',
         }}>
           <span style={{ fontSize: 13, color: '#586782', fontWeight: 700 }}>รวม {summaryLabel}</span>
@@ -638,7 +638,7 @@ export function RequestFormStepper({
 
   /* ── Quotation card wrapper ── */
   const quotationCard = (quotationNo: string, label: string, headerGradient: string, body: React.ReactNode) => (
-    <div style={{ borderRadius: 4, overflow: 'hidden', border: '1px solid #D0D6DF', background: 'linear-gradient(180deg, #ffffff 0%, #F7FBFE 100%)' }}>
+    <div style={{ borderRadius: 6, overflow: 'hidden', border: '1px solid #D0D6DF', background: 'linear-gradient(180deg, #ffffff 0%, #F7FBFE 100%)' }}>
       {quotationHeader(quotationNo, label, headerGradient)}
       {body}
     </div>
@@ -857,7 +857,7 @@ export function RequestFormStepper({
       </Card>
 
       {/* ─── Footer ─── */}
-      <div style={{ background: '#fff', borderRadius: 4, padding: '20px 24px', border: '1px solid #D0D6DF' }}>
+      <div style={{ background: '#fff', borderRadius: 6, padding: '20px 24px', border: '1px solid #D0D6DF' }}>
         {submitError && <div style={{ marginBottom: 12, fontSize: 12, color: '#F3554F' }}>{submitError}</div>}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>

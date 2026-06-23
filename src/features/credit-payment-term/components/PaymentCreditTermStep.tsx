@@ -126,7 +126,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
                 style={{
                   background: '#F7FAFC',
                   border: `1px solid ${errors[`inst${i}.pct`] || errors[`inst${i}.days`] ? '#FCA5A5' : '#E2E8F0'}`,
-                  borderRadius: 4,
+                  borderRadius: 6,
                   padding: 16,
                   marginBottom: 12,
                 }}
@@ -195,7 +195,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
           })}
 
           {/* Total row */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 24, padding: '12px 16px', background: '#EBF0F6', borderRadius: 4, fontSize: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 24, padding: '12px 16px', background: '#EBF0F6', borderRadius: 6, fontSize: 14 }}>
             <div>
               <span style={{ color: '#718096' }}>รวม %: </span>
               <span style={{ fontWeight: 700, color: Math.abs(totalPercent - 100) < 0.01 ? '#16A34A' : '#DC2626' }}>

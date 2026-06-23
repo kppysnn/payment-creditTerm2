@@ -19,7 +19,7 @@ interface Props {
 export function Alert({ type = 'info', title, children }: Props) {
   const { bg, border, color, Icon } = CONFIG[type]
   return (
-    <div style={{ display: 'flex', gap: 10, background: bg, border: `1px solid ${border}`, borderRadius: 4, padding: '12px 14px' }}>
+    <div style={{ display: 'flex', gap: 10, background: bg, border: `1px solid ${border}`, borderRadius: 6, padding: '12px 14px' }}>
       <Icon size={16} style={{ color, flexShrink: 0, marginTop: 1 }} />
       <div style={{ fontSize: 13, color }}>
         {title && <div style={{ fontWeight: 600, marginBottom: 2 }}>{title}</div>}

@@ -47,8 +47,8 @@ export function StickyRequestSummary({ data, currentStep }: Props) {
   ]
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, boxShadow: '0 2px 8px rgba(0,64,129,0.06)', overflow: 'hidden' }}>
-      <div style={{ padding: '14px 16px', background: '#004081', borderBottom: '1px solid rgba(0,0,0,0.12)' }}>
+    <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, boxShadow: '0 2px 8px rgba(0,64,129,0.06)', overflow: 'hidden' }}>
+      <div style={{ padding: '14px 16px', background: '#004081', borderBottom: '1px solid rgba(0,64,129,0.10)' }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           สรุปคำขอ
         </div>
@@ -75,7 +75,7 @@ export function StickyRequestSummary({ data, currentStep }: Props) {
         ))}
       </div>
 
-      <div style={{ padding: '8px 16px', background: '#FAFBFC', borderTop: '1px solid #D0D6DF' }}>
+      <div style={{ padding: '8px 16px', background: '#F2F6F8', borderTop: '1px solid #D0D6DF' }}>
         <div style={{ fontSize: 11, color: '#929EB4' }}>Step {currentStep + 1} / {STEP_LABELS.length} — {STEP_LABELS[currentStep]}</div>
       </div>
     </div>

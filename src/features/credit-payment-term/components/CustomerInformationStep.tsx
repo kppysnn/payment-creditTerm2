@@ -88,7 +88,7 @@ export function CustomerInformationStep({ data, onChange, onNext, onBack }: Prop
                   gap: 8,
                   padding: '10px 14px',
                   border: `2px solid ${customerType === type ? '#1E3A5F' : '#E2E8F0'}`,
-                  borderRadius: 4,
+                  borderRadius: 6,
                   cursor: 'pointer',
                   background: customerType === type ? '#EBF0F6' : '#fff',
                   transition: 'all 0.15s',
@@ -160,7 +160,7 @@ export function CustomerInformationStep({ data, onChange, onNext, onBack }: Prop
               </Button>
             </div>
             {searchResults.length > 0 && (
-              <div style={{ border: '1px solid #E2E8F0', borderRadius: 4, marginTop: 4, background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+              <div style={{ border: '1px solid #E2E8F0', borderRadius: 6, marginTop: 4, background: '#fff', boxShadow: '0 4px 12px rgba(0,64,129,0.07)', overflow: 'hidden' }}>
                 {searchResults.map(c => (
                   <button
                     key={c.id}
@@ -176,7 +176,7 @@ export function CustomerInformationStep({ data, onChange, onNext, onBack }: Prop
           </FormGroup>
 
           {existingCustomerId && (
-            <div style={{ padding: 16, background: '#EBF0F6', borderRadius: 4, border: '1px solid #BFD0E5' }}>
+            <div style={{ padding: 16, background: '#EBF0F6', borderRadius: 6, border: '1px solid #BFD0E5' }}>
               <div style={{ fontWeight: 600, marginBottom: 12, color: '#1E3A5F' }}>ข้อมูลลูกค้าที่เลือก</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
                 <FormGroup label="ชื่อบริษัท"><Input value={String(ec.companyName ?? '')} readOnly style={{ background: '#F7FAFC' }} /></FormGroup>

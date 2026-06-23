@@ -84,7 +84,7 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
     display: 'flex', alignItems: 'center', gap: 10,
     padding: '10px 14px',
     border: `2px solid ${active ? '#004081' : '#D0D6DF'}`,
-    borderRadius: 4, cursor: 'pointer',
+    borderRadius: 6, cursor: 'pointer',
     background: active ? 'rgba(0,64,129,0.05)' : '#fff',
     transition: 'all 0.15s',
   } as React.CSSProperties)
@@ -93,13 +93,13 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
     display: 'flex', alignItems: 'center', gap: 10,
     padding: '10px 14px',
     border: `2px solid ${active ? '#66C5C5' : '#D0D6DF'}`,
-    borderRadius: 4, cursor: 'pointer',
+    borderRadius: 6, cursor: 'pointer',
     background: active ? 'rgba(102,197,197,0.08)' : '#fff',
     transition: 'all 0.15s',
   } as React.CSSProperties)
 
   const searchDropdown = (items: Customer[], onSelect: (c: Customer) => void) => items.length > 0 && (
-    <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, marginTop: 4, background: '#fff', boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflow: 'hidden', position: 'absolute', zIndex: 20, width: '100%' }}>
+    <div style={{ border: '1px solid #D0D6DF', borderRadius: 6, marginTop: 4, background: '#fff', boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflow: 'hidden', position: 'absolute', zIndex: 20, width: '100%' }}>
       {items.map(c => (
         <button key={c.id} onClick={() => onSelect(c)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: '1px solid #F2F6F8', fontSize: 13 }}
           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#F2F6F8' }}
@@ -181,7 +181,7 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
 
         {/* New Customer */}
         {customerType === 'new' && (
-          <div style={{ background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 4, padding: '16px 20px' }}>
+          <div style={{ background: '#F2F6F8', border: '1px solid #D0D6DF', borderRadius: 6, padding: '16px 20px' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>ข้อมูลลูกค้าใหม่</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px 16px' }}>
               <FormGroup label="ชื่อบริษัท" required error={errors['new.companyName']} style={{ gridColumn: 'span 3' } as React.CSSProperties}>
@@ -199,11 +199,11 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
 
         {/* Existing Customer */}
         {customerType === 'existing' && (
-          <div style={{ background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 4, padding: '16px 20px' }}>
+          <div style={{ background: '#F2F6F8', border: '1px solid #D0D6DF', borderRadius: 6, padding: '16px 20px' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>เลือกลูกค้า</div>
 
             {existingCustomerId ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(0,64,129,0.05)', borderRadius: 4, border: '1px solid rgba(0,64,129,0.14)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(0,64,129,0.05)', borderRadius: 6, border: '1px solid rgba(0,64,129,0.14)' }}>
                 <div>
                   <div style={{ fontWeight: 700, color: '#004081', fontSize: 14 }}>{String(ec.companyName ?? '')}</div>
                   <div style={{ fontSize: 12, color: '#586782', marginTop: 3 }}>Net {numVal(ec.defaultCreditTerm)} · {String(ec.contactPerson ?? '')}</div>
@@ -235,11 +235,11 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
 
         {/* Reseller */}
         {customerType === 'reseller' && (
-          <div style={{ background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 4, padding: '16px 20px' }}>
+          <div style={{ background: '#F2F6F8', border: '1px solid #D0D6DF', borderRadius: 6, padding: '16px 20px' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Reseller</div>
 
             {rs.resellerId ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(0,64,129,0.05)', borderRadius: 4, border: '1px solid rgba(0,64,129,0.14)', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(0,64,129,0.05)', borderRadius: 6, border: '1px solid rgba(0,64,129,0.14)', marginBottom: 14 }}>
                 <span style={{ fontWeight: 700, color: '#004081', fontSize: 14 }}>{rs.resellerCompanyName}</span>
                 <button onClick={() => { onChange({ reseller: { ...rs, resellerId: '', resellerCompanyName: '' } }); clearSearch() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#929EB4', padding: 4 }}>
                   <X size={16} />
@@ -281,7 +281,7 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
         )}
 
         {/* Sales auto */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#FAFBFC', border: '1px solid #D0D6DF', borderRadius: 4, fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#F2F6F8', border: '1px solid #D0D6DF', borderRadius: 6, fontSize: 13 }}>
           <span style={{ color: '#929EB4', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sales</span>
           <span style={{ fontWeight: 600, color: '#001122', marginLeft: 4 }}>{String(data.salesName || '')}</span>
           <span style={{ color: '#929EB4' }}>·</span>
