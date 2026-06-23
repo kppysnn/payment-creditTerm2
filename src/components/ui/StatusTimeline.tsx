@@ -15,14 +15,14 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
 }
 
 const ACTION_COLOR: Record<string, string> = {
-  approved: '#16A34A',
-  rejected: '#DC2626',
-  cancelled: '#9CA3AF',
-  submitted: '#2563EB',
-  resubmitted: '#2563EB',
+  approved: '#82C566',
+  rejected: '#F3554F',
+  cancelled: '#929EB4',
+  submitted: '#004081',
+  resubmitted: '#004081',
   created: '#586782',
   draft_saved: '#586782',
-  edited: '#D97706',
+  edited: '#92400E',
 }
 
 interface Props {
@@ -73,7 +73,7 @@ export function StatusTimeline({ history }: Props) {
               <div style={{ fontSize: 12, color: '#586782', marginTop: 2 }}>
                 {entry.actorName}
                 {entry.version > 1 && (
-                  <span style={{ marginLeft: 6, padding: '1px 5px', background: '#EFF6FF', color: '#2563EB', borderRadius: 9999, fontSize: 10, fontWeight: 600 }}>
+                  <span style={{ marginLeft: 6, padding: '1px 5px', background: 'rgba(0,64,129,0.08)', color: '#004081', borderRadius: 9999, fontSize: 10, fontWeight: 600 }}>
                     v{entry.version}
                   </span>
                 )}

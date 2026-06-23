@@ -21,22 +21,22 @@ export const STATUS_CONFIG: Record<RequestStatus, StatusConfig> = {
   approved: {
     label: STATUS_LABELS.approved,
     badgeClass: 'badge-approved',
-    dotColor: '#16A34A',
+    dotColor: '#14532D',
   },
   rejected: {
     label: STATUS_LABELS.rejected,
     badgeClass: 'badge-rejected',
-    dotColor: '#DC2626',
+    dotColor: '#F3554F',
   },
   revised: {
     label: STATUS_LABELS.revised,
     badgeClass: 'badge-revised',
-    dotColor: '#2563EB',
+    dotColor: '#1E40AF',
   },
   cancelled: {
     label: STATUS_LABELS.cancelled,
     badgeClass: 'badge-cancelled',
-    dotColor: '#9CA3AF',
+    dotColor: '#929EB4',
   },
 }
 

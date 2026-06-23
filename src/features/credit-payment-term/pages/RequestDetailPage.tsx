@@ -229,7 +229,7 @@ export function RequestDetailPage() {
             {/* Payment Schedule */}
             <Card title="Payment Schedule">
               <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: '#505060', marginBottom: 4 }}>
+                <div style={{ fontSize: 13, color: '#505050', marginBottom: 4 }}>
                   <strong>Credit Term:</strong> {formatCreditTerm(creditTermDays)}
                 </div>
               </div>

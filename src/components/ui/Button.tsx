@@ -15,7 +15,7 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
     border: '1.5px solid #66C5C5',
   },
   danger: {
-    background: 'linear-gradient(135deg, #FF8A80 0%, #D32F2F 100%)',
+    background: 'linear-gradient(135deg, #F3554F 0%, #C0392B 100%)',
     color: '#FFFFFF',
     border: 'none',
   },

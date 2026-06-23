@@ -165,10 +165,10 @@ export function CustomerInformationStep({ data, onChange, onNext, onBack }: Prop
                   <button
                     key={c.id}
                     onClick={() => selectCustomer(c)}
-                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: '1px solid #F7FAFC', fontSize: 13 }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: '1px solid #F2F6F8', fontSize: 13 }}
                   >
                     <div style={{ fontWeight: 600 }}>{c.companyName}</div>
-                    <div style={{ color: '#718096', fontSize: 12 }}>Tax ID: {c.taxId} · Credit Term: Net {c.defaultCreditTerm}</div>
+                    <div style={{ color: '#586782', fontSize: 12 }}>Tax ID: {c.taxId} · Credit Term: Net {c.defaultCreditTerm}</div>
                   </button>
                 ))}
               </div>
@@ -179,9 +179,9 @@ export function CustomerInformationStep({ data, onChange, onNext, onBack }: Prop
             <div style={{ padding: 16, background: '#F2F6F8', borderRadius: 6, border: '1px solid #D0D6DF' }}>
               <div style={{ fontWeight: 600, marginBottom: 12, color: '#004081' }}>ข้อมูลลูกค้าที่เลือก</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
-                <FormGroup label="ชื่อบริษัท"><Input value={String(ec.companyName ?? '')} readOnly style={{ background: '#F7FAFC' }} /></FormGroup>
-                <FormGroup label="Tax ID"><Input value={String(ec.taxId ?? '')} readOnly style={{ background: '#F7FAFC' }} /></FormGroup>
-                <FormGroup label="Default Credit Term"><Input value={`Net ${ec.defaultCreditTerm ?? 0}`} readOnly style={{ background: '#F7FAFC' }} /></FormGroup>
+                <FormGroup label="ชื่อบริษัท"><Input value={String(ec.companyName ?? '')} readOnly style={{ background: '#F2F6F8' }} /></FormGroup>
+                <FormGroup label="Tax ID"><Input value={String(ec.taxId ?? '')} readOnly style={{ background: '#F2F6F8' }} /></FormGroup>
+                <FormGroup label="Default Credit Term"><Input value={`Net ${ec.defaultCreditTerm ?? 0}`} readOnly style={{ background: '#F2F6F8' }} /></FormGroup>
                 <FormGroup label="ผู้ติดต่อ">
                   <Input value={String(ec.contactPerson ?? '')} onChange={e => onChange({ existingCustomer: { ...ec, contactPerson: e.target.value } })} />
                 </FormGroup>

@@ -124,7 +124,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
               <div
                 key={i}
                 style={{
-                  background: '#F7FAFC',
+                  background: '#F2F6F8',
                   border: `1px solid ${errors[`inst${i}.pct`] || errors[`inst${i}.days`] ? '#FCA5A5' : '#D0D6DF'}`,
                   borderRadius: 6,
                   padding: 16,
@@ -137,7 +137,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
                   </div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: '#004081' }}>งวดที่ {i + 1}</div>
                   {totalSelling > 0 && numVal(row.installmentPercent) > 0 && (
-                    <div style={{ marginLeft: 'auto', fontSize: 15, fontWeight: 700, color: '#16A34A' }}>
+                    <div style={{ marginLeft: 'auto', fontSize: 15, fontWeight: 700, color: '#82C566' }}>
                       {formatCurrency(amount)}
                     </div>
                   )}
@@ -163,7 +163,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
                       error={errors[`inst${i}.days`]}
                     />
                     {row.creditTermDays !== '' && (
-                      <span style={{ fontSize: 11, color: '#2563EB', marginTop: 2 }}>{formatCreditTerm(numVal(row.creditTermDays))}</span>
+                      <span style={{ fontSize: 11, color: '#586782', marginTop: 2 }}>{formatCreditTerm(numVal(row.creditTermDays))}</span>
                     )}
                   </FormGroup>
                   <FormGroup label="เงื่อนไขการชำระ" required error={errors[`inst${i}.cond`]}>
@@ -197,21 +197,21 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
           {/* Total row */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 24, padding: '12px 16px', background: '#F2F6F8', borderRadius: 6, fontSize: 14 }}>
             <div>
-              <span style={{ color: '#718096' }}>รวม %: </span>
-              <span style={{ fontWeight: 700, color: Math.abs(totalPercent - 100) < 0.01 ? '#16A34A' : '#DC2626' }}>
+              <span style={{ color: '#586782' }}>รวม %: </span>
+              <span style={{ fontWeight: 700, color: Math.abs(totalPercent - 100) < 0.01 ? '#82C566' : '#F3554F' }}>
                 {totalPercent.toFixed(1)}%
               </span>
             </div>
             <div>
-              <span style={{ color: '#718096' }}>Max Credit Term: </span>
+              <span style={{ color: '#586782' }}>Max Credit Term: </span>
               <span style={{ fontWeight: 700 }}>{formatCreditTerm(maxCreditTerm)}</span>
             </div>
             <div>
-              <span style={{ color: '#718096' }}>Total: </span>
+              <span style={{ color: '#586782' }}>Total: </span>
               <span style={{ fontWeight: 700 }}>{formatCurrency(totalSelling)}</span>
             </div>
           </div>
-          {errors.totalPct && <div style={{ color: '#DC2626', fontSize: 12, marginTop: 6 }}>{errors.totalPct}</div>}
+          {errors.totalPct && <div style={{ color: '#F3554F', fontSize: 12, marginTop: 6 }}>{errors.totalPct}</div>}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -38,28 +38,28 @@ function buildPrintHTML(req: Request): string {
 
   return `<!DOCTYPE html><html><head><title>${req.requestNo}</title>
 <style>
-  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #1A202C; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #001122; margin: 0; padding: 0; }
   .container { max-width: 210mm; margin: 0 auto; padding: 16mm; }
-  h1 { font-size: 18px; color: #1E3A5F; margin: 0 0 4px; }
-  .sub { font-size: 11px; color: #4A5568; margin-bottom: 16px; }
+  h1 { font-size: 18px; color: #004081; margin: 0 0 4px; }
+  .sub { font-size: 11px; color: #586782; margin-bottom: 16px; }
   .section { margin-bottom: 18px; }
-  .section-title { font-size: 13px; font-weight: 700; color: #1E3A5F; border-bottom: 1.5px solid #1E3A5F; padding-bottom: 3px; margin-bottom: 10px; }
+  .section-title { font-size: 13px; font-weight: 700; color: #004081; border-bottom: 1.5px solid #004081; padding-bottom: 3px; margin-bottom: 10px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
-  .field-label { font-size: 10px; color: #4A5568; font-weight: 600; }
-  .field-val { font-size: 12px; color: #1A202C; margin-bottom: 6px; }
-  .quote-group { border:1px solid #CBD5E0; border-radius:6px; overflow:hidden; margin:12px 0; }
-  .quote-head { display:flex; justify-content:space-between; align-items:baseline; background:#1E3A5F; padding:7px 10px; font-weight:700; color:#fff; }
+  .field-label { font-size: 10px; color: #586782; font-weight: 600; }
+  .field-val { font-size: 12px; color: #001122; margin-bottom: 6px; }
+  .quote-group { border:1px solid #D0D6DF; border-radius:6px; overflow:hidden; margin:12px 0; }
+  .quote-head { display:flex; justify-content:space-between; align-items:baseline; background:#004081; padding:7px 10px; font-weight:700; color:#fff; }
   .quote-no { font-size:13px; }
   .quote-label { font-size:10px; color:rgba(255,255,255,0.78); text-transform:uppercase; letter-spacing:.06em; }
   table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  th { background: #EBF0F6; font-weight: 600; text-align: left; padding: 5px 8px; border: 1px solid #CBD5E0; }
-  td { padding: 5px 8px; border: 1px solid #CBD5E0; }
+  th { background: #F2F6F8; font-weight: 600; text-align: left; padding: 5px 8px; border: 1px solid #D0D6DF; }
+  td { padding: 5px 8px; border: 1px solid #D0D6DF; }
   .mono { font-family: 'Courier New', monospace; }
   .status { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; border: 1px solid; }
   @media print { @page { size: A4; margin: 0; } }
 </style></head><body>
 <div class="container">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1E3A5F;padding-bottom:12px;margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #004081;padding-bottom:12px;margin-bottom:16px">
     <div>
       <h1>Credit &amp; Payment Term Approval Request</h1>
       <div class="sub">${req.requestNo} · Version ${req.version} · Created ${new Date(req.createdAt).toLocaleDateString('th-TH')}</div>
@@ -88,7 +88,7 @@ function buildPrintHTML(req: Request): string {
     ${buildQuotationGroup(hardwareQuotationNo, 'Hardware', hardwareItems, hardwareSelling)}
     ${buildQuotationGroup(serviceQuotationNo, 'Software & Installation', serviceItems, serviceSelling)}
     <table>
-      <tr style="font-weight:700;background:#EBF0F6">
+      <tr style="font-weight:700;background:#F2F6F8">
         <td>สรุปรวม</td>
         <td class="mono">${req.financial.totalSelling.toLocaleString()}</td>
       </tr>

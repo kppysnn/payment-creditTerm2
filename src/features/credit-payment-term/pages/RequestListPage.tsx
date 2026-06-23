@@ -88,18 +88,18 @@ export function RequestListPage() {
     ? [
         { label: 'แบบร่าง',     count: counts.draft,    icon: <FileText size={18} />,    color: '#586782', bg: '#F2F6F8' },
         { label: 'รออนุมัติ',   count: counts.pending,  icon: <Clock size={18} />,       color: '#92400E', bg: '#FFFBEB' },
-        { label: 'อนุมัติแล้ว', count: counts.approved, icon: <CheckCircle size={18} />, color: '#166534', bg: '#F0FDF4' },
+        { label: 'อนุมัติแล้ว', count: counts.approved, icon: <CheckCircle size={18} />, color: '#14532D', bg: '#F0FDF4' },
         { label: 'ไม่อนุมัติ', count: counts.rejected,  icon: <XCircle size={18} />,     color: '#7F1D1D', bg: '#FEF2F2' },
       ]
     : currentUser.role === 'approver'
     ? [
         { label: 'รออนุมัติ',   count: counts.pending,  icon: <Clock size={18} />,       color: '#92400E', bg: '#FFFBEB' },
-        { label: 'อนุมัติแล้ว', count: counts.approved, icon: <CheckCircle size={18} />, color: '#166534', bg: '#F0FDF4' },
+        { label: 'อนุมัติแล้ว', count: counts.approved, icon: <CheckCircle size={18} />, color: '#14532D', bg: '#F0FDF4' },
         { label: 'ไม่อนุมัติ', count: counts.rejected,  icon: <XCircle size={18} />,     color: '#7F1D1D', bg: '#FEF2F2' },
       ]
     : [
-        { label: 'คำขอทั้งหมด',  count: requests.length, icon: <FileText size={18} />,    color: '#004081', bg: '#EBF4FF' },
-        { label: 'อนุมัติแล้ว',  count: counts.approved, icon: <CheckCircle size={18} />, color: '#166534', bg: '#F0FDF4' },
+        { label: 'คำขอทั้งหมด',  count: requests.length, icon: <FileText size={18} />,    color: '#004081', bg: 'rgba(0,64,129,0.08)' },
+        { label: 'อนุมัติแล้ว',  count: counts.approved, icon: <CheckCircle size={18} />, color: '#14532D', bg: '#F0FDF4' },
         { label: 'ไม่อนุมัติ',   count: counts.rejected, icon: <XCircle size={18} />,     color: '#7F1D1D', bg: '#FEF2F2' },
         { label: 'รออนุมัติ',    count: counts.pending,  icon: <Clock size={18} />,       color: '#92400E', bg: '#FFFBEB' },
       ]
@@ -155,7 +155,7 @@ export function RequestListPage() {
       {/* Filters */}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 14, padding: '12px 16px' }}>
         <div style={{ flex: 1, minWidth: 200, display: 'flex', gap: 8, alignItems: 'center' }}>
-          <Search size={15} style={{ color: '#A0AEC0', flexShrink: 0 }} />
+          <Search size={15} style={{ color: '#929EB4', flexShrink: 0 }} />
           <Input
             value={filterText}
             onChange={e => setSearchParams(p => { const n = new URLSearchParams(p); n.set('q', e.target.value); return n })}
@@ -179,9 +179,9 @@ export function RequestListPage() {
       {/* Table */}
       <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 14, overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#A0AEC0' }}>กำลังโหลด...</div>
+          <div style={{ textAlign: 'center', padding: '48px 0', color: '#929EB4' }}>กำลังโหลด...</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#A0AEC0' }}>ไม่พบคำขอ</div>
+          <div style={{ textAlign: 'center', padding: '48px 0', color: '#929EB4' }}>ไม่พบคำขอ</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>

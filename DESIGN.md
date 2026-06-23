@@ -1,295 +1,363 @@
----
-name: PCT — Payment & Credit Term Approval System
-description: Internal approval workflow tool for EXZY Co., Ltd. — structured, role-aware, and audit-traceable.
-colors:
-  teal: "#66C5C5"
-  navy: "#004081"
-  ink: "#001122"
-  body-text: "#505050"
-  text-secondary: "#586782"
-  text-muted: "#929EB4"
-  text-muted-alt: "#626262"
-  bg-primary: "#F8F9FA"
-  bg-secondary: "#F2F6F8"
-  border: "#D0D6DF"
-  success: "#82C566"
-  warning: "#FFCC00"
-  error: "#F3554F"
-  white: "#FFFFFF"
-typography:
-  display:
-    fontFamily: "'Poppins', 'Noto Sans Thai', system-ui, sans-serif"
-    fontSize: "clamp(2.125rem, 4.8vw, 3.5rem)"
-    fontWeight: 700
-    lineHeight: 1.2
-    letterSpacing: "-0.02em"
-  headline:
-    fontFamily: "'Poppins', 'Noto Sans Thai', system-ui, sans-serif"
-    fontSize: "clamp(1.875rem, 4vw, 2.75rem)"
-    fontWeight: 700
-    lineHeight: 1.25
-  title:
-    fontFamily: "'Poppins', 'Noto Sans Thai', system-ui, sans-serif"
-    fontSize: "1.25rem"
-    fontWeight: 700
-    lineHeight: 1.4
-  body:
-    fontFamily: "'Poppins', 'Noto Sans Thai', system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 400
-    lineHeight: 1.75
-  small:
-    fontFamily: "'Poppins', 'Noto Sans Thai', system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: 1.6
-  label:
-    fontFamily: "'Poppins', 'Noto Sans Thai', system-ui, sans-serif"
-    fontSize: "0.6875rem"
-    fontWeight: 700
-    letterSpacing: "0.07em"
-rounded:
-  sm: "6px"
-  md: "14px"
-  lg: "22px"
-  pill: "9999px"
-spacing:
-  xs: "4px"
-  sm: "8px"
-  md: "16px"
-  lg: "24px"
-  xl: "32px"
-  "2xl": "48px"
-  "3xl": "64px"
-components:
-  button-primary:
-    backgroundColor: "linear-gradient(135deg, #66C5C5 0%, #004081 100%)"
-    textColor: "#F8F9FA"
-    rounded: "9999px"
-    padding: "14px 24px"
-  button-primary-hover:
-    backgroundColor: "linear-gradient(135deg, #7FD0D0 0%, #005BB8 100%)"
-    textColor: "#F8F9FA"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "#001122"
-    rounded: "9999px"
-    padding: "14px 24px"
-  button-ghost-hover:
-    backgroundColor: "rgba(102,197,197,0.10)"
-    textColor: "#004081"
-  button-danger:
-    backgroundColor: "#F3554F"
-    textColor: "#FFFFFF"
-    rounded: "9999px"
-    padding: "14px 24px"
-  card:
-    backgroundColor: "#FFFFFF"
-    rounded: "14px"
-    padding: "24px"
-  input:
-    backgroundColor: "#FFFFFF"
-    textColor: "#001122"
-    rounded: "6px"
-    padding: "0 12px"
-    height: "40px"
+# DESIGN.md — W+ Design System · payment&creditTerm Module
+
+> **Primary source of truth:** Figma file `60RgjevWzbKhCCjoc5kcmk` (W+ Library)  
+> **Analysed:** Figma pages — Website, Button, Field (182 styles via Styles API)  
+> **Last updated:** 2026-06-23
+
+This document is the authoritative design reference for all developers and AI tools working on this module. Follow every rule here exactly. Do not guess or deviate unless a rule is explicitly marked as unclear.
+
 ---
 
-# Design System: PCT — EXZY Approval Platform
+## 1. Design System Overview
 
-## 1. Overview
+W+ (WorkPlus / Exzy platform) is a **B2B internal enterprise platform** with a **Professional-Clean** design language. The visual system prioritises:
 
-**Creative North Star: "The Trusted Instrument"**
+- **Trust and clarity** over decorative embellishment
+- **Semantic colour usage** — every colour carries a role, not just a hex value
+- **Bilingual readability** — English (Poppins) and Thai (Noto Sans Thai) coexist in one font stack
+- **Consistent component language** — pill buttons, 14px cards, navy topbar accent, teal interaction signal
 
-PCT is the internal approval instrument for EXZY Co., a B2B technology company that prides itself on running on systems that work. The interface must embody this: every screen should feel like a precision tool — nothing surprising, nothing wasted, nothing uncertain. Users trust the tool because it behaves like the best-run teams at EXZY do: structured, responsive, and genuinely helpful.
+The `payment & credit term` module is an **embedded sub-section** of this platform and must look indistinguishable from the rest of the W+ product.
 
-The palette anchors on EXZY Teal (#66C5C5) and EXZY Navy (#004081) — two colors that together read as technology with depth. Teal signals activity: hover states, focus rings, active badges, accent marks. Navy signals authority: primary navigation, headings of consequence, CTA emphasis. Between them sits a clean light-background system (#F8F9FA) that keeps reading fast and fatigue low. This is a tool used every day, multiple times; the design must not fight its users.
+---
 
-This system explicitly rejects three aesthetics: legacy enterprise density (gray tables that look like Windows XP, SAP-style forms), consumer-startup template (Notion/Linear cream-white padding, large empty spaces), and aggressive dark-gamer (neon accents, heavy glow effects). PCT must feel distinctly EXZY — not like a category default.
+## 2. Colour System
 
-**Key Characteristics:**
-- Light, clean backgrounds with flat surfaces; depth conveyed through borders and subtle navy-tinted shadows
-- EXZY Teal as signal (hover, active, focus, badge, accent line); EXZY Navy as anchor (nav, headings, CTA, footer)
-- Noto Sans Thai primary — the Thai language is first-class, not an afterthought
-- Pill-shaped primary buttons with teal-to-navy gradient; used sparingly
-- Status badges are the highest-density communication layer: always consistent, always legible
-- The activity timeline is a first-class component, not a log page
+### 2.1 Brand Palette (EXZY CI)
 
-## 2. Colors: The EXZY CI Palette
+These are the only brand colours. Do not invent new brand colours.
 
-A two-color signal system on a clean light ground. Teal signals; Navy anchors. Everything else supports.
+| Token (CSS var) | Hex | Role |
+|-----------------|-----|------|
+| `--color-navy` | `#004081` | Sidebar background, primary heading, info state |
+| `--color-navy-dark` | `#002D5C` | Navy hover state |
+| `--color-teal` | `#66C5C5` | Accent, focus ring, active indicator, topbar stripe |
+| `--color-teal-dark` | `#4AADAD` | Teal hover state |
+| `--gradient-primary` | `linear-gradient(135deg, #66C5C5 0%, #004081 100%)` | Primary button, quotation headers |
 
-### Primary
-- **EXZY Teal** (#66C5C5): Signal color. Hover states, active nav indicators, focus rings, badge accents, icon highlights, subtle section borders. Used to show the system responding to the user. Never used as a large background fill.
-- **EXZY Navy** (#004081): Anchor color. Sidebar background, critical headings, CTA emphasis, navigation active state, icon containers, footer/dark sections. Provides weight and authority.
+### 2.2 Neutral / Surface Palette
 
-### Secondary
-- **Teal-to-Navy Gradient** (`linear-gradient(135deg, #66C5C5 0%, #004081 100%)`): Reserved for the primary CTA button and hero action moments only. Prohibited on cards, section backgrounds, headings, badges, and icons.
+| Token | Hex | Role |
+|-------|-----|------|
+| `--color-bg` | `#F8F9FA` | Page background |
+| `--color-surface` | `#FFFFFF` | Card body, input background, modal body |
+| `--color-surface-2` | `#F2F6F8` | Card header, table header, read-only input, divider panels |
+| `--color-border` | `#D0D6DF` | Default border on all elements |
 
-### Tertiary (Semantic)
-- **Success Green** (#82C566): Approved status, positive confirmation, completion indicators.
-- **Warning Yellow** (#FFCC00): Pending states, time-sensitive alerts, risk flags. Use with navy or ink text — never white-on-yellow.
-- **Error Red** (#F3554F): Rejected status, delete actions, error states, destructive confirmations.
+### 2.3 Text Hierarchy
 
-### Neutral
-- **Ink** (#001122): Page titles, critical headings, modal titles. Maximum contrast. Used for text that must never be missed.
-- **Body Text** (#505050): All paragraph text, table cell values, form input values. 4.5:1+ against white.
-- **Slate Secondary** (#586782): Labels, helper text, secondary information. Still readable; not decorative muted.
-- **Bluegray Muted** (#929EB4): Placeholder text, disabled labels, timestamps in low-emphasis contexts.
-- **Muted Alt** (#626262): Alternative muted tone for light contexts. Use only when #929EB4 reads too blue.
-- **Background** (#F8F9FA): Page canvas. All main content sits on this.
-- **Secondary Surface** (#F2F6F8): Sidebar content areas, table headers, subtle row alternation, form group backgrounds.
-- **Border / Divider** (#D0D6DF): All card borders, table row borders, input borders, section dividers.
-- **White** (#FFFFFF): Card surface, modal background, input background.
+| Token | Hex | Role |
+|-------|-----|------|
+| `--color-ink` | `#001122` | Primary heading text |
+| `--color-body` | `#505050` | Body text, form values |
+| `--color-secondary` | `#586782` | Labels, secondary text, read-only values, card subheadings |
+| `--color-muted` | `#929EB4` | Placeholders, timestamps, hints, disabled text |
 
-### Named Rules
+### 2.4 Semantic Status Colours
 
-**The Signal Rule.** Teal is a signal, not a fill. It appears on ≤15% of any screen surface — as hover states, active indicators, focus rings, and accent marks. Teal backgrounds on sections, cards, or large containers are prohibited. Its relative rarity is what makes it communicate.
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--color-success` | `#82C566` | Success icon accent, completion indicator |
+| `--color-warning` | `#FFCC00` | Warning (use `#92400E` for text on light bg — see badges) |
+| `--color-danger` | `#F3554F` | Error, rejected, destructive action |
+| `--color-info` | `#004081` | Info state (same as navy) |
 
-**The Gradient Restraint Rule.** Two gradient registers exist, and they are not interchangeable.
-- **Signal Gradient** — the full teal-to-navy gradient (`linear-gradient(135deg, #66C5C5 0%, #004081 100%)`). Reserved for exactly one element per screen: the primary CTA. Never on section backgrounds, headings, badge text, icon fills, or decorative stripes. If a second Signal Gradient element is tempting, the design has lost confidence.
-- **Wash Gradient** — soft, low-contrast tints where the two stops read as one color from a normal viewing distance (e.g. `linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)` for selected/active control states, `linear-gradient(90deg, #EEF5FB 0%, #EFF9F9 100%)` for subtotal/summary row backgrounds, `linear-gradient(180deg, #ffffff 0%, #F7FBFE 100%)` for card body fills, or a darker navy-toned bar like `linear-gradient(135deg, #001D3D 0%, #004081 100%)` for section-header bars). Wash Gradients are permitted on segmented-control selection states, card section headers, card body backgrounds, and data-row washes — anywhere a flat tint would otherwise sit. A gradient counts as a Wash only while it stays low-contrast; once it's bright or high-contrast enough to read as a signal, it has become a Signal Gradient and the one-per-screen limit applies.
+### 2.5 Status Badge Colours (exact values — do not approximate)
 
-**The Navy Shadow Rule.** No generic black box-shadows (`rgba(0,0,0,0.x)`). Every shadow uses navy tint: small `0 1px 2px rgba(0,64,129,0.04)`, medium `0 4px 14px rgba(0,64,129,0.07)`, large `0 16px 34px rgba(0,64,129,0.10)`.
+| Status | Background | Text | Border |
+|--------|-----------|------|--------|
+| `draft` | `#F7FAFC` | `#4A5568` | `#CBD5E0` |
+| `pending` | `#FFFBEB` | `#92400E` | `#FCD34D` |
+| `approved` | `#F0FDF4` | `#14532D` | `#86EFAC` |
+| `rejected` | `#FEF2F2` | `#7F1D1D` | `#FCA5A5` |
+| `revised` | `#EFF6FF` | `#1E40AF` | `#93C5FD` |
+| `cancelled` | `#F9FAFB` | `#6B7280` | `#D1D5DB` |
 
-## 3. Typography: Dual-Script by Design
+> `#1E40AF` and similar blues are **status-specific** badge colours. Do not use them as general UI blue.
 
-**Stack:** `'Poppins', 'Noto Sans Thai', system-ui, sans-serif` — defined once as `--font-sans` in `globals.css`. Every component inherits it; no component should set its own `fontFamily` literal for body text.
+### 2.6 Approval Workflow Accent Colours
 
-**Character:** English copy renders in Poppins, Thai copy renders in Noto Sans Thai — automatically, per character, even within a single mixed-language string (e.g. "Quotation No. 1345678-1"). This works because of how the browser resolves font stacks: it doesn't pick a font for the whole text node, it walks the stack per character and uses the first font that has a glyph for it. Poppins is listed first and has zero Thai glyph coverage, so Thai characters (`U+0E01–0E5B`) fall straight through to Noto Sans Thai. Noto Sans Thai is listed second and has full Latin coverage as well as Thai, so it's a safe catch-all.
+Used in status timeline and result panels only:
 
-**Do not reverse this order.** Putting Noto Sans Thai first breaks the split silently: Noto Sans Thai's own Latin glyphs would render English text too, and Poppins would never be reached for anything, since "Thai-first" only changes which font wins on contested Latin characters — Noto already covers Thai either way.
+| Event | Accent colour | Rationale |
+|-------|---------------|-----------|
+| `approved` | `#82C566` | `--color-success` |
+| `rejected` | `#F3554F` | `--color-danger` |
+| `cancelled` | `#929EB4` | `--color-muted` |
+| `submitted` / `resubmitted` | `#004081` | `--color-navy` (info) |
+| `edited` | `#92400E` | warning text (pending badge text) |
+| `created` / `draft_saved` | `#586782` | `--color-secondary` |
 
-Thai typography demands extra line-height care: vowel marks and tone marks stack above the base letterform, requiring a minimum 1.65 line-height for body text (1.75 preferred). This is not a preference — it is a legibility requirement.
+### 2.7 Shadow System (navy-tinted ONLY)
 
-### Hierarchy
+**Never use `rgba(0,0,0,x)` shadows anywhere in this project.**
 
-- **Display** (700, clamp(2.125rem–3.5rem), lh 1.2): Hero headlines on empty states, large confirmation pages, and marketing-facing contexts. Use `text-wrap: balance`.
-- **Headline** (700, clamp(1.875rem–2.75rem), lh 1.25): Section headings, modal titles, page-level headings. Use `text-wrap: balance`.
-- **Title** (700, 1.25rem, lh 1.4): Card headings, stat labels, panel titles, table section breaks.
-- **Body** (400, 1rem, lh 1.75): All paragraph copy, table cell values, form labels. Max line length 65–75ch on prose; no max on table cells. Thai paragraphs: `text-wrap: pretty`.
-- **Small** (400, 0.875rem, lh 1.6): Helper text below inputs, secondary table columns, breadcrumbs, timestamps.
-- **Label** (700, 0.6875rem, ls 0.07em, uppercase): Badge text, status tags, column headers in tables, category markers. Thai labels should avoid uppercase; use weight instead.
+```css
+--shadow-sm:    0 1px 2px rgba(0,64,129,0.04);
+--shadow-md:    0 4px 14px rgba(0,64,129,0.07);
+--shadow-lg:    0 16px 34px rgba(0,64,129,0.10), 0 2px 6px rgba(0,64,129,0.06);
+```
 
-### Named Rules
+### 2.8 Colours NOT in the W+ Design System — Replace Immediately
 
-**The Thai-First Rule.** Every spacing and sizing decision must be validated with Thai text in place. Thai characters are taller than Latin equivalents. A line-height that works for English body copy will clip tone marks in Thai. Minimum 1.65 line-height everywhere; 1.75 preferred for paragraph text.
+| Incorrect hex | Correct replacement |
+|---------------|--------------------|
+| `#A0AEC0` | `#929EB4` (`--color-muted`) |
+| `#E2E8F0` | `#D0D6DF` (`--color-border`) |
+| `#1A202C` | `#001122` (`--color-ink`) |
+| `#4A5568` | `#586782` (`--color-secondary`) |
+| `#F5F7FA` | `#F8F9FA` (`--color-bg`) |
+| `#1E3A5F` | `#004081` (`--color-navy`) |
+| `#2563EB` (general UI) | `#004081` for info/nav; status colour in badge context only |
+| `#D97706` | `#92400E` (warning text) |
+| `#9CA3AF` | `#929EB4` (`--color-muted`) |
+| `#16A34A` | `#82C566` (`--color-success`) |
+| `#DC2626` | `#F3554F` (`--color-danger`) |
+| `#EBF4FF` | `rgba(0,64,129,0.08)` (navy-tinted light bg) |
+| `#505060` (typo) | `#505050` (`--color-body`) |
+| `#991B1B` | `#7F1D1D` (rejected badge text) |
+| `#FF8A80` (danger btn start) | `#F3554F` (`--color-danger`) |
 
-## 4. Elevation: Flat by Default, Navy-Tinted on State
+---
 
-This system is flat at rest. Cards and containers sit flush on the canvas with a 1px solid border (`#D0D6DF`). Shadows appear only as a response to interaction state (hover, modal emergence) or semantic elevation (modals are above the canvas; they need separation).
+## 3. Typography
 
-### Shadow Vocabulary
+### 3.1 Font Stack
 
-- **Hover lift** (`0 4px 14px rgba(0,64,129,0.07)` + `translateY(-2px)`): Applied to interactive cards on hover. The translateY signals interactivity; the shadow confirms lift.
-- **Modal** (`0 16px 34px rgba(0,64,129,0.10)` + `0 2px 6px rgba(0,64,129,0.06)`): Modal panels need clear separation from the backdrop. Two-layer shadow at different radii reads as genuine depth.
-- **Small structural** (`0 1px 2px rgba(0,64,129,0.04)`): Topbar, sticky headers, dropdown menus. Barely-there; just enough to signal layer.
+```css
+--font-sans: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif;
+--font-mono: 'JetBrains Mono', 'Noto Sans Thai', monospace;
+```
 
-### Named Rules
+**Critical rule:** Poppins MUST come first. Poppins has no Thai glyphs, so Thai characters automatically cascade to Noto Sans Thai. Reversing the order breaks mixed-language text. Noto Sans Thai in the mono stack covers the ฿ symbol JetBrains Mono lacks.
 
-**The Flat-By-Default Rule.** No resting shadows on cards or containers. Border + background difference provide layer separation at rest. Shadows are earned through state transitions, not applied decoratively.
+### 3.2 Type Scale
 
-**The Black Shadow Ban.** `rgba(0,0,0,x)` is prohibited. Every shadow is navy-tinted. A black shadow on a cool-light palette reads as a foreign body.
+| Role | Size | Weight | Colour | Notes |
+|------|------|--------|--------|-------|
+| Page title | 22px | 700 | `#001122` | `<h1>` in page headers |
+| Card header | 14px | 700 | `#001122` | `letter-spacing: -0.01em` |
+| Section label | 11px | 700 | `#586782` | UPPERCASE, `letter-spacing: 0.06em` |
+| Body text | 14px | 400 | `#505050` | `line-height: 1.65` |
+| Form label | 12px | 600 | `#586782` | above each field |
+| Table header | 11px | 700 | `#586782` | UPPERCASE, `letter-spacing: 0.05em` |
+| Hint / muted | 11–12px | 400 | `#929EB4` | timestamps, placeholders |
+| Topbar title | 18px | 600 | `#001122` | `letter-spacing: -0.01em` |
+| Mono reference | — | 700 | `#004081` (selling) / `#929EB4` (cost) | `font-family: --font-mono` |
 
-## 5. Components
+### 3.3 Thai Text
 
-### Buttons
+Any element containing Thai text needs extra line height:
+```css
+line-height: 1.75;
+```
+Use `:lang(th)` or `.thai` class (defined in `globals.css`).
 
-The primary button is the most distinctive element in the system — pill-shaped, gradient-filled, with an intentional confidence.
+---
 
-- **Shape:** Full pill (`border-radius: 9999px`), `padding: 14px 24px`, `font-size: 0.875rem`, `font-weight: 600`.
-- **Primary:** Background is the teal-to-navy gradient. White/`#F8F9FA` text. On hover: `translateY(-2px)`, shadow deepens to `0 6px 20px rgba(0,64,129,0.18)`, brightness increases slightly. If an arrow icon is present, it shifts 3px right on hover.
-- **Ghost / Secondary:** Transparent background, `#001122` ink text, `1px solid rgba(0,64,129,0.22)` border. On hover: background `rgba(102,197,197,0.10)`, border shifts to `#66C5C5`, text to `#004081`.
-- **Danger:** `#F3554F` background, white text. Pill shape. Used for reject, delete, destructive confirmation actions. Always requires a modal confirmation before the action fires.
-- **Disabled:** `opacity: 0.4`, `cursor: not-allowed`. Never change shape or size for disabled state.
-- **Height:** 40px minimum (touch target). Desktop: `padding: 10px 20px`.
+## 4. Spacing Scale (4pt base grid)
 
-### Chips / Badges (Status Tags)
+| Token | Value | Use |
+|-------|-------|-----|
+| `--space-1` | 4px | Icon gap, micro gaps |
+| `--space-2` | 8px | Button icon gap, badge padding |
+| `--space-3` | 12px | Table cell padding, dropdown item |
+| `--space-4` | 16px | Form field gap, nav item padding |
+| `--space-5` | 20px | Card body padding |
+| `--space-6` | 24px | Card-to-card gap, section gap |
+| `--space-8` | 32px | Page-level padding |
+| `--space-10` | 40px | Large section gap |
 
-The highest-communication-density component in the system. Every status badge must be legible at a glance without reading the text.
+Page layout: `padding: 28px 32px` on `<main>`.
 
-- **Shape:** Pill (`border-radius: 9999px`), `padding: 2px 10px`, `font-size: 0.6875rem`, `font-weight: 700`, uppercase (Latin only; Thai: weight-only).
-- **Pending (L1/L2):** Background `#FFFBEB`, text `#92400E`, border `1px solid #FCD34D`. Amber register.
-- **Approved:** Background `#F0FDF4`, text `#14532D`, border `1px solid #86EFAC`. Green register.
-- **Rejected:** Background `#FEF2F2`, text `#7F1D1D`, border `1px solid #FCA5A5`. Red register.
-- **Completed:** Background `#F0FDF4`, text `#166534`, border `1px solid #4ADE80`. Darker green register.
-- **Draft:** Background `#F7FAFC`, text `#4A5568`, border `1px solid #CBD5E0`. Neutral.
-- **Cancelled:** Background `#F9FAFB`, text `#6B7280`, border `1px solid #D1D5DB`. Muted neutral.
-- **Revision Needed:** Background `#FDF4FF`, text `#581C87`, border `1px solid #D8B4FE`. Purple register.
+---
 
-### Cards / Containers
+## 5. Border Radius Scale
 
-Flat, structured, legible. Cards are used only when the content genuinely needs grouping — not as a default layout chrome.
+| Token | Value | Use |
+|-------|-------|-----|
+| `--radius-sm` | 6px | Inputs, alerts, dropdown items, comment bubbles |
+| `--radius-md` | 14px | Cards, modals, filter bars, container panels |
+| `--radius-lg` | 22px | Large stat cards (Figma spec — currently 14px, migrate when possible) |
+| `--radius-pill` | 9999px | **All buttons**, badges, chips, version tags |
 
-- **Corner Style:** Gently curved (14px radius). Large containers (stat blocks, feature panels): 22px.
-- **Background:** `#FFFFFF` (white card on `#F8F9FA` background provides clear layer separation without shadows).
-- **Shadow Strategy:** None at rest. Hover: `0 4px 14px rgba(0,64,129,0.07)` + `translateY(-2px)`. Modals: large shadow.
-- **Border:** `1px solid #D0D6DF` always. No border + shadow combination at rest.
-- **Internal Padding:** `24px` standard. `16px 20px` for panel headers. `20px` for compact cards.
-- **Hover border shift:** `rgba(102,197,197,0.5)` — the teal signal reads as interactivity.
+**Rule: All buttons are pill-shaped.** `borderRadius: 9999` is mandatory.
 
-### Inputs / Fields
+---
 
-- **Style:** Stroke input — `1px solid #D0D6DF` border on `#FFFFFF` background. Radius `6px`. Height `40px`. Padding `0 12px`.
-- **Focus:** `outline: 2px solid rgba(102,197,197,0.6)`, `outline-offset: 2px`, border shifts to `#66C5C5`. Focus ring uses teal, reinforcing the signal rule.
-- **Error:** Border `#F3554F`, helper text below in `#F3554F`, `font-size: 0.75rem`.
-- **Disabled:** `background: #F2F6F8`, `color: #929EB4`, `cursor: not-allowed`.
-- **Labels:** Above the input, `0.75rem`, weight `600`, color `#586782`. Required fields: asterisk `*` in `#F3554F` after label text.
+## 6. Border / Stroke Rules
 
-### Navigation (Sidebar)
+- Default: `1px solid #D0D6DF`
+- Active/focus: `1.5px solid #66C5C5`
+- Error: `1px solid #F3554F`
+- Card header bottom: `1px solid #D0D6DF`
+- Table row: `1px solid #D0D6DF`
+- Divider: `height: 1px; background: #D0D6DF; border: none`
+- Soft divider (inside panels): `borderBottom: 1px solid #F2F6F8`
+- Topbar: `borderBottom: 1px solid #D0D6DF`
+- Sidebar internal: `rgba(255,255,255,0.08)` (on navy bg)
 
-The sidebar is the spatial anchor of the application — the one persistent element every role sees.
+---
 
-- **Style:** `#004081` (EXZY Navy) background. Width `260px` fixed. No border; the color contrast with `#F8F9FA` content area is separation enough.
-- **Logo area:** `72px` height. EXZY wordmark / logo in white or teal.
-- **Nav items:** `14px`, weight `500`, color `rgba(255,255,255,0.75)`. `padding: 10px 16px`. Border-radius `8px`.
-- **Hover:** `background: rgba(255,255,255,0.08)`, text `rgba(255,255,255,0.95)`.
-- **Active:** `background: rgba(102,197,197,0.15)`, text `#FFFFFF`, left border `3px solid #66C5C5`.
-- **Mobile:** Drawer pattern — slides in from left, `backdrop-filter: blur(8px)` overlay.
-- **User footer:** Pinned to bottom. Avatar + name + role chip. Logout button with `rgba(255,255,255,0.15)` hover.
+## 7. Layout
 
-### Topbar
+### Shell
 
-- **Style:** `#FFFFFF` background, `border-bottom: 1px solid #D0D6DF`. Height `60px`. `padding: 0 24px`.
-- **Shadow:** `0 1px 2px rgba(0,64,129,0.04)` — barely visible, just enough layer signal.
-- **Page title:** Weight `600`, color `#001122`, `18px`.
-- **Actions:** Aligned right. Secondary/ghost buttons only — no primary CTAs in the topbar.
+```
+Sidebar: 260px wide, bg #004081, sticky
+Topbar: 60px, bg #FFFFFF, borderBottom #D0D6DF
+  boxShadow: 0 1px 2px rgba(0,64,129,0.04), inset 0 3px 0 0 #66C5C5
+Main: bg #F8F9FA, padding 28px 32px
+```
 
-### Tables
+### Content Widths
 
-The primary data display component. Used on every list page.
+- Forms: `maxWidth: 760px` centred
+- List/table: full fluid width
+- Modals: sm=420px / md=560px / lg=720px
 
-- **Header:** `background: #F2F6F8`, `font-size: 0.75rem`, `font-weight: 700`, `text-transform: uppercase`, `color: #586782`, `letter-spacing: 0.05em`. `border-bottom: 1px solid #D0D6DF`.
-- **Row height:** `52px`. `border-bottom: 1px solid #D0D6DF`.
-- **Row hover:** `background: #F8F9FA`. No elevation, just tint.
-- **Cell text:** `#505050` body color. Amounts in monospace (`JetBrains Mono` if available, else `monospace`).
-- **Empty state:** Centered illustration or icon, headline in `#001122`, description in `#586782`, optional CTA button.
+---
 
-## 6. Do's and Don'ts
+## 8. Component Rules
 
-### Do:
-- **Do** use EXZY Teal (#66C5C5) exclusively as a signal: hover states, focus rings, active nav indicators, badge accents. Its rarity makes it communicate.
-- **Do** use EXZY Navy (#004081) as the anchor: sidebar, headings of consequence, CTA buttons, footer.
-- **Do** use navy-tinted shadows at all times: `rgba(0,64,129,0.04/0.07/0.10)`. Never `rgba(0,0,0,x)`.
-- **Do** apply the Signal Gradient (full teal-to-navy) to exactly one element per screen: the primary CTA button. Wash Gradients (soft, low-contrast tints) may appear more broadly — see the Gradient Restraint Rule.
-- **Do** set Thai body text line-height at minimum 1.65; prefer 1.75. Tone marks stack above Thai letterforms and need room.
-- **Do** use `text-wrap: balance` on h1–h3 and `text-wrap: pretty` on Thai paragraphs.
-- **Do** keep card surfaces white on the `#F8F9FA` background — the contrast provides layer without shadows.
-- **Do** use pill-shaped buttons (border-radius 9999px) for all primary and ghost actions.
-- **Do** display status badges consistently with the exact same color mapping across every page — the badge is the fastest status read.
-- **Do** require modal confirmation before any destructive action (reject, delete, cancel). Danger buttons are always red (#F3554F).
-- **Do** use WCAG AA contrast as a floor, not a ceiling. Body text (#505050 on #FFFFFF) should clear 4.5:1.
+### Button
 
-### Don't:
-- **Don't** use the Signal Gradient (teal-to-navy) on section backgrounds, card fills, heading text, icon fills, badges, or decorative stripes — that combination is reserved for the primary CTA. Wash Gradients are fine in those places; the Signal Gradient is not.
-- **Don't** use gradient text (`background-clip: text`). Prohibited. Use a single solid color.
-- **Don't** add a new color to the system without a semantic role. The system has two accent colors and three semantic colors. That is enough.
-- **Don't** use black-tinted shadows. Every shadow uses navy as the shadow color.
-- **Don't** stack border + shadow on a card at rest. Border gives structure; shadow gives lift. Rest state uses border. Hover state uses both.
-- **Don't** use `border-left` wider than 1px as an accent stripe on cards, callouts, or alerts. Rewrite with background tint or full border instead.
-- **Don't** use glassmorphism on card or content surfaces. Blurs and glass are prohibited as general card treatment — only permissible on transient overlays (the mobile sidebar backdrop).
-- **Don't** make the UI look like a SaaS landing page template: no hero metrics grid, no testimonial cards, no big-number stat callouts with gradient borders. This is a workflow tool.
-- **Don't** use rounded corners beyond 22px on any card. Pill is reserved for buttons and badges.
-- **Don't** add tiny uppercase section-kicker labels above every section heading. One named kicker as a deliberate system is voice; eyebrows on every heading is AI grammar.
-- **Don't** use purple, pink, or orange anywhere in the UI. Those colors have no semantic role in this system and will read as accidents.
-- **Don't** use line-height below 1.65 for any Thai text. This clips tone marks. It is a legibility defect, not a stylistic choice.
+| Variant | Background | Text | Border |
+|---------|-----------|------|--------|
+| `primary` | `linear-gradient(135deg, #66C5C5 0%, #004081 100%)` | `#F8F9FA` | none |
+| `secondary` | `linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)` | `#004081` | `1.5px solid #66C5C5` |
+| `danger` | `linear-gradient(135deg, #F3554F 0%, #C0392B 100%)` | `#FFFFFF` | none |
+| `ghost` | transparent | `#586782` | `1px solid transparent` |
+| `success` | `linear-gradient(135deg, #A8DD8C 0%, #4F9A3A 100%)` | `#FFFFFF` | none |
+
+Sizes: sm=30px / md=38px / lg=44px. Always pill (`borderRadius: 9999`).
+
+### Card
+
+- bg `#FFFFFF`, border `1px solid #D0D6DF`, radius `14px`
+- Header: bg `#F2F6F8`, padding `14px 20px`, text `14px/700/#001122`
+- Body padding: `20px`
+- Hover: `translateY(-2px)` + `shadow-md` + border `rgba(102,197,197,0.5)`
+
+### Form Fields
+
+- Input height: `38px`, radius `6px`, border `1px solid #D0D6DF`
+- Focus: `borderColor #66C5C5`, outline `2px solid rgba(102,197,197,0.6)`
+- Error: `borderColor #F3554F`, bg `#FEF2F2`
+- Disabled: bg `#F2F6F8`, color `#929EB4`
+- Label: `12px/600/#586782`; required `*` in `#F3554F`
+
+### Table
+
+- Header: bg `#F2F6F8`, `11px/700/#586782/UPPERCASE`
+- Row separator: `1px solid #D0D6DF`
+- Count footer: bg `#F2F6F8`, `12px/#929EB4`
+
+### Status Badge
+
+Always `<StatusBadge status="..." />`. Never build inline badge spans.
+
+Badge base: `11px/700/UPPERCASE/letter-spacing 0.03em/borderRadius 4px/padding 2px 10px`.
+
+### Status Timeline
+
+- Action colours per §2.6
+- Version badge: bg `rgba(0,64,129,0.08)`, color `#004081`
+
+---
+
+## 9. Icon Usage
+
+Library: `lucide-react` (stroke, not filled).
+
+| Context | Size |
+|---------|------|
+| Button inline | 14–15px |
+| Form / input | 16px |
+| Modal close | 18px |
+| Stat card | 18–20px |
+| Timeline | 14px |
+
+---
+
+## 10. Accessibility
+
+- All inputs have `<label>` via `<FormGroup>`
+- Icon-only buttons have `aria-label`
+- Colour never sole status indicator
+- Focus ring: `2px solid rgba(102,197,197,0.7); outline-offset: 2px`
+- Modal: scroll-lock while open
+
+---
+
+## 11. Print
+
+`src/styles/print.css`:
+- Hide: `.no-print`, `header`, `nav`
+- Page: A4, `margin: 0`
+- Section title border: `#004081`
+- Table borders visible
+
+---
+
+## 12. Do / Don't
+
+### ✅ DO
+
+- Use shared components: `<Button>`, `<Card>`, `<FormGroup>`, `<Input>`, `<Modal>`, `<StatusBadge>`, `<Alert>`
+- Pill radius on all buttons
+- 14px radius on all cards
+- Navy-tinted shadows only
+- `JetBrains Mono` for numbers and reference codes
+- `line-height: 1.75` for Thai text blocks
+
+### ❌ DON'T
+
+- Use `rgba(0,0,0,x)` shadows
+- Use off-brand colours from §2.8
+- Use rectangular buttons
+- Use `borderRadius` below `6px`
+- Use raw `<button>`/`<input>` without component wrappers
+- Use gradients outside the approved set
+- Use `#2563EB` blue for general non-status UI
+
+---
+
+## 13. CSS Variables Reference
+
+All defined in `src/styles/globals.css` under `@theme {}`:
+
+```css
+--color-navy: #004081;     --color-navy-dark: #002D5C;
+--color-teal: #66C5C5;     --color-teal-dark: #4AADAD;
+--gradient-primary: linear-gradient(135deg, #66C5C5 0%, #004081 100%);
+--color-bg: #F8F9FA;       --color-surface: #FFFFFF;
+--color-surface-2: #F2F6F8;  --color-border: #D0D6DF;
+--color-ink: #001122;      --color-body: #505050;
+--color-secondary: #586782;  --color-muted: #929EB4;
+--color-success: #82C566;  --color-warning: #FFCC00;
+--color-danger: #F3554F;   --color-info: #004081;
+--shadow-sm: 0 1px 2px rgba(0,64,129,0.04);
+--shadow-md: 0 4px 14px rgba(0,64,129,0.07);
+--shadow-lg: 0 16px 34px rgba(0,64,129,0.10), 0 2px 6px rgba(0,64,129,0.06);
+--font-sans: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif;
+--font-mono: 'JetBrains Mono', 'Noto Sans Thai', monospace;
+--radius-sm: 6px;  --radius-md: 14px;  --radius-lg: 22px;  --radius-pill: 9999px;
+--space-1: 4px;  --space-2: 8px;  --space-3: 12px;  --space-4: 16px;
+--space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-10: 40px;
+```
+
+---
+
+## 14. Unclear / Needs Manual Verification
+
+1. **Icon page** (`937:913`) — not fully retrieved. Confirm all icons covered by Lucide React.
+2. **Metropolis brand colours** — secondary palette in Figma; hex values unknown.
+3. **Mobile responsive rules** — Figma has mobile field variant (72px vs 60px desktop). App is currently desktop-only.
+4. **Topbar height** — Figma Navbar = 80px; current code = 60px. Confirm for embedded context.
+5. **Stat card radius** — Figma spec = 22px (`radius-lg`); current = 14px. Confirm target.
+6. **Stepper component** — Figma shows a step-form indicator. Current form is a single-page scroll, not a wizard.
+
+---
+
+*DESIGN.md · W+ Design System · EXZY CI v2 · 2026-06-23*
