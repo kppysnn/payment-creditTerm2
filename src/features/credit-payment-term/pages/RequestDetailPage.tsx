@@ -101,28 +101,30 @@ export function RequestDetailPage() {
   //
   // Read-only viewers (sales/accounting, or anyone looking at a decided request)
   // never see a textarea — only an Approver/Rejecter actively deciding a pending
-  // request gets the editable box. Read-only always shows the band, with either
-  // the saved note in a "this is recorded data" box or a polite empty state —
-  // never just disappears, and never looks like an empty field waiting for input.
-  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true, priorComment?: string, placeholder = 'ระบุรายละเอียดเพิ่มเติม เช่น เหตุผล เงื่อนไข หรือข้อมูลประกอบการพิจารณา', emptyStateText = 'ยังไม่มีหมายเหตุเพิ่มเติม') => (
-    <div>
-      {labeledBand(label, undefined, framed)}
-      <div style={{ padding: framed ? '0 14px 18px' : '0 0 4px' }}>
-        {priorComment && !value.trim() && (
-          <div style={{ marginBottom: 8, padding: '7px 10px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 12, color: '#7F1D1D' }}>
-            เคยถูกปฏิเสธไว้ว่า: <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
-          </div>
-        )}
-        {editable ? (
-          <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder={placeholder} />
-        ) : value.trim() ? (
-          <div style={{ padding: '10px 12px', background: '#F8F9FA', border: '1px solid #F2F6F8', borderRadius: 4, fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
-        ) : (
-          <div style={{ padding: '10px 12px', background: '#F8F9FA', border: '1px solid #F2F6F8', borderRadius: 4, fontSize: 13, color: '#586782', fontStyle: 'italic' }}>{emptyStateText}</div>
-        )}
+  // request gets the editable box. For read-only viewers, this whole block is a
+  // record of the approver's response: hide it entirely until there's actually
+  // something to show (a saved note or a past rejection), rather than reserving
+  // space for "ยังไม่มีหมายเหตุ" before anyone has reviewed the request at all.
+  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true, priorComment?: string, placeholder = 'ระบุรายละเอียดเพิ่มเติม เช่น เหตุผล เงื่อนไข หรือข้อมูลประกอบการพิจารณา') => {
+    if (!editable && !value.trim() && !priorComment) return null
+    return (
+      <div>
+        {labeledBand(label, undefined, framed)}
+        <div style={{ padding: framed ? '0 14px 18px' : '0 0 4px' }}>
+          {priorComment && !value.trim() && (
+            <div style={{ marginBottom: 8, padding: '7px 10px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 12, color: '#7F1D1D' }}>
+              เคยถูกปฏิเสธไว้ว่า: <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
+            </div>
+          )}
+          {editable ? (
+            <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder={placeholder} />
+          ) : value.trim() ? (
+            <div style={{ padding: '10px 12px', background: '#F8F9FA', border: '1px solid #F2F6F8', borderRadius: 4, fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
+          ) : null}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   // Column-header style is shared by every table on this page — same size, weight,
   // color and underline — so "this is a header row" never has two different looks.
@@ -359,11 +361,11 @@ export function RequestDetailPage() {
 
             {/* Hardware quotation: items + its own payment schedule */}
             {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareCost, hardwareSelling, req.installments[0]?.creditTermDays ?? 0, req.installments,
-              sectionComment('หมายเหตุสำหรับ Hardware', hardwareComment, canComment, setHardwareComment, true, req.approvalResult?.hardwareComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา', 'ยังไม่มีหมายเหตุสำหรับหมวดนี้'))}
+              sectionComment('หมายเหตุสำหรับ Hardware', hardwareComment, canComment, setHardwareComment, true, req.approvalResult?.hardwareComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'))}
 
             {/* Software & Installation quotation: items + its own payment schedule */}
             {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceCost, serviceSelling, req.swInstallments?.[0]?.creditTermDays ?? 0, req.swInstallments ?? [],
-              sectionComment('หมายเหตุสำหรับ Software & Installation', swComment, canComment, setSwComment, true, req.approvalResult?.swComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา', 'ยังไม่มีหมายเหตุสำหรับหมวดนี้'))}
+              sectionComment('หมายเหตุสำหรับ Software & Installation', swComment, canComment, setSwComment, true, req.approvalResult?.swComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'))}
 
             {/* Overall total */}
             <Card title="สรุปยอดรวม" noPad>
