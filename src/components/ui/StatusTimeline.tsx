@@ -1,14 +1,14 @@
 import type { ApprovalHistoryEntry } from '../../features/credit-payment-term/types/approval'
 import { APPROVAL_ACTION_LABELS } from '../../features/credit-payment-term/types/approval'
 import { formatDateTime } from '../../features/credit-payment-term/utils/formatters'
-import { CheckCircle, XCircle, Clock, FileText, Send, RefreshCw, Ban } from 'lucide-react'
+import { Check, X, Clock, FileText, Send, RefreshCw, Ban } from 'lucide-react'
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   created: <FileText size={14} />,
   draft_saved: <FileText size={14} />,
   submitted: <Send size={14} />,
-  approved: <CheckCircle size={14} />,
-  rejected: <XCircle size={14} />,
+  approved: <Check size={14} />,
+  rejected: <X size={14} />,
   edited: <RefreshCw size={14} />,
   resubmitted: <Send size={14} />,
   cancelled: <Ban size={14} />,

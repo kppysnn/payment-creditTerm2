@@ -6,7 +6,7 @@ import { Alert } from '../../../components/ui/Alert'
 import { PAYMENT_CONDITION_LABELS, type PaymentCondition } from '../types/request'
 import { calcInstallmentAmount, calcTotalInstallmentPercent, formatCurrency } from '../utils/calculations'
 import { formatCreditTerm } from '../utils/formatters'
-import { ArrowRight, ArrowLeft } from 'lucide-react'
+import { ChevronRight, ChevronLeft } from 'lucide-react'
 
 interface InstallmentRow {
   installmentPercent: number | ''
@@ -215,8 +215,8 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button variant="secondary" icon={<ArrowLeft size={15} />} onClick={onBack}>ย้อนกลับ</Button>
-          <Button icon={<ArrowRight size={15} />} onClick={() => validate() && onNext()}>ถัดไป — สรุปและส่ง</Button>
+          <Button variant="secondary" icon={<ChevronLeft size={15} />} onClick={onBack}>ย้อนกลับ</Button>
+          <Button icon={<ChevronRight size={15} />} onClick={() => validate() && onNext()}>ถัดไป — สรุปและส่ง</Button>
         </div>
       </div>
     </Card>

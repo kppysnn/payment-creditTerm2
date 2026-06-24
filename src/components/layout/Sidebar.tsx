@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, Plus } from 'lucide-react'
+import { Grid2x2, ClipboardCheck, Plus } from 'lucide-react'
 import { useCurrentUser } from '../../app/UserContext'
 import { ROLE_LABELS } from '../../features/credit-payment-term/types/user'
 
@@ -11,8 +11,8 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
-  { to: '/requests', icon: <ClipboardList size={16} />, label: 'รายการคำขอ' },
+  { to: '/dashboard', icon: <Grid2x2 size={16} />, label: 'Dashboard' },
+  { to: '/requests', icon: <ClipboardCheck size={16} />, label: 'รายการคำขอ' },
   { to: '/requests/new', icon: <Plus size={16} />, label: 'สร้างคำขอใหม่', roles: ['sales'] },
 ]
 

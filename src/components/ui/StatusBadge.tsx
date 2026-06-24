@@ -17,11 +17,11 @@ export function StatusBadge({ status, size = 'md' }: Props) {
         gap: 5,
         fontSize: size === 'sm' ? 12 : 13,
         fontWeight: 700,
-        color: cfg.color,
+        color: cfg.textColor,
         whiteSpace: 'nowrap',
       }}
     >
-      <Icon size={size === 'sm' ? 13 : 14} style={{ flexShrink: 0 }} />
+      <Icon size={size === 'sm' ? 13 : 14} color={cfg.iconColor} style={{ flexShrink: 0 }} />
       {cfg.label}
     </span>
   )

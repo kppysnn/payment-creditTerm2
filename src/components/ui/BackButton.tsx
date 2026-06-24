@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { Button } from './Button'
 
 interface Props {
@@ -13,7 +13,7 @@ export function BackButton({ to, label = 'ย้อนกลับ', style }: Pr
   return (
     <Button
       variant="secondary"
-      icon={<ArrowLeft size={15} />}
+      icon={<ChevronLeft size={15} />}
       onClick={() => navigate(to)}
       style={style}
     >

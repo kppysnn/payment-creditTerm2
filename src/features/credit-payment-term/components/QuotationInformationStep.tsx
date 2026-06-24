@@ -5,7 +5,7 @@ import { FormGroup, Input, Select } from '../../../components/ui/FormField'
 import { formatCurrency, calcGrossProfit, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
 import { formatCreditTerm } from '../utils/formatters'
 import { PAYMENT_CONDITION_LABELS, type PaymentCondition } from '../types/request'
-import { Plus, Trash2, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { SaleType } from '../types/request'
 
 interface HwItem { name: string; sellingPrice: number | ''; cost: number | '' }
@@ -362,8 +362,8 @@ export function QuotationInformationStep({ data, onChange, onNext, onBack }: Pro
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-        <Button variant="secondary" icon={<ArrowLeft size={15} />} onClick={onBack}>ย้อนกลับ</Button>
-        <Button icon={<ArrowRight size={15} />} onClick={() => validate() && onNext()}>ถัดไป — สรุปและส่ง</Button>
+        <Button variant="secondary" icon={<ChevronLeft size={15} />} onClick={onBack}>ย้อนกลับ</Button>
+        <Button icon={<ChevronRight size={15} />} onClick={() => validate() && onNext()}>ถัดไป — สรุปและส่ง</Button>
       </div>
     </Card>
   )

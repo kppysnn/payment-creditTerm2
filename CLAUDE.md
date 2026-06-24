@@ -262,17 +262,18 @@ import { StatusBadge } from '../../../components/ui/StatusBadge'
 <StatusBadge status="pending" size="sm" />
 ```
 
-**Squared off in favor of the WorkX host app's plain status convention (2026-06-24):** no background, no border, no badge pill — just a colored Lucide icon + label, matching how the WorkX shell (e.g. the transport-request module) renders terminal statuses as plain colored text+icon. Config lives in `getStatusConfig()` (`src/features/credit-payment-term/utils/status.ts`), which returns `{ label, color, icon }` per status.
+**Squared off in favor of the WorkX host app's plain status convention (2026-06-24):** no background, no border, no badge pill — just a colored Lucide icon + label, matching how the WorkX shell (e.g. the transport-request module) renders terminal statuses as plain colored text+icon. Config lives in `getStatusConfig()` (`src/features/credit-payment-term/utils/status.ts`), which returns `{ label, iconColor, textColor, icon }` per status.
 
-Status color/icon reference:
-| Status | color | icon |
-|--------|-------|------|
-| draft | `#4A5568` | `FileText` |
-| pending | `#92400E` | `Hourglass` |
-| approved | `#14532D` | `CheckCircle` |
-| rejected | `#7F1D1D` | `XCircle` |
-| revised | `#1E40AF` | `RefreshCw` |
-| cancelled | `#6B7280` | `Ban` |
+**Icon color and text color are independent (2026-06-24).** The icon always gets the brand's exact semantic token (`--color-warning`/`--color-success`/`--color-danger`), even where that token is too light to read as text (`#FFCC00`, `#82C566` both fail WCAG text contrast on white). The label next to it uses a darker, readable variant of the same hue instead.
+
+| Status | icon color | text color | icon |
+|--------|-----------|-----------|------|
+| draft | `#4A5568` | `#4A5568` | `FileText` |
+| pending | `#FFCC00` (`--color-warning`) | `#92400E` | `Hourglass` |
+| approved | `#82C566` (`--color-success`) | `#14532D` | `CheckCircle` |
+| rejected | `#F3554F` (`--color-danger`) | `#F3554F` | `XCircle` |
+| revised | `#1E40AF` | `#1E40AF` | `RefreshCw` |
+| cancelled | `#6B7280` | `#6B7280` | `Ban` |
 
 Badge base: `13px (12px for size="sm") / weight 700 / icon 14px (13px sm) / gap 5px / no uppercase, no background, no border`
 

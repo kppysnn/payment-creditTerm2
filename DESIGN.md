@@ -66,14 +66,16 @@ These are the only brand colours. Do not invent new brand colours.
 
 **Plain icon + colored label (2026-06-24) — no background, no border, no pill.** Squared off in favor of the WorkX host app's convention, where terminal statuses render as a colored Lucide icon + text with no badge container. Replaces the earlier bg/border/text three-column badge.
 
-| Status | Text/icon colour | Icon |
-|--------|------------------|------|
-| `draft` | `#4A5568` | `FileText` |
-| `pending` | `#92400E` | `Hourglass` |
-| `approved` | `#14532D` | `CheckCircle` |
-| `rejected` | `#7F1D1D` | `XCircle` |
-| `revised` | `#1E40AF` | `RefreshCw` |
-| `cancelled` | `#6B7280` | `Ban` |
+**Icon colour and text colour are independent.** `#FFCC00`/`#82C566` (the exact `--color-warning`/`--color-success` tokens) fail WCAG text contrast on white, so they're used for the icon only; the label next to it uses a darker, readable variant of the same hue.
+
+| Status | Icon colour | Text colour | Icon |
+|--------|-------------|-------------|------|
+| `draft` | `#4A5568` | `#4A5568` | `FileText` |
+| `pending` | `#FFCC00` (`--color-warning`) | `#92400E` | `Hourglass` |
+| `approved` | `#82C566` (`--color-success`) | `#14532D` | `CheckCircle` |
+| `rejected` | `#F3554F` (`--color-danger`) | `#F3554F` | `XCircle` |
+| `revised` | `#1E40AF` | `#1E40AF` | `RefreshCw` |
+| `cancelled` | `#6B7280` | `#6B7280` | `Ban` |
 
 > `#1E40AF` and similar blues are **status-specific** badge colours. Do not use them as general UI blue.
 
@@ -255,7 +257,9 @@ Sizes: sm=30px / md=38px / lg=44px. Always squared (`borderRadius: 4`).
 
 - Header: bg `#F2F6F8`, `11px/700/#586782/UPPERCASE` (default); `RequestListPage` overrides header text to `12.5px/700/#004081`, normal case, to match the WorkX host table
 - Row separator: `1px solid #D0D6DF`
-- Count footer: bg `#F2F6F8`, `12px/#929EB4`
+- Cell padding: `12px 20px` (default `10px 14px`; widened on `RequestListPage` so adjacent columns don't crowd together)
+- Count footer: bg `#F2F6F8`, `12px/#929EB4` (default, below the table); `RequestListPage` moves this above the table, no bg/border, to match the WorkX host page
+- No enclosing card/border around the table itself on `RequestListPage` (2026-06-24) — the WorkX host tables sit directly on the page background with no outer frame, just the header-row bg and row separators. Other tables (detail-page item/installment tables) keep their card wrapper.
 
 ### Status Badge
 

@@ -5,7 +5,7 @@ import { FormGroup, Input } from '../../../components/ui/FormField'
 import { searchCustomers } from '../services/customerService'
 import type { Customer, CustomerType } from '../types/customer'
 import { CUSTOMER_TYPE_LABELS } from '../types/customer'
-import { ArrowRight, Search, X } from 'lucide-react'
+import { ChevronRight, Search, X } from 'lucide-react'
 
 interface Props {
   data: Record<string, unknown>
@@ -291,7 +291,7 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
-        <Button icon={<ArrowRight size={15} />} onClick={() => validate() && onNext()}>
+        <Button icon={<ChevronRight size={15} />} onClick={() => validate() && onNext()}>
           ถัดไป — ใบเสนอราคา & งวด
         </Button>
       </div>

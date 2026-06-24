@@ -6,7 +6,7 @@ import { Alert } from '../../../components/ui/Alert'
 import { CUSTOMER_TYPE_LABELS, type CustomerType } from '../types/customer'
 import { searchCustomers } from '../services/customerService'
 import type { Customer } from '../types/customer'
-import { ArrowRight, ArrowLeft, Search } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Search } from 'lucide-react'
 
 interface Props {
   data: Record<string, unknown>
@@ -244,8 +244,8 @@ export function CustomerInformationStep({ data, onChange, onNext, onBack }: Prop
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-        <Button variant="secondary" icon={<ArrowLeft size={15} />} onClick={onBack}>ย้อนกลับ</Button>
-        <Button icon={<ArrowRight size={15} />} onClick={() => validate() && onNext()}>ถัดไป — ใบเสนอราคา</Button>
+        <Button variant="secondary" icon={<ChevronLeft size={15} />} onClick={onBack}>ย้อนกลับ</Button>
+        <Button icon={<ChevronRight size={15} />} onClick={() => validate() && onNext()}>ถัดไป — ใบเสนอราคา</Button>
       </div>
     </Card>
   )

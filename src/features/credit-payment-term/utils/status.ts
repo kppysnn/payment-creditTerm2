@@ -5,39 +5,48 @@ import { STATUS_LABELS } from '../types/request'
 
 export interface StatusConfig {
   label: string
-  color: string
+  /** Icon color — the brand's exact semantic token, even where it's too light to use as text. */
+  iconColor: string
+  /** Label color — a readable dark variant of the same hue, used since some semantic tokens fail text contrast. */
+  textColor: string
   icon: LucideIcon
 }
 
 export const STATUS_CONFIG: Record<RequestStatus, StatusConfig> = {
   draft: {
     label: STATUS_LABELS.draft,
-    color: '#4A5568',
+    iconColor: '#4A5568',
+    textColor: '#4A5568',
     icon: FileText,
   },
   pending: {
     label: STATUS_LABELS.pending,
-    color: '#92400E',
+    iconColor: '#FFCC00',
+    textColor: '#92400E',
     icon: Hourglass,
   },
   approved: {
     label: STATUS_LABELS.approved,
-    color: '#14532D',
+    iconColor: '#82C566',
+    textColor: '#14532D',
     icon: CheckCircle,
   },
   rejected: {
     label: STATUS_LABELS.rejected,
-    color: '#7F1D1D',
+    iconColor: '#F3554F',
+    textColor: '#F3554F',
     icon: XCircle,
   },
   revised: {
     label: STATUS_LABELS.revised,
-    color: '#1E40AF',
+    iconColor: '#1E40AF',
+    textColor: '#1E40AF',
     icon: RefreshCw,
   },
   cancelled: {
     label: STATUS_LABELS.cancelled,
-    color: '#6B7280',
+    iconColor: '#6B7280',
+    textColor: '#6B7280',
     icon: Ban,
   },
 }
