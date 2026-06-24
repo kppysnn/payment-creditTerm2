@@ -32,11 +32,19 @@ export interface ApprovalHistoryEntry {
   createdAt: string
 }
 
-export interface ApprovalResult {
+// Per-section reviewer notes — replaces a single freeform decision comment.
+// Lets an approver comment on exactly the section they have feedback on
+// (customer info, Hardware, or Software & Installation) instead of one
+// undifferentiated text box.
+export interface SectionComments {
+  customerComment?: string
+  hardwareComment?: string
+  swComment?: string
+}
+
+export interface ApprovalResult extends SectionComments {
   approverEmail: string
   approverName: string
   approvedAt?: string
   rejectedAt?: string
-  decisionComment: string
-  suggestion?: string
 }

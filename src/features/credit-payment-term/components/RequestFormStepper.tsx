@@ -656,9 +656,14 @@ export function RequestFormStepper({
 
       {isResubmit && initialRequest?.approvalResult && (
         <Alert type="error" title="เหตุผลที่ถูก Reject ครั้งก่อน">
-          <div style={{ marginTop: 4 }}>{initialRequest.approvalResult.decisionComment}</div>
-          {initialRequest.approvalResult.suggestion && (
-            <div style={{ marginTop: 4, color: '#586782' }}>{initialRequest.approvalResult.suggestion}</div>
+          {initialRequest.approvalResult.customerComment && (
+            <div style={{ marginTop: 4 }}><strong>ลูกค้า:</strong> {initialRequest.approvalResult.customerComment}</div>
+          )}
+          {initialRequest.approvalResult.hardwareComment && (
+            <div style={{ marginTop: 4 }}><strong>Hardware:</strong> {initialRequest.approvalResult.hardwareComment}</div>
+          )}
+          {initialRequest.approvalResult.swComment && (
+            <div style={{ marginTop: 4 }}><strong>Software &amp; Installation:</strong> {initialRequest.approvalResult.swComment}</div>
           )}
         </Alert>
       )}

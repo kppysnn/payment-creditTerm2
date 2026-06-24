@@ -59,11 +59,14 @@ export const MOCK_REQUESTS: Request[] = [
       maxCreditTerm: 30,
     },
     status: 'approved',
+    customerComment: 'ลูกค้าเก่าที่มีประวัติดี',
+    hardwareComment: 'Margin เพียงพอ อนุมัติ',
     approvalResult: {
       approverEmail: 'approver@company.com',
       approverName: 'นายประยุทธ์ มั่นคง',
       approvedAt: '2026-06-03T10:00:00.000Z',
-      decisionComment: 'อนุมัติ ลูกค้าเก่าที่มีประวัติดี margin เพียงพอ',
+      customerComment: 'ลูกค้าเก่าที่มีประวัติดี',
+      hardwareComment: 'Margin เพียงพอ อนุมัติ',
     },
     history: [
       {
@@ -186,11 +189,14 @@ export const MOCK_REQUESTS: Request[] = [
       maxCreditTerm: 30,
     },
     status: 'pending',
+    // live customer/hardware/swComment intentionally absent — this is a fresh
+    // review round after resubmission; approvalResult below is the snapshot
+    // from the round that got rejected, preserved for history
     approvalResult: {
       approverEmail: 'approver@company.com',
       approverName: 'นายประยุทธ์ มั่นคง',
       rejectedAt: '2026-06-07T11:00:00.000Z',
-      decisionComment: 'ลูกค้าใหม่ credit term 60 วันสูงเกินไป ขอ max 30 วัน',
+      swComment: 'ลูกค้าใหม่ credit term 60 วันสูงเกินไป ขอ max 30 วัน',
     },
     history: [
       {
@@ -387,12 +393,14 @@ export const MOCK_REQUESTS: Request[] = [
       maxCreditTerm: 45,
     },
     status: 'rejected',
+    // not yet resubmitted — still the same review round, so the live field
+    // matches the approvalResult snapshot below
+    swComment: 'Margin ต่ำเกินไปสำหรับ Azure subscription ขอให้ review ราคาใหม่ ควร negotiate ราคา Azure กับ Microsoft อีกครั้ง หรือปรับ margin ให้ได้อย่างน้อย 20%',
     approvalResult: {
       approverEmail: 'approver@company.com',
       approverName: 'นายประยุทธ์ มั่นคง',
       rejectedAt: '2026-06-15T09:00:00.000Z',
-      decisionComment: 'Margin ต่ำเกินไปสำหรับ Azure subscription ขอให้ review ราคาใหม่',
-      suggestion: 'ควร negotiate ราคา Azure กับ Microsoft อีกครั้ง หรือปรับ margin ให้ได้อย่างน้อย 20%',
+      swComment: 'Margin ต่ำเกินไปสำหรับ Azure subscription ขอให้ review ราคาใหม่ ควร negotiate ราคา Azure กับ Microsoft อีกครั้ง หรือปรับ margin ให้ได้อย่างน้อย 20%',
     },
     history: [
       {

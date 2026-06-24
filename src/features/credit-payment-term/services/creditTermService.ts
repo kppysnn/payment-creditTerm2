@@ -6,7 +6,7 @@
  *   Requests | Customers | Request_Customers | Quotation_Items | Payment_Terms | Approval_History
  */
 import type { Request, RequestStatus, RequestListItem } from '../types/request'
-import type { ApprovalHistoryEntry } from '../types/approval'
+import type { ApprovalHistoryEntry, SectionComments } from '../types/approval'
 import {
   getMockRequests,
   getMockRequestById,
@@ -18,6 +18,19 @@ import type { CurrentUser } from '../types/user'
 
 function _delay(ms = 150): Promise<void> {
   return new Promise(r => setTimeout(r, ms))
+}
+
+const _SECTION_LABELS: Record<keyof SectionComments, string> = {
+  customerComment: 'ลูกค้า',
+  hardwareComment: 'Hardware',
+  swComment: 'Software & Installation',
+}
+
+function _summarizeComments(comments: SectionComments): string {
+  return (Object.keys(_SECTION_LABELS) as (keyof SectionComments)[])
+    .filter(key => comments[key]?.trim())
+    .map(key => `${_SECTION_LABELS[key]}: ${comments[key]}`)
+    .join(' / ')
 }
 
 function _toListItem(req: Request): RequestListItem {
@@ -185,6 +198,11 @@ export async function resubmitRequest(id: string, data: Partial<Request>, actor:
   const updated: Request = {
     ...existing,
     ...data,
+    // fresh review round — clear last round's section comments so the
+    // approver isn't looking at stale notes against the revised request
+    customerComment: undefined,
+    hardwareComment: undefined,
+    swComment: undefined,
     status: 'pending',
     version: newVersion,
     updatedAt: now,
@@ -224,7 +242,7 @@ export async function updatePendingRequest(id: string, data: Partial<Request>, a
   return updated
 }
 
-export async function approveRequest(id: string, comment: string, actor: CurrentUser): Promise<Request> {
+export async function approveRequest(id: string, comments: SectionComments, actor: CurrentUser): Promise<Request> {
   await _delay()
   const existing = getMockRequestById(id)
   if (!existing) throw new Error('Request not found')
@@ -239,18 +257,19 @@ export async function approveRequest(id: string, comment: string, actor: Current
     actorName: actor.name,
     fromStatus: 'pending',
     toStatus: 'approved',
-    comment,
+    comment: _summarizeComments(comments) || undefined,
     createdAt: now,
   }
   const updated: Request = {
     ...existing,
+    ...comments,
     status: 'approved',
     updatedAt: now,
     approvalResult: {
       approverEmail: actor.email,
       approverName: actor.name,
       approvedAt: now,
-      decisionComment: comment,
+      ...comments,
     },
     history: [...existing.history, entry],
   }
@@ -258,16 +277,12 @@ export async function approveRequest(id: string, comment: string, actor: Current
   return updated
 }
 
-export async function rejectRequest(
-  id: string,
-  reason: string,
-  suggestion: string,
-  actor: CurrentUser,
-): Promise<Request> {
+export async function rejectRequest(id: string, comments: SectionComments, actor: CurrentUser): Promise<Request> {
   await _delay()
   const existing = getMockRequestById(id)
   if (!existing) throw new Error('Request not found')
   if (existing.status !== 'pending') throw new Error('Only pending requests can be rejected')
+  if (!_summarizeComments(comments)) throw new Error('กรุณาระบุคอมเม้นอย่างน้อย 1 ช่อง ก่อนปฏิเสธคำขอ')
   const now = new Date().toISOString()
   const entry: ApprovalHistoryEntry = {
     historyId: generateId('h'),
@@ -278,19 +293,19 @@ export async function rejectRequest(
     actorName: actor.name,
     fromStatus: 'pending',
     toStatus: 'rejected',
-    comment: reason,
+    comment: _summarizeComments(comments),
     createdAt: now,
   }
   const updated: Request = {
     ...existing,
+    ...comments,
     status: 'rejected',
     updatedAt: now,
     approvalResult: {
       approverEmail: actor.email,
       approverName: actor.name,
       rejectedAt: now,
-      decisionComment: reason,
-      suggestion,
+      ...comments,
     },
     history: [...existing.history, entry],
   }

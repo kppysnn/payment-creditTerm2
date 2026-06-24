@@ -80,12 +80,13 @@ function buildPrintHTML(req: Request): string {
   <div class="section">
     <div class="section-title">2. ข้อมูลลูกค้า</div>
     ${buildCustomerSection(req)}
+    ${req.customerComment ? `<div class="field-label" style="margin-top:8px">คอมเม้นข้อมูลลูกค้า</div><div class="field-val">${req.customerComment}</div>` : ''}
   </div>
 
   <div class="section">
     <div class="section-title">3. ใบเสนอราคาและ Payment Schedule</div>
-    ${hardwareItems.length > 0 ? buildQuotationGroup(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareSelling, req.installments) : ''}
-    ${serviceItems.length > 0 ? buildQuotationGroup(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceSelling, req.swInstallments ?? []) : ''}
+    ${hardwareItems.length > 0 ? buildQuotationGroup(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareSelling, req.installments, req.hardwareComment) : ''}
+    ${serviceItems.length > 0 ? buildQuotationGroup(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceSelling, req.swInstallments ?? [], req.swComment) : ''}
     <table>
       <tr style="font-weight:700;background:#F2F6F8">
         <td>สรุปรวม</td>
@@ -99,14 +100,13 @@ function buildPrintHTML(req: Request): string {
     <div class="grid2">
       <div><div class="field-label">ผลการพิจารณา</div><div class="field-val">${req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ'}</div></div>
       <div><div class="field-label">Approver</div><div class="field-val">${req.approvalResult.approverName}</div></div>
-      <div style="grid-column:span 2"><div class="field-label">เหตุผล</div><div class="field-val">${req.approvalResult.decisionComment}</div></div>
-      ${req.approvalResult.suggestion ? `<div style="grid-column:span 2"><div class="field-label">ข้อเสนอแนะ</div><div class="field-val">${req.approvalResult.suggestion}</div></div>` : ''}
     </div>
+    <div class="sub">ดูคอมเม้นของผู้พิจารณาแยกตาม section ด้านบน</div>
   </div>` : ''}
 </div></body></html>`
 }
 
-function buildQuotationGroup(no: string, title: string, gradient: string, items: Request['quotationItems'], total: number, installments: PaymentInstallment[]): string {
+function buildQuotationGroup(no: string, title: string, gradient: string, items: Request['quotationItems'], total: number, installments: PaymentInstallment[], comment?: string): string {
   return `<div class="quote-group">
     <div class="quote-head" style="background:${gradient}"><span class="quote-no">${no}</span><span class="quote-label">${title}</span></div>
     <table>
@@ -131,6 +131,7 @@ function buildQuotationGroup(no: string, title: string, gradient: string, items:
         <td class="mono" style="text-align:right">${i.installmentAmount.toLocaleString()}</td>
       </tr>`).join('')}
     </table>` : ''}
+    ${comment ? `<div style="padding:8px;border:1px solid #D0D6DF;border-top:none"><div class="field-label">คอมเม้น ${title}</div><div class="field-val" style="margin-bottom:0">${comment}</div></div>` : ''}
   </div>`
 }
 

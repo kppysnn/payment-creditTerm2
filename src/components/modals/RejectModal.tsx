@@ -1,32 +1,31 @@
 import { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
-import { FormGroup, Textarea } from '../ui/FormField'
 import { XCircle } from 'lucide-react'
 import type { Request } from '../../features/credit-payment-term/types/request'
+import type { SectionComments } from '../../features/credit-payment-term/types/approval'
 
 interface Props {
   open: boolean
   request: Request | null
+  comments: SectionComments
   onClose: () => void
-  onReject: (reason: string, suggestion: string) => Promise<void>
+  onReject: () => Promise<void>
 }
 
-export function RejectModal({ open, request, onClose, onReject }: Props) {
-  const [reason, setReason] = useState('')
-  const [suggestion, setSuggestion] = useState('')
+export function RejectModal({ open, request, comments, onClose, onReject }: Props) {
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const hasComment = Boolean(comments.customerComment?.trim() || comments.hardwareComment?.trim() || comments.swComment?.trim())
+
   async function handleSubmit() {
-    if (!reason.trim()) { setError('กรุณาระบุเหตุผลที่ไม่อนุมัติ'); return }
+    if (!hasComment) { setError('กรุณาระบุคอมเม้นอย่างน้อย 1 ช่อง ก่อนปฏิเสธคำขอ'); return }
     if (!confirmed) { setError('กรุณายืนยันการไม่อนุมัติ'); return }
     setLoading(true)
     try {
-      await onReject(reason.trim(), suggestion.trim())
-      setReason('')
-      setSuggestion('')
+      await onReject()
       setConfirmed(false)
       onClose()
     } catch (e: unknown) {
@@ -63,37 +62,27 @@ export function RejectModal({ open, request, onClose, onReject }: Props) {
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <FormGroup label="เหตุผลที่ไม่อนุมัติ (Reject Reason)" required error={error && !reason.trim() ? error : undefined}>
-          <Textarea
-            value={reason}
-            onChange={e => { setReason(e.target.value); setError('') }}
-            rows={4}
-            placeholder="ระบุเหตุผลที่ชัดเจน เพื่อให้ Sales สามารถแก้ไขและส่งใหม่ได้..."
-          />
-        </FormGroup>
+      {hasComment ? (
+        <p style={{ margin: '0 0 14px', fontSize: 13, color: '#505050', lineHeight: 1.65 }}>
+          ระบบจะบันทึกคอมเม้นที่ระบุไว้ในแต่ละ section เป็นเหตุผลที่ไม่อนุมัติคำขอนี้
+        </p>
+      ) : (
+        <div style={{ marginBottom: 14, padding: '12px 14px', background: '#FFFBEB', borderRadius: 4, border: '1px solid #FCD34D', fontSize: 13, color: '#92400E' }}>
+          ยังไม่ได้ระบุคอมเม้น — กรุณากลับไปเพิ่มคอมเม้นที่ section ที่มีปัญหาก่อนกดไม่อนุมัติ
+        </div>
+      )}
 
-        <FormGroup label="ข้อเสนอแนะสำหรับ Sales (ถ้ามี)">
-          <Textarea
-            value={suggestion}
-            onChange={e => setSuggestion(e.target.value)}
-            rows={3}
-            placeholder="แนะนำแนวทางที่ Sales ควรปรับปรุง..."
-          />
-        </FormGroup>
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', fontSize: 13 }}>
+        <input
+          type="checkbox"
+          checked={confirmed}
+          onChange={e => { setConfirmed(e.target.checked); setError('') }}
+          style={{ marginTop: 2, accentColor: '#F3554F' }}
+        />
+        <span>ยืนยันไม่อนุมัติคำขอนี้</span>
+      </label>
 
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', fontSize: 13 }}>
-          <input
-            type="checkbox"
-            checked={confirmed}
-            onChange={e => { setConfirmed(e.target.checked); setError('') }}
-            style={{ marginTop: 2, accentColor: '#F3554F' }}
-          />
-          <span>ยืนยันไม่อนุมัติคำขอนี้</span>
-        </label>
-
-        {error && <div style={{ fontSize: 12, color: '#F3554F' }}>{error}</div>}
-      </div>
+      {error && <div style={{ marginTop: 10, fontSize: 12, color: '#F3554F' }}>{error}</div>}
     </Modal>
   )
 }

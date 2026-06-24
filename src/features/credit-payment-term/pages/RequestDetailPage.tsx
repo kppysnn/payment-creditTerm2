@@ -11,6 +11,7 @@ import { StatusTimeline } from '../../../components/ui/StatusTimeline'
 import { Card, FieldDisplay, FieldGrid } from '../../../components/ui/Card'
 import { Button } from '../../../components/ui/Button'
 import { Alert } from '../../../components/ui/Alert'
+import { FormGroup, Textarea } from '../../../components/ui/FormField'
 import { ApproveModal } from '../../../components/modals/ApproveModal'
 import { RejectModal } from '../../../components/modals/RejectModal'
 import { CancelModal } from '../../../components/modals/CancelModal'
@@ -30,11 +31,17 @@ export function RequestDetailPage() {
   const [rejectOpen, setRejectOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [customerComment, setCustomerComment] = useState('')
+  const [hardwareComment, setHardwareComment] = useState('')
+  const [swComment, setSwComment] = useState('')
 
   async function loadReq() {
     if (!id) return
     const r = await getRequestById(id)
     setReq(r ?? null)
+    setCustomerComment(r?.customerComment ?? '')
+    setHardwareComment(r?.hardwareComment ?? '')
+    setSwComment(r?.swComment ?? '')
     setLoading(false)
   }
 
@@ -61,6 +68,27 @@ export function RequestDetailPage() {
       {formatCurrency(value)}
     </span>
   )
+
+  // Whoever currently has decision authority on this request can leave
+  // section-level notes; everyone else only sees what's already been written.
+  const canComment = canApproveRequest(currentUser, req) || canRejectRequest(currentUser, req)
+
+  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void) => {
+    if (!editable && !value.trim()) return null
+    if (editable) {
+      return (
+        <FormGroup label={label}>
+          <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder="เพิ่มรายละเอียดเพิ่มเติม (ถ้ามี)..." />
+        </FormGroup>
+      )
+    }
+    return (
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 6 }}>{label}</div>
+        <div style={{ fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
+      </div>
+    )
+  }
 
   const itemsTable = (items: QuotationItem[]) => (
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -131,7 +159,7 @@ export function RequestDetailPage() {
     </table>
   )
 
-  const quotationBlock = (quotationNo: string, label: string, gradient: string, items: QuotationItem[], cost: number, selling: number, creditTermDays: number, installments: PaymentInstallment[]) => (
+  const quotationBlock = (quotationNo: string, label: string, gradient: string, items: QuotationItem[], cost: number, selling: number, creditTermDays: number, installments: PaymentInstallment[], extra?: React.ReactNode) => (
     <div style={{ borderRadius: 4, overflow: 'hidden', border: '1px solid #D0D6DF', background: '#FFFFFF' }}>
       <div style={{ background: gradient, padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
         <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>{label}</span>
@@ -145,19 +173,20 @@ export function RequestDetailPage() {
           {installmentTable(installments)}
         </>
       )}
+      {extra && <div style={{ padding: '14px 18px', borderTop: '1px solid #D0D6DF' }}>{extra}</div>}
     </div>
   )
 
-  async function handleApprove(comment: string) {
+  async function handleApprove() {
     if (!id) return
-    const updated = await approveRequest(id, comment, currentUser)
+    const updated = await approveRequest(id, { customerComment, hardwareComment, swComment }, currentUser)
     setReq(updated)
     setApproveOpen(false)
   }
 
-  async function handleReject(reason: string, suggestion: string) {
+  async function handleReject() {
     if (!id) return
-    const updated = await rejectRequest(id, reason, suggestion, currentUser)
+    const updated = await rejectRequest(id, { customerComment, hardwareComment, swComment }, currentUser)
     setReq(updated)
     setRejectOpen(false)
   }
@@ -224,15 +253,15 @@ export function RequestDetailPage() {
           </div>
         </div>
 
-        {/* Rejection context — visible to every role, not just sales, so an approver
-            re-deciding a resubmitted request sees why it was rejected last time */}
+        {/* Rejection flag — visible to every role, not just sales, so an approver
+            re-deciding a resubmitted request knows to check the section comments
+            below for why it was rejected last time */}
         {req.approvalResult?.rejectedAt && (
           <Alert
             type="error"
             title={req.status === 'rejected' ? 'คำขอถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่' : 'เคยถูกปฏิเสธมาก่อน — แก้ไขและส่งใหม่แล้ว'}
           >
-            <div><strong>เหตุผล:</strong> {req.approvalResult.decisionComment}</div>
-            {req.approvalResult.suggestion && <div style={{ marginTop: 4 }}><strong>ข้อเสนอแนะ:</strong> {req.approvalResult.suggestion}</div>}
+            ดูคอมเม้นของผู้พิจารณาในแต่ละ section ด้านล่าง
           </Alert>
         )}
 
@@ -278,13 +307,20 @@ export function RequestDetailPage() {
                   </>
                 )}
               </FieldGrid>
+              {(canComment || customerComment.trim()) && (
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #D0D6DF' }}>
+                  {sectionComment('เพิ่มคอมเม้นข้อมูลลูกค้า', customerComment, canComment, setCustomerComment)}
+                </div>
+              )}
             </Card>
 
             {/* Hardware quotation: items + its own payment schedule */}
-            {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareCost, hardwareSelling, req.installments[0]?.creditTermDays ?? 0, req.installments)}
+            {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareCost, hardwareSelling, req.installments[0]?.creditTermDays ?? 0, req.installments,
+              (canComment || hardwareComment.trim()) ? sectionComment('เพิ่มคอมเม้น Hardware', hardwareComment, canComment, setHardwareComment) : null)}
 
             {/* Software & Installation quotation: items + its own payment schedule */}
-            {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceCost, serviceSelling, req.swInstallments?.[0]?.creditTermDays ?? 0, req.swInstallments ?? [])}
+            {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceCost, serviceSelling, req.swInstallments?.[0]?.creditTermDays ?? 0, req.swInstallments ?? [],
+              (canComment || swComment.trim()) ? sectionComment('เพิ่มคอมเม้น Software & Installation', swComment, canComment, setSwComment) : null)}
 
             {/* Overall total */}
             <Card title="สรุปรวมทั้งหมด" noPad>
@@ -328,30 +364,18 @@ export function RequestDetailPage() {
               </table>
             </Card>
 
-            {/* Approval result */}
+            {/* Approval result — section-by-section comments live with their
+                respective data above; this just records who decided and when */}
             {req.approvalResult && (
               <Card title={req.status === 'approved' ? 'ผลการอนุมัติ' : 'ผลการปฏิเสธ'}>
-                <FieldGrid cols={2}>
+                <FieldGrid cols={3}>
                   <FieldDisplay label="ผลการพิจารณา" value={req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ'} />
                   <FieldDisplay label="Approver" value={req.approvalResult.approverName} />
                   <FieldDisplay label="วันที่" value={formatDate(req.approvalResult.approvedAt ?? req.approvalResult.rejectedAt ?? '')} />
                 </FieldGrid>
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 11, color: '#586782', fontWeight: 600, marginBottom: 4 }}>
-                    {req.approvalResult.approvedAt ? 'Approval Comment' : 'Reject Reason'}
-                  </div>
-                  <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: req.approvalResult.approvedAt ? '#F0FDF4' : '#FEF2F2', borderRadius: 4, border: `1px solid ${req.approvalResult.approvedAt ? '#86EFAC' : '#FCA5A5'}` }}>
-                    {req.approvalResult.decisionComment}
-                  </p>
-                </div>
-                {req.approvalResult.suggestion && (
-                  <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 11, color: '#586782', fontWeight: 600, marginBottom: 4 }}>ข้อเสนอแนะสำหรับ Sales</div>
-                    <p style={{ margin: 0, fontSize: 14, padding: '10px 12px', background: '#FFFBEB', borderRadius: 4, border: '1px solid #FCD34D' }}>
-                      {req.approvalResult.suggestion}
-                    </p>
-                  </div>
-                )}
+                <p style={{ margin: '12px 0 0', fontSize: 12, color: '#586782' }}>
+                  ดูคอมเม้นของผู้พิจารณาแยกตาม section ด้านบน
+                </p>
               </Card>
             )}
 
@@ -364,7 +388,7 @@ export function RequestDetailPage() {
       </div>
 
       <ApproveModal open={approveOpen} request={req} onClose={() => setApproveOpen(false)} onApprove={handleApprove} />
-      <RejectModal open={rejectOpen} request={req} onClose={() => setRejectOpen(false)} onReject={handleReject} />
+      <RejectModal open={rejectOpen} request={req} comments={{ customerComment, hardwareComment, swComment }} onClose={() => setRejectOpen(false)} onReject={handleReject} />
       <CancelModal open={cancelOpen} request={req} onClose={() => setCancelOpen(false)} onCancel={handleCancel} />
     </>
   )

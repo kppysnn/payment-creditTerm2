@@ -1,5 +1,5 @@
 import type { RequestCustomerInfo } from './customer'
-import type { ApprovalHistoryEntry, ApprovalResult } from './approval'
+import type { ApprovalHistoryEntry, ApprovalResult, SectionComments } from './approval'
 
 export type RequestStatus =
   | 'draft'
@@ -74,7 +74,7 @@ export interface FinancialSummary {
   maxCreditTerm: number
 }
 
-export interface Request {
+export interface Request extends SectionComments {
   id: string
   requestNo: string
   version: number
