@@ -62,11 +62,7 @@ export function RejectModal({ open, request, comments, onClose, onReject }: Prop
         </div>
       )}
 
-      {hasComment ? (
-        <p style={{ margin: '0 0 14px', fontSize: 13, color: '#505050', lineHeight: 1.65 }}>
-          ระบบจะบันทึกคอมเม้นที่ระบุไว้ในแต่ละ section เป็นเหตุผลที่ไม่อนุมัติคำขอนี้
-        </p>
-      ) : (
+      {!hasComment && (
         <div style={{ marginBottom: 14, padding: '12px 14px', background: '#FFFBEB', borderRadius: 4, border: '1px solid #FCD34D', fontSize: 13, color: '#92400E' }}>
           ยังไม่ได้ระบุคอมเม้น — กรุณากลับไปเพิ่มคอมเม้นที่ section ที่มีปัญหาก่อนกดไม่อนุมัติ
         </div>

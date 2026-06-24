@@ -11,7 +11,7 @@ import { StatusTimeline } from '../../../components/ui/StatusTimeline'
 import { Card, FieldDisplay, FieldGrid } from '../../../components/ui/Card'
 import { Button } from '../../../components/ui/Button'
 import { Alert } from '../../../components/ui/Alert'
-import { FormGroup, Textarea } from '../../../components/ui/FormField'
+import { Textarea } from '../../../components/ui/FormField'
 import { ApproveModal } from '../../../components/modals/ApproveModal'
 import { RejectModal } from '../../../components/modals/RejectModal'
 import { CancelModal } from '../../../components/modals/CancelModal'
@@ -19,7 +19,7 @@ import { canApproveRequest, canRejectRequest, canEditRequest, canCancelRequest }
 import { formatCurrency } from '../utils/calculations'
 import { formatDate, formatDateTime, formatCreditTerm } from '../utils/formatters'
 import { BackButton } from '../../../components/ui/BackButton'
-import { Edit, RefreshCw, Printer, Send, Ban, CheckCircle, XCircle } from 'lucide-react'
+import { Edit, RefreshCw, Printer, Send, Ban, CheckCircle, XCircle, Receipt, Calendar, MessageSquare } from 'lucide-react'
 
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -73,19 +73,33 @@ export function RequestDetailPage() {
   // section-level notes; everyone else only sees what's already been written.
   const canComment = canApproveRequest(currentUser, req) || canRejectRequest(currentUser, req)
 
-  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void) => {
+  // Every named sub-section below (total, payment schedule, comment) is a
+  // peer: same icon + Card-title-weight label, same generous spacing. None
+  // of them should read as "just another row" next to the data table above it.
+  // `framed` zones sit directly inside a borderless wrapper (quotationBlock) and need
+  // their own 18px horizontal padding; non-framed zones already sit inside a Card
+  // body that provides that padding, so they only need the top divider + vertical rhythm.
+  const labeledBand = (icon: React.ReactNode, label: string, right?: React.ReactNode, framed = true) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: framed ? '16px 18px 10px' : '16px 0 10px', borderTop: '1px solid #F2F6F8' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#001122', letterSpacing: '-0.01em' }}>
+        {icon}{label}
+      </span>
+      {right}
+    </div>
+  )
+
+  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true) => {
     if (!editable && !value.trim()) return null
-    if (editable) {
-      return (
-        <FormGroup label={label}>
-          <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder="เพิ่มรายละเอียดเพิ่มเติม (ถ้ามี)..." />
-        </FormGroup>
-      )
-    }
     return (
       <div>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#586782', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 6 }}>{label}</div>
-        <div style={{ fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
+        {labeledBand(<MessageSquare size={16} color="#004081" />, label, undefined, framed)}
+        <div style={{ padding: framed ? '0 18px 16px' : '0 0 4px' }}>
+          {editable ? (
+            <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder="เพิ่มรายละเอียดเพิ่มเติม (ถ้ามี)..." />
+          ) : (
+            <div style={{ fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
+          )}
+        </div>
       </div>
     )
   }
@@ -101,7 +115,7 @@ export function RequestDetailPage() {
       </thead>
       <tbody>
         {items.map(item => (
-          <tr key={item.itemId} style={{ borderBottom: '1px solid #D0D6DF' }}>
+          <tr key={item.itemId} style={{ borderBottom: '1px solid #F2F6F8' }}>
             <td style={{ padding: '10px 14px' }}>{item.name}</td>
             <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(item.cost, '#586782')}</td>
             <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(item.sellingPrice, '#004081')}</td>
@@ -111,17 +125,7 @@ export function RequestDetailPage() {
     </table>
   )
 
-  const summaryStrip = (label: string, right: React.ReactNode) => (
-    <div style={{
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '12px 14px', background: '#F2F6F8', borderTop: '1px solid #D0D6DF', borderBottom: '1px solid #D0D6DF',
-    }}>
-      <span style={{ fontSize: 13, color: '#001122', fontWeight: 700 }}>{label}</span>
-      {right}
-    </div>
-  )
-
-  const totalStrip = (label: string, cost: number, selling: number) => summaryStrip(`รวม ${label}`, (
+  const totalStrip = (label: string, cost: number, selling: number) => labeledBand(<Receipt size={16} color="#004081" />, `รวม ${label}`, (
     <span style={{ display: 'flex', gap: 24 }}>
       <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
         ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(cost)}</span>
@@ -132,27 +136,27 @@ export function RequestDetailPage() {
     </span>
   ))
 
-  const installmentStrip = (creditTermDays: number) => summaryStrip('งวดการชำระเงิน', (
+  const installmentStrip = (creditTermDays: number) => labeledBand(<Calendar size={16} color="#004081" />, 'งวดการชำระเงิน', (
     <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
       Credit Term <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
     </span>
   ))
 
   const installmentTable = (installments: PaymentInstallment[]) => (
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, margin: '6px 0 6px' }}>
       <thead>
-        <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
+        <tr style={{ borderBottom: '1px solid #F2F6F8' }}>
           {['งวด', '%', 'จำนวนเงิน'].map(h => (
-            <th key={h} style={{ padding: '8px 14px', textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const }}>{h}</th>
+            <th key={h} style={{ padding: '0 14px 6px', textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.05em', whiteSpace: 'nowrap' as const }}>{h}</th>
           ))}
         </tr>
       </thead>
       <tbody>
         {installments.map(inst => (
           <tr key={inst.installmentNo} style={{ borderBottom: '1px solid #F2F6F8' }}>
-            <td style={{ padding: '8px 14px', fontWeight: 700 }}>{inst.installmentNo}</td>
-            <td style={{ padding: '8px 14px' }}>{inst.installmentPercent}%</td>
-            <td style={{ padding: '8px 14px', textAlign: 'right', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace' }}>{formatCurrency(inst.installmentAmount)}</td>
+            <td style={{ padding: '7px 14px', fontWeight: 700 }}>{inst.installmentNo}</td>
+            <td style={{ padding: '7px 14px' }}>{inst.installmentPercent}%</td>
+            <td style={{ padding: '7px 14px', textAlign: 'right', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace' }}>{formatCurrency(inst.installmentAmount)}</td>
           </tr>
         ))}
       </tbody>
@@ -168,12 +172,12 @@ export function RequestDetailPage() {
       {itemsTable(items)}
       {totalStrip(label, cost, selling)}
       {installments.length > 0 && (
-        <>
+        <div style={{ paddingBottom: 16 }}>
           {installmentStrip(creditTermDays)}
           {installmentTable(installments)}
-        </>
+        </div>
       )}
-      {extra && <div style={{ padding: '14px 18px', borderTop: '1px solid #D0D6DF' }}>{extra}</div>}
+      {extra}
     </div>
   )
 
@@ -307,11 +311,7 @@ export function RequestDetailPage() {
                   </>
                 )}
               </FieldGrid>
-              {(canComment || customerComment.trim()) && (
-                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #D0D6DF' }}>
-                  {sectionComment('เพิ่มคอมเม้นข้อมูลลูกค้า', customerComment, canComment, setCustomerComment)}
-                </div>
-              )}
+              {sectionComment('เพิ่มคอมเม้นข้อมูลลูกค้า', customerComment, canComment, setCustomerComment, false)}
             </Card>
 
             {/* Hardware quotation: items + its own payment schedule */}

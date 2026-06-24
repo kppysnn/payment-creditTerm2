@@ -52,10 +52,6 @@ export function ApproveModal({ open, request, onClose, onApprove }: Props) {
         </div>
       )}
 
-      <p style={{ margin: '0 0 14px', fontSize: 13, color: '#505050', lineHeight: 1.65 }}>
-        หากมีข้อสังเกตเพิ่มเติม สามารถระบุคอมเม้นไว้ที่แต่ละ section ในหน้ารายละเอียดคำขอได้เลย
-      </p>
-
       <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', fontSize: 13 }}>
         <input
           type="checkbox"
