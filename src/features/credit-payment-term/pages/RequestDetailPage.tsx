@@ -63,8 +63,8 @@ export function RequestDetailPage() {
   const serviceSelling = serviceItems.reduce((sum, item) => sum + item.sellingPrice, 0)
   const hardwareCost = hardwareItems.reduce((sum, item) => sum + item.cost, 0)
   const serviceCost = serviceItems.reduce((sum, item) => sum + item.cost, 0)
-  const summaryAmount = (value: number, color = '#001122') => (
-    <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color }}>
+  const summaryAmount = (value: number, color = '#001122', size?: number) => (
+    <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color, fontSize: size }}>
       {formatCurrency(value)}
     </span>
   )
@@ -74,31 +74,39 @@ export function RequestDetailPage() {
   const canComment = canApproveRequest(currentUser, req) || canRejectRequest(currentUser, req)
 
   // Every named sub-section below (total, payment schedule, comment) is a peer:
-  // a thin rule above + bold Card-title-weight label, document/quotation style.
-  // `framed` zones sit directly inside a borderless wrapper (quotationBlock) and need
-  // their own 18px horizontal padding; non-framed zones already sit inside a Card
-  // body that provides that padding, so they only need the top divider + vertical rhythm.
+  // a thin rule above + bold label, document/quotation style. Deliberately one
+  // step below Card-header weight (#586782, not #001122/14px) so these read as
+  // sub-sections of their parent card, not as competing top-level headings.
   // One horizontal rhythm for everything inside a quotation block: 14px, matching
   // the table cells below, so the header bar, section labels and table columns
   // all share the same left edge instead of drifting onto their own grid.
   const labeledBand = (label: string, right?: React.ReactNode, framed = true) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: framed ? '16px 14px 10px' : '16px 0 10px', borderTop: '1px solid #D0D6DF' }}>
-      <span style={{ fontSize: 14, fontWeight: 700, color: '#001122', letterSpacing: '-0.01em' }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 700, color: '#586782' }}>{label}</span>
       {right}
     </div>
   )
 
-  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true) => {
-    if (!editable && !value.trim()) return null
+  // After a resubmit, live comments are cleared for the fresh round but the
+  // prior round's rejection note is preserved on req.approvalResult — surface
+  // it inline (only while the live field is still empty) so a reviewer doesn't
+  // have to hunt through all 3 sections to find which one was flagged last time.
+  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true, priorComment?: string) => {
+    if (!editable && !value.trim() && !priorComment) return null
     return (
       <div>
         {labeledBand(label, undefined, framed)}
         <div style={{ padding: framed ? '0 14px 16px' : '0 0 4px' }}>
+          {priorComment && !value.trim() && (
+            <div style={{ marginBottom: 8, padding: '7px 10px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 12, color: '#7F1D1D' }}>
+              เคยถูกปฏิเสธไว้ว่า: <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
+            </div>
+          )}
           {editable ? (
             <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder="เพิ่มรายละเอียดเพิ่มเติม (ถ้ามี)..." />
-          ) : (
+          ) : value.trim() ? (
             <div style={{ fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
-          )}
+          ) : null}
         </div>
       </div>
     )
@@ -167,11 +175,16 @@ export function RequestDetailPage() {
     </table>
   )
 
+  // The gradient is a thin identity accent, not a hero band — the label below it
+  // carries the same weight as any other Card header (#001122/700/14px on
+  // #F2F6F8), so this block reads as a peer of "ข้อมูลคำขอ"/"ข้อมูลลูกค้า", not
+  // as the loudest thing on the page.
   const quotationBlock = (quotationNo: string, label: string, gradient: string, items: QuotationItem[], cost: number, selling: number, creditTermDays: number, installments: PaymentInstallment[], extra?: React.ReactNode) => (
     <div style={{ borderRadius: 4, overflow: 'hidden', border: '1px solid #D0D6DF', background: '#FFFFFF' }}>
-      <div style={{ background: gradient, padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>{label}</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{quotationNo}</span>
+      <div style={{ height: 4, background: gradient }} />
+      <div style={{ background: '#F2F6F8', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderBottom: '1px solid #D0D6DF' }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: '#001122', letterSpacing: '-0.01em' }}>{label}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: '#586782' }}>{quotationNo}</span>
       </div>
       {itemsTable(items)}
       {totalStrip(label, cost, selling)}
@@ -315,16 +328,16 @@ export function RequestDetailPage() {
                   </>
                 )}
               </FieldGrid>
-              {sectionComment('เพิ่มคอมเม้นข้อมูลลูกค้า', customerComment, canComment, setCustomerComment, false)}
+              {sectionComment('เพิ่มคอมเม้นข้อมูลลูกค้า', customerComment, canComment, setCustomerComment, false, req.approvalResult?.customerComment)}
             </Card>
 
             {/* Hardware quotation: items + its own payment schedule */}
             {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareCost, hardwareSelling, req.installments[0]?.creditTermDays ?? 0, req.installments,
-              (canComment || hardwareComment.trim()) ? sectionComment('เพิ่มคอมเม้น Hardware', hardwareComment, canComment, setHardwareComment) : null)}
+              sectionComment('เพิ่มคอมเม้น Hardware', hardwareComment, canComment, setHardwareComment, true, req.approvalResult?.hardwareComment))}
 
             {/* Software & Installation quotation: items + its own payment schedule */}
             {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceCost, serviceSelling, req.swInstallments?.[0]?.creditTermDays ?? 0, req.swInstallments ?? [],
-              (canComment || swComment.trim()) ? sectionComment('เพิ่มคอมเม้น Software & Installation', swComment, canComment, setSwComment) : null)}
+              sectionComment('เพิ่มคอมเม้น Software & Installation', swComment, canComment, setSwComment, true, req.approvalResult?.swComment))}
 
             {/* Overall total */}
             <Card title="สรุปรวมทั้งหมด" noPad>
@@ -360,9 +373,9 @@ export function RequestDetailPage() {
                 </tbody>
                 <tfoot>
                   <tr style={{ borderTop: '1.5px solid #D0D6DF', background: '#F2F6F8' }}>
-                    <td style={{ padding: '12px 14px', fontWeight: 700, color: '#001122' }}>รวมทั้งหมด</td>
-                    <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#586782')}</td>
-                    <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalSelling, '#004081')}</td>
+                    <td style={{ padding: '14px', fontWeight: 700, fontSize: 14, color: '#001122' }}>รวมทั้งหมด</td>
+                    <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#586782')}</td>
+                    <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalSelling, '#004081', 16)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -373,7 +386,11 @@ export function RequestDetailPage() {
             {req.approvalResult && (
               <Card title={req.status === 'approved' ? 'ผลการอนุมัติ' : 'ผลการปฏิเสธ'}>
                 <FieldGrid cols={3}>
-                  <FieldDisplay label="ผลการพิจารณา" value={req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ'} />
+                  <FieldDisplay label="ผลการพิจารณา">
+                    <div style={{ fontSize: 14, fontWeight: 700, color: req.approvalResult.approvedAt ? '#14532D' : '#7F1D1D' }}>
+                      {req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ'}
+                    </div>
+                  </FieldDisplay>
                   <FieldDisplay label="Approver" value={req.approvalResult.approverName} />
                   <FieldDisplay label="วันที่" value={formatDate(req.approvalResult.approvedAt ?? req.approvalResult.rejectedAt ?? '')} />
                 </FieldGrid>

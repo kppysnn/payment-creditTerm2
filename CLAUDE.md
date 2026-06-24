@@ -127,11 +127,13 @@ All tokens live in **`src/styles/globals.css`** inside a Tailwind v4 `@theme {}`
   --font-sans: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Noto Sans Thai', monospace;
 
-  /* Border radius */
-  --radius-sm:   6px;     /* input, alert, dropdown item */
-  --radius-md:   14px;    /* card, modal container */
-  --radius-lg:   22px;    /* large stat card */
-  --radius-pill: 9999px;  /* button, badge, chip */
+  /* Border radius — squared off app-wide as of commit 98d50f4 (2026-06-23).
+     4px is now the universal radius: buttons, cards, modals, alerts, notice
+     boxes, stat cards. Inputs/dropdown items stay at 6px. Badges stay at 4px
+     (unchanged — they were already square). Pill (9999px) is no longer used
+     anywhere in this codebase; do not reintroduce it without an explicit ask. */
+  --radius-sm:   6px;     /* input, dropdown item */
+  --radius-md:   4px;     /* card, modal, button, alert, notice box, stat card */
 
   /* Spacing — 4pt base */
   --space-1:  4px;   --space-2:  8px;   --space-3:  12px;
@@ -179,7 +181,7 @@ import { Button } from '../../../components/ui/Button'
 ```
 
 Key specs:
-- **All variants use `borderRadius: 9999` (pill)** — never change this
+- **All variants use `borderRadius: 4`** (squared, EXZY CI v3 — pill was retired in commit `98d50f4`) — never change this
 - Primary: `linear-gradient(135deg, #66C5C5 0%, #004081 100%)` bg / white text
 - Secondary: `linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)` bg / `#004081` text / `1.5px solid #66C5C5` border
 - Hover: `translateY(-1px)` + deepened shadow — applied via `onMouseEnter`/`Leave` inline JS
@@ -199,7 +201,7 @@ import { Card, FieldDisplay, FieldGrid } from '../../../components/ui/Card'
 ```
 
 Key specs:
-- Background: `#FFFFFF`, border: `1px solid #D0D6DF`, borderRadius: `14px`
+- Background: `#FFFFFF`, border: `1px solid #D0D6DF`, borderRadius: `4px` (squared, EXZY CI v3)
 - Header: bg `#F2F6F8`, `14px / weight 700 / color #001122`, border-bottom `1px solid #D0D6DF`, padding `14px 20px`
 - Body padding: `20px` (use `noPad` prop to suppress)
 - Hover: `translateY(-2px)` + `shadow-md` + teal border (`rgba(102,197,197,0.5)`)
@@ -239,7 +241,7 @@ import { Modal } from '../../../components/ui/Modal'
 
 Key specs:
 - Backdrop: `rgba(15,23,42,0.50)` (no blur in current impl, use backdrop-filter if adding)
-- Box: `borderRadius: 16`, shadow: `shadow-lg` (navy-tinted)
+- Box: `borderRadius: 4` (squared, EXZY CI v3), shadow: `shadow-lg` (navy-tinted)
 - Sizes: sm=420px, md=560px, lg=720px max-width
 - Scroll lock: `document.body.style.overflow = 'hidden'` while open
 - Header: `16px / weight 700 / color #001122`; close button: X icon at 18px
@@ -486,8 +488,8 @@ interface Request {
 ## 11. Design Rules & Constraints
 
 ### Must follow
-- **Buttons:** always pill shape (`borderRadius: 9999`). Never use any other radius.
-- **Cards:** always `borderRadius: 14`. Never deviate.
+- **Buttons:** always squared (`borderRadius: 4`). Never use any other radius. (Pill was retired app-wide in commit `98d50f4`, 2026-06-23 — don't reintroduce it.)
+- **Cards:** always `borderRadius: 4`. Never deviate.
 - **Shadows:** always navy-tinted (`rgba(0,64,129,x)`). Never use black/grey shadows.
 - **Font stack:** Poppins → Noto Sans Thai (order matters). Never reverse.
 - **Topbar accent:** `inset 0 3px 0 0 #66C5C5` in boxShadow.
@@ -525,7 +527,7 @@ When implementing a Figma component into this codebase:
 
 1. **Use inline styles** (React `CSSProperties`) — not Tailwind classes, not CSS modules
 2. **Reference the token table** in §3.2 for every color — do not invent new hex values
-3. **Pick the radius** from `--radius-sm/md/lg/pill` — only those four values exist
+3. **Pick the radius** from `--radius-sm` (6px, inputs/dropdowns) or `--radius-md` (4px, everything else: cards, buttons, modals, alerts) — only those two values exist now
 4. **Use Lucide icons** at the sizes listed in §7
 5. **Wrap in a `<Card>`** if the Figma component is a panel/card
 6. **Use `<FormGroup>` + `<Input>`** for any text input — do not build raw `<input>` elements
@@ -534,4 +536,4 @@ When implementing a Figma component into this codebase:
 
 ---
 
-*Last updated: 2026-06-23 · EXZY CI v2 design system*
+*Last updated: 2026-06-24 · EXZY CI v3 design system (squared radii, commit `98d50f4`)*

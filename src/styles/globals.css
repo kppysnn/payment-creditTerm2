@@ -43,10 +43,12 @@
      monospace font per machine, causing inconsistent ฿ baseline alignment. */
   --font-mono: 'JetBrains Mono', 'Noto Sans Thai', monospace;
 
-  /* Radius */
+  /* Radius — squared off app-wide in commit 98d50f4 (2026-06-23). 4px is the
+     universal radius for buttons/cards/modals/alerts/stat cards; only inputs
+     keep 6px. --radius-pill is kept defined but unused — don't default to it. */
   --radius-sm:   6px;
-  --radius-md:   14px;
-  --radius-lg:   22px;
+  --radius-md:   4px;
+  --radius-lg:   4px;
   --radius-pill: 9999px;
 
   /* Spacing scale (4pt base) */
@@ -81,6 +83,12 @@ body {
 /* Thai text needs extra line-height for tone marks */
 :lang(th), .thai {
   line-height: 1.75;
+}
+
+/* Placeholder text needs body-level contrast, not the decorative --color-muted */
+::placeholder {
+  color: var(--color-secondary);
+  opacity: 1;
 }
 
 /* Scrollbar */

@@ -17,7 +17,7 @@ export function RoleSwitcher() {
         flexShrink: 0,
       }}
     >
-      <span style={{ fontWeight: 700, color: '#929EB4', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+      <span style={{ fontWeight: 700, color: '#586782', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
         DEV — Role
       </span>
       <div style={{ display: 'flex', gap: 5 }}>

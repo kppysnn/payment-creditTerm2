@@ -614,7 +614,7 @@ export function RequestFormStepper({
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>รวมสัดส่วนงวด</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#66C5C5' : '#F3554F' }}>{totalPct.toFixed(0)}%</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#001122' : '#F3554F' }}>{totalPct.toFixed(0)}%</span>
           </div>
           <div style={{ height: 6, background: '#D0D6DF', borderRadius: 6, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${Math.min(Math.max(totalPct, 0), 100)}%`, background: pctOk ? '#66C5C5' : '#F3554F', transition: 'width 0.2s' }} />

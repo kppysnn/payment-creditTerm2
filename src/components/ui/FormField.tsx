@@ -15,7 +15,7 @@ export function FormGroup({ label, error, hint, required, children, style }: Bas
       {label && (
         <label style={{ fontSize: 12, fontWeight: 600, color: error ? '#F3554F' : '#586782' }}>
           {label}
-          {required && <span style={{ color: '#F3554F', marginLeft: 3 }}>*</span>}
+          {required && <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, marginLeft: 3 }}>*</span>}
         </label>
       )}
       {children}

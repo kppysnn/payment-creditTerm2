@@ -15,7 +15,7 @@ W+ (WorkPlus / Exzy platform) is a **B2B internal enterprise platform** with a *
 - **Trust and clarity** over decorative embellishment
 - **Semantic colour usage** — every colour carries a role, not just a hex value
 - **Bilingual readability** — English (Poppins) and Thai (Noto Sans Thai) coexist in one font stack
-- **Consistent component language** — pill buttons, 14px cards, navy topbar accent, teal interaction signal
+- **Consistent component language** — squared 4px buttons/cards (EXZY CI v3, commit `98d50f4`), navy topbar accent, teal interaction signal
 
 The `payment & credit term` module is an **embedded sub-section** of this platform and must look indistinguishable from the rest of the W+ product.
 
@@ -174,14 +174,16 @@ Page layout: `padding: 28px 32px` on `<main>`.
 
 ## 5. Border Radius Scale
 
+**EXZY CI v3 (commit `98d50f4`, 2026-06-23): the whole app was squared off.** Pill buttons and 14px/16px/22px card radii were retired in favor of one universal 4px radius. Do not reintroduce pill or large radii without an explicit ask.
+
 | Token | Value | Use |
 |-------|-------|-----|
-| `--radius-sm` | 6px | Inputs, alerts, dropdown items, comment bubbles |
-| `--radius-md` | 14px | Cards, modals, filter bars, container panels |
-| `--radius-lg` | 22px | Large stat cards (Figma spec — currently 14px, migrate when possible) |
-| `--radius-pill` | 9999px | **All buttons**, badges, chips, version tags |
+| `--radius-sm` | 6px | Inputs, dropdown items |
+| `--radius-md` | 4px | Cards, modals, buttons, alerts, notice boxes, stat cards — everything except inputs |
 
-**Rule: All buttons are pill-shaped.** `borderRadius: 9999` is mandatory.
+Badges were already 4px before this change and are unaffected.
+
+**Rule: All buttons are squared.** `borderRadius: 4` is mandatory.
 
 ---
 
@@ -230,11 +232,11 @@ Main: bg #F8F9FA, padding 28px 32px
 | `ghost` | transparent | `#586782` | `1px solid transparent` |
 | `success` | `linear-gradient(135deg, #A8DD8C 0%, #4F9A3A 100%)` | `#FFFFFF` | none |
 
-Sizes: sm=30px / md=38px / lg=44px. Always pill (`borderRadius: 9999`).
+Sizes: sm=30px / md=38px / lg=44px. Always squared (`borderRadius: 4`).
 
 ### Card
 
-- bg `#FFFFFF`, border `1px solid #D0D6DF`, radius `14px`
+- bg `#FFFFFF`, border `1px solid #D0D6DF`, radius `4px`
 - Header: bg `#F2F6F8`, padding `14px 20px`, text `14px/700/#001122`
 - Body padding: `20px`
 - Hover: `translateY(-2px)` + `shadow-md` + border `rgba(102,197,197,0.5)`
@@ -305,8 +307,8 @@ Library: `lucide-react` (stroke, not filled).
 ### ✅ DO
 
 - Use shared components: `<Button>`, `<Card>`, `<FormGroup>`, `<Input>`, `<Modal>`, `<StatusBadge>`, `<Alert>`
-- Pill radius on all buttons
-- 14px radius on all cards
+- 4px radius on all buttons, cards, modals, alerts (EXZY CI v3)
+- 6px radius on inputs and dropdown items only
 - Navy-tinted shadows only
 - `JetBrains Mono` for numbers and reference codes
 - `line-height: 1.75` for Thai text blocks
@@ -315,8 +317,7 @@ Library: `lucide-react` (stroke, not filled).
 
 - Use `rgba(0,0,0,x)` shadows
 - Use off-brand colours from §2.8
-- Use rectangular buttons
-- Use `borderRadius` below `6px`
+- Use pill buttons or radii above 6px anywhere (retired in commit `98d50f4`)
 - Use raw `<button>`/`<input>` without component wrappers
 - Use gradients outside the approved set
 - Use `#2563EB` blue for general non-status UI
@@ -342,7 +343,7 @@ All defined in `src/styles/globals.css` under `@theme {}`:
 --shadow-lg: 0 16px 34px rgba(0,64,129,0.10), 0 2px 6px rgba(0,64,129,0.06);
 --font-sans: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif;
 --font-mono: 'JetBrains Mono', 'Noto Sans Thai', monospace;
---radius-sm: 6px;  --radius-md: 14px;  --radius-lg: 22px;  --radius-pill: 9999px;
+--radius-sm: 6px;  --radius-md: 4px;  --radius-lg: 4px;  --radius-pill: 9999px; /* defined, unused */
 --space-1: 4px;  --space-2: 8px;  --space-3: 12px;  --space-4: 16px;
 --space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-10: 40px;
 ```
@@ -355,9 +356,9 @@ All defined in `src/styles/globals.css` under `@theme {}`:
 2. **Metropolis brand colours** — secondary palette in Figma; hex values unknown.
 3. **Mobile responsive rules** — Figma has mobile field variant (72px vs 60px desktop). App is currently desktop-only.
 4. **Topbar height** — Figma Navbar = 80px; current code = 60px. Confirm for embedded context.
-5. **Stat card radius** — Figma spec = 22px (`radius-lg`); current = 14px. Confirm target.
+5. ~~Stat card radius~~ — **Resolved 2026-06-23 (commit `98d50f4`):** the team deliberately deviated from the Figma spec and squared every radius to 4px app-wide (buttons, cards, modals, alerts, stat cards), retiring pill buttons and the 14px/22px card/stat-card radii. This is an intentional, permanent divergence from the original Figma file, not an open question — don't "fix" components back toward Figma's rounder spec.
 6. **Stepper component** — Figma shows a step-form indicator. Current form is a single-page scroll, not a wizard.
 
 ---
 
-*DESIGN.md · W+ Design System · EXZY CI v2 · 2026-06-23*
+*DESIGN.md · W+ Design System · EXZY CI v3 · 2026-06-24*

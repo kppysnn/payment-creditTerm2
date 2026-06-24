@@ -207,7 +207,7 @@ export function RequestListPage() {
                     <div style={{ color: '#001122', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.customerName}</div>
                     <div style={{ color: '#586782', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.projectName}</div>
                   </td>
-                  <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'right', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 13, fontWeight: 700, color: '#001122', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
+                  <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'right', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 13, fontWeight: 700, color: '#004081', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}><StatusBadge status={req.status} size="sm" /></td>
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', color: '#586782', fontSize: 12, whiteSpace: 'nowrap' }}>{formatDate(req.updatedAt)}</td>
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
