@@ -21,7 +21,7 @@ export function RejectModal({ open, request, comments, onClose, onReject }: Prop
   const hasComment = Boolean(comments.customerComment?.trim() || comments.hardwareComment?.trim() || comments.swComment?.trim())
 
   async function handleSubmit() {
-    if (!hasComment) { setError('กรุณาระบุคอมเม้นอย่างน้อย 1 ช่อง ก่อนปฏิเสธคำขอ'); return }
+    if (!hasComment) { setError('กรุณาระบุหมายเหตุอย่างน้อย 1 หมวด ก่อนปฏิเสธคำขอ'); return }
     if (!confirmed) { setError('กรุณายืนยันการไม่อนุมัติ'); return }
     setLoading(true)
     try {
@@ -64,7 +64,7 @@ export function RejectModal({ open, request, comments, onClose, onReject }: Prop
 
       {!hasComment && (
         <div style={{ marginBottom: 14, padding: '12px 14px', background: '#FFFBEB', borderRadius: 4, border: '1px solid #FCD34D', fontSize: 13, color: '#92400E' }}>
-          ยังไม่ได้ระบุคอมเม้น — กรุณากลับไปเพิ่มคอมเม้นที่ section ที่มีปัญหาก่อนกดไม่อนุมัติ
+          ยังไม่ได้ระบุหมายเหตุ — กรุณากลับไประบุหมายเหตุที่หมวดที่มีปัญหาก่อนกดไม่อนุมัติ
         </div>
       )}
 

@@ -63,8 +63,8 @@ export function RequestDetailPage() {
   const serviceSelling = serviceItems.reduce((sum, item) => sum + item.sellingPrice, 0)
   const hardwareCost = hardwareItems.reduce((sum, item) => sum + item.cost, 0)
   const serviceCost = serviceItems.reduce((sum, item) => sum + item.cost, 0)
-  const summaryAmount = (value: number, color = '#001122', size?: number) => (
-    <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color, fontSize: size }}>
+  const summaryAmount = (value: number, color = '#001122', size?: number, weight: number = 700) => (
+    <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: weight, color, fontSize: size }}>
       {formatCurrency(value)}
     </span>
   )
@@ -73,15 +73,17 @@ export function RequestDetailPage() {
   // section-level notes; everyone else only sees what's already been written.
   const canComment = canApproveRequest(currentUser, req) || canRejectRequest(currentUser, req)
 
-  // Every named sub-section below (total, payment schedule, comment) is a peer:
+  // Every named sub-section below (total, payment schedule, note) is a peer:
   // a thin rule above + bold label, document/quotation style. Deliberately one
   // step below Card-header weight (#586782, not #001122/14px) so these read as
   // sub-sections of their parent card, not as competing top-level headings.
+  // `tinted` gets a soft background — reserved for summary/payment data, not
+  // notes, so a glance tells "this is a rolled-up figure" from "this is text."
   // One horizontal rhythm for everything inside a quotation block: 14px, matching
   // the table cells below, so the header bar, section labels and table columns
   // all share the same left edge instead of drifting onto their own grid.
-  const labeledBand = (label: string, right?: React.ReactNode, framed = true) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: framed ? '16px 14px 10px' : '16px 0 10px', borderTop: '1px solid #D0D6DF' }}>
+  const labeledBand = (label: string, right?: React.ReactNode, framed = true, tinted = false) => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: framed ? '18px 14px 12px' : '18px 0 12px', borderTop: '1px solid #D0D6DF', background: tinted ? '#F8F9FA' : undefined }}>
       <span style={{ fontSize: 13, fontWeight: 700, color: '#586782' }}>{label}</span>
       {right}
     </div>
@@ -91,19 +93,19 @@ export function RequestDetailPage() {
   // prior round's rejection note is preserved on req.approvalResult — surface
   // it inline (only while the live field is still empty) so a reviewer doesn't
   // have to hunt through all 3 sections to find which one was flagged last time.
-  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true, priorComment?: string) => {
+  const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true, priorComment?: string, placeholder = 'ระบุรายละเอียดเพิ่มเติม เช่น เหตุผล เงื่อนไข หรือข้อมูลประกอบการพิจารณา') => {
     if (!editable && !value.trim() && !priorComment) return null
     return (
       <div>
         {labeledBand(label, undefined, framed)}
-        <div style={{ padding: framed ? '0 14px 16px' : '0 0 4px' }}>
+        <div style={{ padding: framed ? '0 14px 18px' : '0 0 4px' }}>
           {priorComment && !value.trim() && (
             <div style={{ marginBottom: 8, padding: '7px 10px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 12, color: '#7F1D1D' }}>
               เคยถูกปฏิเสธไว้ว่า: <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
             </div>
           )}
           {editable ? (
-            <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder="เพิ่มรายละเอียดเพิ่มเติม (ถ้ามี)..." />
+            <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder={placeholder} />
           ) : value.trim() ? (
             <div style={{ fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
           ) : null}
@@ -116,29 +118,34 @@ export function RequestDetailPage() {
   // color and underline — so "this is a header row" never has two different looks.
   const tableHeaderCell: React.CSSProperties = { padding: '8px 14px', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }
 
+  // Line items stay informative but quiet (navy at normal weight) — bold navy
+  // is reserved for the category subtotal and, more emphatically, the grand
+  // total, so a reader's eye lands on the number that actually matters most.
   const itemsTable = (items: QuotationItem[]) => (
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-      <thead>
-        <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
-          {['รายการ', 'ราคาทุน', 'ราคาขาย'].map(h => (
-            <th key={h} style={{ ...tableHeaderCell, textAlign: h === 'รายการ' ? 'left' : 'right' }}>{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {items.map((item, idx) => (
-          <tr key={item.itemId} style={{ borderBottom: idx === items.length - 1 ? 'none' : '1px solid #F2F6F8' }}>
-            <td style={{ padding: '10px 14px' }}>{item.name}</td>
-            <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(item.cost, '#586782')}</td>
-            <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(item.sellingPrice, '#004081')}</td>
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
+            {['รายการ', 'ราคาทุน', 'ราคาขาย'].map(h => (
+              <th key={h} style={{ ...tableHeaderCell, textAlign: h === 'รายการ' ? 'left' : 'right' }}>{h}</th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {items.map((item, idx) => (
+            <tr key={item.itemId} style={{ borderBottom: idx === items.length - 1 ? 'none' : '1px solid #F2F6F8' }}>
+              <td style={{ padding: '12px 14px' }}>{item.name}</td>
+              <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(item.cost, '#586782', undefined, 500)}</td>
+              <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(item.sellingPrice, '#004081', undefined, 600)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 
-  const totalStrip = (label: string, cost: number, selling: number) => labeledBand(`รวม ${label}`, (
-    <span style={{ display: 'flex', gap: 24 }}>
+  const totalStrip = (label: string, cost: number, selling: number) => labeledBand(`รวมหมวด ${label}`, (
+    <span style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
       <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
         ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(cost)}</span>
       </span>
@@ -146,33 +153,35 @@ export function RequestDetailPage() {
         ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
       </span>
     </span>
-  ))
+  ), true, true)
 
-  const installmentStrip = (creditTermDays: number) => labeledBand('งวดการชำระเงิน', (
+  const installmentStrip = (creditTermDays: number) => labeledBand('Payment Schedule', (
     <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-      Credit Term <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
+      Credit Term: <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
     </span>
-  ))
+  ), true, true)
 
   const installmentTable = (installments: PaymentInstallment[]) => (
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-      <thead>
-        <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
-          {['งวด', '%', 'จำนวนเงิน'].map(h => (
-            <th key={h} style={{ ...tableHeaderCell, textAlign: h === 'จำนวนเงิน' ? 'right' : 'left', whiteSpace: 'nowrap' }}>{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {installments.map((inst, idx) => (
-          <tr key={inst.installmentNo} style={{ borderBottom: idx === installments.length - 1 ? 'none' : '1px solid #F2F6F8' }}>
-            <td style={{ padding: '10px 14px' }}>{inst.installmentNo}</td>
-            <td style={{ padding: '10px 14px', color: '#505050' }}>{inst.installmentPercent}%</td>
-            <td style={{ padding: '10px 14px', textAlign: 'right' }}>{summaryAmount(inst.installmentAmount, '#004081')}</td>
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
+            {['งวดที่', '%', 'ยอดชำระ'].map(h => (
+              <th key={h} style={{ ...tableHeaderCell, textAlign: h === 'ยอดชำระ' ? 'right' : 'left', whiteSpace: 'nowrap' }}>{h}</th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {installments.map((inst, idx) => (
+            <tr key={inst.installmentNo} style={{ borderBottom: idx === installments.length - 1 ? 'none' : '1px solid #F2F6F8' }}>
+              <td style={{ padding: '12px 14px' }}>{inst.installmentNo}</td>
+              <td style={{ padding: '12px 14px', color: '#505050' }}>{inst.installmentPercent}%</td>
+              <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(inst.installmentAmount, '#004081', undefined, 600)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 
   // The gradient is a thin identity accent, not a hero band — the label below it
@@ -182,9 +191,12 @@ export function RequestDetailPage() {
   const quotationBlock = (quotationNo: string, label: string, gradient: string, items: QuotationItem[], cost: number, selling: number, creditTermDays: number, installments: PaymentInstallment[], extra?: React.ReactNode) => (
     <div style={{ borderRadius: 4, overflow: 'hidden', border: '1px solid #D0D6DF', background: '#FFFFFF' }}>
       <div style={{ height: 4, background: gradient }} />
-      <div style={{ background: '#F2F6F8', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderBottom: '1px solid #D0D6DF' }}>
+      <div style={{ background: '#F2F6F8', padding: '12px 14px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: '4px 12px', borderBottom: '1px solid #D0D6DF' }}>
         <span style={{ fontSize: 14, fontWeight: 700, color: '#001122', letterSpacing: '-0.01em' }}>{label}</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: '#586782' }}>{quotationNo}</span>
+        <span style={{ fontSize: 13, fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace' }}>
+          <span style={{ fontWeight: 500, color: '#586782' }}>Quotation No. </span>
+          <span style={{ fontWeight: 700, color: '#586782' }}>{quotationNo}</span>
+        </span>
       </div>
       {itemsTable(items)}
       {totalStrip(label, cost, selling)}
@@ -232,7 +244,7 @@ export function RequestDetailPage() {
       <div style={{ marginBottom: 20 }}>
         <BackButton to="/requests" label="กลับไปหน้ารายการคำขอ" />
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 760, margin: '0 auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 760, margin: '0 auto' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
@@ -282,11 +294,11 @@ export function RequestDetailPage() {
             type="error"
             title={req.status === 'rejected' ? 'คำขอถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่' : 'เคยถูกปฏิเสธมาก่อน — แก้ไขและส่งใหม่แล้ว'}
           >
-            ดูคอมเม้นของผู้พิจารณาในแต่ละ section ด้านล่าง
+            ดูหมายเหตุของผู้พิจารณาในแต่ละหมวดด้านล่าง
           </Alert>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Request Info */}
             <Card title="ข้อมูลคำขอ">
               <FieldGrid cols={3}>
@@ -306,7 +318,9 @@ export function RequestDetailPage() {
                 {req.customerInfo.type === 'existing' && (
                   <>
                     <FieldDisplay label="ชื่อบริษัท" value={req.customerInfo.data.companyName} />
-                    <FieldDisplay label="Default Credit Term" value={`Net ${req.customerInfo.data.defaultCreditTerm ?? 0}`} />
+                    <FieldDisplay label="Default Credit Term" preserveLabelCase>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#004081' }}>Net {req.customerInfo.data.defaultCreditTerm ?? 0}</div>
+                    </FieldDisplay>
                     <FieldDisplay label="ผู้ติดต่อ" value={req.customerInfo.data.contactPerson || '—'} />
                     <FieldDisplay label="โทรศัพท์" value={req.customerInfo.data.contactPhone || '—'} />
                   </>
@@ -321,64 +335,68 @@ export function RequestDetailPage() {
                 {req.customerInfo.type === 'reseller' && (
                   <>
                     <FieldDisplay label="Reseller" value={req.customerInfo.data.resellerCompanyName} />
-                    <FieldDisplay label="Default Credit Term" value={`Net ${req.customerInfo.data.defaultCreditTerm ?? 0}`} />
+                    <FieldDisplay label="Default Credit Term" preserveLabelCase>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#004081' }}>Net {req.customerInfo.data.defaultCreditTerm ?? 0}</div>
+                    </FieldDisplay>
                     <FieldDisplay label="ผู้ติดต่อ" value={req.customerInfo.data.contactPerson || '—'} />
                     <FieldDisplay label="โทรศัพท์" value={req.customerInfo.data.contactPhone || '—'} />
                     <FieldDisplay label="End Customer" value={req.customerInfo.data.endCustomerCompanyName} />
                   </>
                 )}
               </FieldGrid>
-              {sectionComment('เพิ่มคอมเม้นข้อมูลลูกค้า', customerComment, canComment, setCustomerComment, false, req.approvalResult?.customerComment)}
+              {sectionComment('หมายเหตุข้อมูลลูกค้า', customerComment, canComment, setCustomerComment, false, req.approvalResult?.customerComment)}
             </Card>
 
             {/* Hardware quotation: items + its own payment schedule */}
             {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareCost, hardwareSelling, req.installments[0]?.creditTermDays ?? 0, req.installments,
-              sectionComment('เพิ่มคอมเม้น Hardware', hardwareComment, canComment, setHardwareComment, true, req.approvalResult?.hardwareComment))}
+              sectionComment('หมายเหตุสำหรับ Hardware', hardwareComment, canComment, setHardwareComment, true, req.approvalResult?.hardwareComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'))}
 
             {/* Software & Installation quotation: items + its own payment schedule */}
             {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceCost, serviceSelling, req.swInstallments?.[0]?.creditTermDays ?? 0, req.swInstallments ?? [],
-              sectionComment('เพิ่มคอมเม้น Software & Installation', swComment, canComment, setSwComment, true, req.approvalResult?.swComment))}
+              sectionComment('หมายเหตุสำหรับ Software & Installation', swComment, canComment, setSwComment, true, req.approvalResult?.swComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'))}
 
             {/* Overall total */}
             <Card title="สรุปรวมทั้งหมด" noPad>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                <thead>
-                  <tr style={{ background: '#F2F6F8', borderBottom: '1px solid #D0D6DF' }}>
-                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>รายการ</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาทุน</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#586782', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>ราคาขาย</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hardwareItems.length > 0 && (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
                     <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
-                      <td style={{ padding: '11px 14px' }}>
-                        <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{hardwareQuotationNo}</span>
-                        <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
-                      </td>
-                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#586782')}</td>
-                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(hardwareSelling, '#004081')}</td>
+                      <th style={{ ...tableHeaderCell, textAlign: 'left' }}>รายการ</th>
+                      <th style={{ ...tableHeaderCell, textAlign: 'right' }}>ราคาทุน</th>
+                      <th style={{ ...tableHeaderCell, textAlign: 'right' }}>ราคาขาย</th>
                     </tr>
-                  )}
-                  {serviceItems.length > 0 && (
-                    <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
-                      <td style={{ padding: '11px 14px' }}>
-                        <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{serviceQuotationNo}</span>
-                        <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
-                      </td>
-                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782')}</td>
-                      <td style={{ padding: '11px 14px', textAlign: 'right' }}>{summaryAmount(serviceSelling, '#004081')}</td>
+                  </thead>
+                  <tbody>
+                    {hardwareItems.length > 0 && (
+                      <tr style={{ borderBottom: '1px solid #F2F6F8' }}>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{hardwareQuotationNo}</span>
+                          <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
+                        </td>
+                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#586782', undefined, 500)}</td>
+                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareSelling, '#004081', undefined, 600)}</td>
+                      </tr>
+                    )}
+                    {serviceItems.length > 0 && (
+                      <tr style={{ borderBottom: '1px solid #F2F6F8' }}>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{serviceQuotationNo}</span>
+                          <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
+                        </td>
+                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782', undefined, 500)}</td>
+                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceSelling, '#004081', undefined, 600)}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ borderTop: '1.5px solid #D0D6DF', background: '#F8F9FA' }}>
+                      <td style={{ padding: '14px', fontWeight: 700, fontSize: 14, color: '#001122' }}>รวมทั้งหมด</td>
+                      <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#586782')}</td>
+                      <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalSelling, '#004081', 16)}</td>
                     </tr>
-                  )}
-                </tbody>
-                <tfoot>
-                  <tr style={{ borderTop: '1.5px solid #D0D6DF', background: '#F2F6F8' }}>
-                    <td style={{ padding: '14px', fontWeight: 700, fontSize: 14, color: '#001122' }}>รวมทั้งหมด</td>
-                    <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#586782')}</td>
-                    <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalSelling, '#004081', 16)}</td>
-                  </tr>
-                </tfoot>
-              </table>
+                  </tfoot>
+                </table>
+              </div>
             </Card>
 
             {/* Approval result — section-by-section comments live with their
@@ -395,7 +413,7 @@ export function RequestDetailPage() {
                   <FieldDisplay label="วันที่" value={formatDate(req.approvalResult.approvedAt ?? req.approvalResult.rejectedAt ?? '')} />
                 </FieldGrid>
                 <p style={{ margin: '12px 0 0', fontSize: 12, color: '#586782' }}>
-                  ดูคอมเม้นของผู้พิจารณาแยกตาม section ด้านบน
+                  ดูหมายเหตุของผู้พิจารณาแยกตามหมวดด้านบน
                 </p>
               </Card>
             )}

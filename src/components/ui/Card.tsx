@@ -57,9 +57,12 @@ interface FieldProps {
   value?: string | number | null
   mono?: boolean
   children?: ReactNode
+  /** Business terms like "Default Credit Term" read better in their natural
+   * Title Case than forced uppercase — opt out per-field, not globally. */
+  preserveLabelCase?: boolean
 }
 
-export function FieldDisplay({ label, value, mono, children }: FieldProps) {
+export function FieldDisplay({ label, value, mono, children, preserveLabelCase }: FieldProps) {
   return (
     <div>
       <div style={{
@@ -67,8 +70,8 @@ export function FieldDisplay({ label, value, mono, children }: FieldProps) {
         fontWeight: 700,
         color: '#586782',
         marginBottom: 4,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
+        letterSpacing: preserveLabelCase ? '0.01em' : '0.06em',
+        textTransform: preserveLabelCase ? 'none' : 'uppercase',
       }}>
         {label}
       </div>
@@ -87,8 +90,12 @@ export function FieldDisplay({ label, value, mono, children }: FieldProps) {
 }
 
 export function FieldGrid({ children, cols = 3 }: { children: ReactNode; cols?: number }) {
+  // auto-fit instead of a hard column count: holds `cols` columns at typical
+  // desktop widths but collapses to 2, then 1, as the container narrows —
+  // no breakpoints needed, and it never overflows on a narrow screen.
+  const minWidth = cols >= 3 ? 190 : 240
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '16px 28px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${minWidth}px, 1fr))`, gap: '16px 28px' }}>
       {children}
     </div>
   )
