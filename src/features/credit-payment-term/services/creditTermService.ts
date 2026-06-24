@@ -282,7 +282,7 @@ export async function rejectRequest(id: string, comments: SectionComments, actor
   const existing = getMockRequestById(id)
   if (!existing) throw new Error('Request not found')
   if (existing.status !== 'pending') throw new Error('Only pending requests can be rejected')
-  if (!_summarizeComments(comments)) throw new Error('กรุณาระบุคอมเม้นอย่างน้อย 1 ช่อง ก่อนปฏิเสธคำขอ')
+  if (!_summarizeComments(comments)) throw new Error('กรุณาระบุหมายเหตุอย่างน้อย 1 หมวด ก่อนปฏิเสธคำขอ')
   const now = new Date().toISOString()
   const entry: ApprovalHistoryEntry = {
     historyId: generateId('h'),

@@ -59,14 +59,14 @@ export const MOCK_REQUESTS: Request[] = [
       maxCreditTerm: 30,
     },
     status: 'approved',
-    customerComment: 'ลูกค้าเก่าที่มีประวัติดี',
-    hardwareComment: 'Margin เพียงพอ อนุมัติ',
+    customerComment: 'ลูกค้าเก่าที่มีประวัติการชำระเงินดี',
+    hardwareComment: 'Margin เพียงพอต่อการอนุมัติ',
     approvalResult: {
       approverEmail: 'approver@company.com',
       approverName: 'นายประยุทธ์ มั่นคง',
       approvedAt: '2026-06-03T10:00:00.000Z',
-      customerComment: 'ลูกค้าเก่าที่มีประวัติดี',
-      hardwareComment: 'Margin เพียงพอ อนุมัติ',
+      customerComment: 'ลูกค้าเก่าที่มีประวัติการชำระเงินดี',
+      hardwareComment: 'Margin เพียงพอต่อการอนุมัติ',
     },
     history: [
       {
@@ -100,7 +100,7 @@ export const MOCK_REQUESTS: Request[] = [
         actorName: 'นายประยุทธ์ มั่นคง',
         fromStatus: 'pending',
         toStatus: 'approved',
-        comment: 'อนุมัติ ลูกค้าเก่าที่มีประวัติดี margin เพียงพอ',
+        comment: 'อนุมัติ ลูกค้าเก่าที่มีประวัติการชำระเงินดี Margin เพียงพอต่อการอนุมัติ',
         createdAt: '2026-06-03T10:00:00.000Z',
       },
     ],

@@ -80,7 +80,7 @@ function buildPrintHTML(req: Request): string {
   <div class="section">
     <div class="section-title">2. ข้อมูลลูกค้า</div>
     ${buildCustomerSection(req)}
-    ${req.customerComment ? `<div class="field-label" style="margin-top:8px">คอมเม้นข้อมูลลูกค้า</div><div class="field-val">${req.customerComment}</div>` : ''}
+    ${req.customerComment ? `<div class="field-label" style="margin-top:8px">หมายเหตุข้อมูลลูกค้า</div><div class="field-val">${req.customerComment}</div>` : ''}
   </div>
 
   <div class="section">
@@ -89,7 +89,7 @@ function buildPrintHTML(req: Request): string {
     ${serviceItems.length > 0 ? buildQuotationGroup(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceSelling, req.swInstallments ?? [], req.swComment) : ''}
     <table>
       <tr style="font-weight:700;background:#F2F6F8">
-        <td>สรุปรวม</td>
+        <td>รวมทั้งหมด</td>
         <td class="mono">${req.financial.totalSelling.toLocaleString()}</td>
       </tr>
     </table>
@@ -99,9 +99,9 @@ function buildPrintHTML(req: Request): string {
     <div class="section-title">4. ผลการพิจารณา</div>
     <div class="grid2">
       <div><div class="field-label">ผลการพิจารณา</div><div class="field-val">${req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ'}</div></div>
-      <div><div class="field-label">Approver</div><div class="field-val">${req.approvalResult.approverName}</div></div>
+      <div><div class="field-label">ผู้อนุมัติ</div><div class="field-val">${req.approvalResult.approverName}</div></div>
     </div>
-    <div class="sub">ดูคอมเม้นของผู้พิจารณาแยกตาม section ด้านบน</div>
+    <div class="sub">ดูหมายเหตุของผู้พิจารณาแยกตามหมวดด้านบน</div>
   </div>` : ''}
 </div></body></html>`
 }
@@ -115,23 +115,23 @@ function buildQuotationGroup(no: string, title: string, gradient: string, items:
         <td class="mono" style="text-align:right">${i.sellingPrice.toLocaleString()}</td>
       </tr>`).join('')}
       <tr style="font-weight:700;background:#F2F6F8">
-        <td>รวม</td>
+        <td>รวมหมวด ${title}</td>
         <td class="mono" style="text-align:right">${total.toLocaleString()}</td>
       </tr>
     </table>
     ${installments.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#F2F6F8;border:1px solid #D0D6DF;border-top:none">
-      <span style="font-size:12px;font-weight:700;color:#001122">งวดการชำระเงิน</span>
-      <span style="font-size:11px;font-weight:600;color:#586782">Credit Term <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
+      <span style="font-size:12px;font-weight:700;color:#001122">Payment Schedule</span>
+      <span style="font-size:11px;font-weight:600;color:#586782">Credit Term: <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
     </div>
     <table>
-      <tr><th>งวด</th><th>%</th><th style="text-align:right">จำนวนเงิน</th></tr>
+      <tr><th>งวดที่</th><th>%</th><th style="text-align:right">ยอดชำระ</th></tr>
       ${installments.map(i => `<tr>
         <td>${i.installmentNo}</td>
         <td>${i.installmentPercent}%</td>
         <td class="mono" style="text-align:right">${i.installmentAmount.toLocaleString()}</td>
       </tr>`).join('')}
     </table>` : ''}
-    ${comment ? `<div style="padding:8px;border:1px solid #D0D6DF;border-top:none"><div class="field-label">คอมเม้น ${title}</div><div class="field-val" style="margin-bottom:0">${comment}</div></div>` : ''}
+    ${comment ? `<div style="padding:8px;border:1px solid #D0D6DF;border-top:none"><div class="field-label">หมายเหตุสำหรับ ${title}</div><div class="field-val" style="margin-bottom:0">${comment}</div></div>` : ''}
   </div>`
 }
 

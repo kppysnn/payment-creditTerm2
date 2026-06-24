@@ -82,8 +82,13 @@ export function RequestDetailPage() {
   // One horizontal rhythm for everything inside a quotation block: 14px, matching
   // the table cells below, so the header bar, section labels and table columns
   // all share the same left edge instead of drifting onto their own grid.
+  // `framed` bands sit inside a bordered quotationBlock, where the top rule marks
+  // a real block-level break (#D0D6DF matches the block's own border weight).
+  // Non-framed bands sit inside a plain Card body (e.g. the customer note) —
+  // there's no outer box to echo, so the rule can be the same soft tone used
+  // for ordinary row dividers, not a hard structural edge.
   const labeledBand = (label: string, right?: React.ReactNode, framed = true, tinted = false) => (
-    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: framed ? '18px 14px 12px' : '18px 0 12px', borderTop: '1px solid #D0D6DF', background: tinted ? '#F8F9FA' : undefined }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: framed ? '18px 14px 12px' : '18px 0 12px', borderTop: `1px solid ${framed ? '#D0D6DF' : '#F2F6F8'}`, background: tinted ? '#F8F9FA' : undefined }}>
       <span style={{ fontSize: 13, fontWeight: 700, color: '#586782' }}>{label}</span>
       {right}
     </div>
@@ -147,10 +152,10 @@ export function RequestDetailPage() {
   const totalStrip = (label: string, cost: number, selling: number) => labeledBand(`รวมหมวด ${label}`, (
     <span style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
       <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-        ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(cost)}</span>
+        ราคาทุนรวม <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 600, color: '#586782' }}>{formatCurrency(cost)}</span>
       </span>
       <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-        ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
+        ราคาขายรวม <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
       </span>
     </span>
   ), true, true)
@@ -167,7 +172,7 @@ export function RequestDetailPage() {
         <thead>
           <tr style={{ borderBottom: '1px solid #D0D6DF' }}>
             {['งวดที่', '%', 'ยอดชำระ'].map(h => (
-              <th key={h} style={{ ...tableHeaderCell, textAlign: h === 'ยอดชำระ' ? 'right' : 'left', whiteSpace: 'nowrap' }}>{h}</th>
+              <th key={h} style={{ ...tableHeaderCell, textAlign: h === 'ยอดชำระ' ? 'right' : h === '%' ? 'center' : 'left', whiteSpace: 'nowrap' }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -175,7 +180,7 @@ export function RequestDetailPage() {
           {installments.map((inst, idx) => (
             <tr key={inst.installmentNo} style={{ borderBottom: idx === installments.length - 1 ? 'none' : '1px solid #F2F6F8' }}>
               <td style={{ padding: '12px 14px' }}>{inst.installmentNo}</td>
-              <td style={{ padding: '12px 14px', color: '#505050' }}>{inst.installmentPercent}%</td>
+              <td style={{ padding: '12px 14px', color: '#505050', textAlign: 'center' }}>{inst.installmentPercent}%</td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(inst.installmentAmount, '#004081', undefined, 600)}</td>
             </tr>
           ))}
@@ -356,7 +361,7 @@ export function RequestDetailPage() {
               sectionComment('หมายเหตุสำหรับ Software & Installation', swComment, canComment, setSwComment, true, req.approvalResult?.swComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'))}
 
             {/* Overall total */}
-            <Card title="สรุปรวมทั้งหมด" noPad>
+            <Card title="สรุปยอดรวม" noPad>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
@@ -409,7 +414,7 @@ export function RequestDetailPage() {
                       {req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ'}
                     </div>
                   </FieldDisplay>
-                  <FieldDisplay label="Approver" value={req.approvalResult.approverName} />
+                  <FieldDisplay label="ผู้อนุมัติ" value={req.approvalResult.approverName} />
                   <FieldDisplay label="วันที่" value={formatDate(req.approvalResult.approvedAt ?? req.approvalResult.rejectedAt ?? '')} />
                 </FieldGrid>
                 <p style={{ margin: '12px 0 0', fontSize: 12, color: '#586782' }}>

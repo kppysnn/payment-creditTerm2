@@ -632,12 +632,12 @@ export function RequestFormStepper({
           background: '#F2F6F8',
         }}>
           <span style={{ fontSize: 13, color: '#586782', fontWeight: 700 }}>รวมหมวด {summaryLabel}</span>
-          <span style={{ display: 'flex', gap: 24 }}>
+          <span style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-              ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#586782' }}>{formatCurrency(costTotal)}</span>
+              ราคาทุนรวม <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 600, color: '#586782' }}>{formatCurrency(costTotal)}</span>
             </span>
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-              ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(sellingTotal)}</span>
+              ราคาขายรวม <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(sellingTotal)}</span>
             </span>
           </span>
         </div>
