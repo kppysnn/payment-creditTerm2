@@ -65,7 +65,13 @@ function _toListItem(req: Request): RequestListItem {
 export async function getRequests(userId?: string, viewAll?: boolean): Promise<RequestListItem[]> {
   await _delay()
   const all = getMockRequests()
-  const filtered = viewAll ? all : all.filter(r => r.salesId === userId)
+  // Drafts are private to the sales rep who owns them — viewAll (approver/
+  // accounting) never sees someone else's draft, even though it sees every
+  // other status.
+  const filtered = all.filter(r => {
+    if (r.status === 'draft') return r.salesId === userId
+    return viewAll || r.salesId === userId
+  })
   return filtered.map(_toListItem)
 }
 

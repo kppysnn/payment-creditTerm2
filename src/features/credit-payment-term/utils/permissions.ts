@@ -10,6 +10,9 @@ export function canCreateRequest(user: CurrentUser): boolean {
 }
 
 export function canViewRequest(user: CurrentUser, req: Request): boolean {
+  // Drafts are private to their owner regardless of viewAll — a draft is the
+  // sales rep's own scratch work and isn't a request yet.
+  if (req.status === 'draft') return req.salesId === user.id
   if (hasPermission(user, 'creditTerm.viewAll')) return true
   if (hasPermission(user, 'creditTerm.viewOwn') && req.salesId === user.id) return true
   return false

@@ -10,7 +10,7 @@ import { FormGroup, Input, Select } from '../../../components/ui/FormField'
 import { Alert } from '../../../components/ui/Alert'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
 import { searchCustomers } from '../services/customerService'
-import { Save, Send, X, ChevronDown, Check } from 'lucide-react'
+import { Save, Send, X } from 'lucide-react'
 
 interface InstRow { installmentPercent: number | ''; creditTermDays: number | ''; paymentCondition: PaymentCondition | '' }
 
@@ -119,8 +119,11 @@ export function RequestFormStepper({
   const [submitError, setSubmitError] = useState('')
 
   // ── HW payment state ──
+  // No request loaded yet → leave blank rather than defaulting to 0, so the
+  // field starts genuinely unanswered instead of looking like "0 days" was
+  // already chosen (and tripping the custom-value check below).
   const [hwCreditTermDays, setHwCreditTermDays] = useState<number | ''>(
-    req?.installments[0]?.creditTermDays ?? 0
+    req?.installments[0]?.creditTermDays ?? ''
   )
   const [hwInstallmentCount, setHwInstallmentCount] = useState<number>(req?.installmentCount ?? 1)
   const [hwInstallments, setHwInstallments] = useState<InstRow[]>(
@@ -131,12 +134,11 @@ export function RequestFormStepper({
     })) ?? [{ installmentPercent: 100, creditTermDays: 0, paymentCondition: 'on_delivery' }]
   )
   const [hwCustomCreditTerm, setHwCustomCreditTerm] = useState(false)
-  const [hwCreditTermDropdownOpen, setHwCreditTermDropdownOpen] = useState(false)
   const [hwCustomPercentRows, setHwCustomPercentRows] = useState<Record<number, boolean>>({})
 
   // ── SW payment state ──
   const [swCreditTermDays, setSwCreditTermDays] = useState<number | ''>(
-    req?.swInstallments?.[0]?.creditTermDays ?? 0
+    req?.swInstallments?.[0]?.creditTermDays ?? ''
   )
   const [swInstallmentCount, setSwInstallmentCount] = useState<number>(req?.swInstallmentCount ?? 1)
   const [swInstallments, setSwInstallments] = useState<InstRow[]>(
@@ -147,7 +149,6 @@ export function RequestFormStepper({
     })) ?? [{ installmentPercent: 100, creditTermDays: 0, paymentCondition: 'on_delivery' }]
   )
   const [swCustomCreditTerm, setSwCustomCreditTerm] = useState(false)
-  const [swCreditTermDropdownOpen, setSwCreditTermDropdownOpen] = useState(false)
   const [swCustomPercentRows, setSwCustomPercentRows] = useState<Record<number, boolean>>({})
 
   const fd = formData
@@ -343,7 +344,7 @@ export function RequestFormStepper({
   )
 
   const summaryAmount = (value: number, color = '#001122', size?: number, weight: number = 700) => (
-    <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: weight, color, fontSize: size }}>
+    <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: weight, color, fontSize: size }}>
       {formatCurrency(value)}
     </span>
   )
@@ -373,8 +374,6 @@ export function RequestFormStepper({
     const setInsts     = prefix === 'hw' ? setHwInstallments       : setSwInstallments
     const isCustomCT   = prefix === 'hw' ? hwCustomCreditTerm      : swCustomCreditTerm
     const setIsCustomCT= prefix === 'hw' ? setHwCustomCreditTerm   : setSwCustomCreditTerm
-    const ctDropOpen   = prefix === 'hw' ? hwCreditTermDropdownOpen : swCreditTermDropdownOpen
-    const setCtDropOpen= prefix === 'hw' ? setHwCreditTermDropdownOpen : setSwCreditTermDropdownOpen
     const customPctRows    = prefix === 'hw' ? hwCustomPercentRows    : swCustomPercentRows
     const setCustomPctRows = prefix === 'hw' ? setHwCustomPercentRows : setSwCustomPercentRows
 
@@ -422,84 +421,43 @@ export function RequestFormStepper({
         {/* Credit Term + Count */}
         <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <FormGroup label="Credit Term" required error={errors[ctErrKey]} style={{ width: 200 }}>
-            <div style={{ position: 'relative', width: 200 }}
-              onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setCtDropOpen(false) }}
-            >
-              <Input
-                type="text" inputMode="numeric"
-                value={String(ctDays ?? '')}
-                onFocus={() => setCtDropOpen(true)}
+            {creditTermIsCustom ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Input
+                  type="number" min="0" autoFocus
+                  value={ctDays}
+                  onChange={e => setCtDays(e.target.value !== '' ? Number(e.target.value) : '')}
+                  placeholder="พิมพ์จำนวนวัน"
+                  error={errors[ctErrKey]}
+                  style={{ flex: 1 }}
+                />
+                <span style={{ color: '#586782', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>วัน</span>
+                <button type="button" onClick={() => { setIsCustomCT(false); setCtDays('') }}
+                  style={{ width: 28, height: 38, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                  aria-label="เลือกจากรายการแทน">
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <Select
+                value={ctDays === '' ? '' : String(ctDays)}
                 onChange={e => {
-                  const v = e.target.value.replace(/\D/g, '')
-                  const d = v === '' ? '' : Number(v)
-                  setIsCustomCT(d === '' || !CREDIT_TERM_PRESETS.includes(numVal(d)))
-                  setCtDays(d)
+                  const v = e.target.value
+                  if (v === 'custom') { setIsCustomCT(true); setCtDays('') }
+                  else setCtDays(v === '' ? '' : Number(v))
                 }}
-                placeholder={creditTermIsCustom ? 'ระบุเอง' : 'เลือกวัน'}
                 error={errors[ctErrKey]}
-                style={{ paddingRight: 40 }}
-              />
-              <button type="button" onClick={() => setCtDropOpen(o => !o)}
-                style={{
-                  position: 'absolute', top: '50%', right: 5,
-                  transform: ctDropOpen ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)',
-                  width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer',
-                  transition: 'transform 0.15s, background 0.15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                aria-label="เลือก Credit Term">
-                <ChevronDown size={15} />
-              </button>
-              {ctDropOpen && (
-                <div style={{ position: 'absolute', zIndex: 5, top: 44, left: 0, width: 200, maxHeight: 280, overflowY: 'auto', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, boxShadow: '0 8px 20px rgba(0,64,129,0.14)', padding: 6 }}>
-                  {CREDIT_TERM_PRESETS.map(days => {
-                    const active = numVal(ctDays) === days && !creditTermIsCustom
-                    return (
-                      <button key={days} type="button"
-                        onMouseDown={e => e.preventDefault()}
-                        onClick={() => { setIsCustomCT(false); setCtDays(days); setCtDropOpen(false) }}
-                        style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
-                          padding: '8px 10px', marginBottom: 2, border: 'none', borderRadius: 4,
-                          background: active ? 'rgba(102,197,197,0.12)' : 'transparent',
-                          color: active ? '#004081' : '#001122',
-                          textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                          transition: 'background 0.12s',
-                        }}
-                        onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#F2F6F8' }}
-                        onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
-                      >
-                        <span>{days} วัน</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 11, fontWeight: 500, color: '#586782' }}>{CREDIT_TERM_HINTS[days]}</span>
-                          {active && <Check size={14} color="#66C5C5" />}
-                        </span>
-                      </button>
-                    )
-                  })}
-                  <div style={{ height: 1, background: '#F2F6F8', margin: '4px 4px 6px' }} />
-                  <button type="button"
-                    onMouseDown={e => e.preventDefault()}
-                    onClick={() => { setIsCustomCT(true); setCtDays(''); setCtDropOpen(false) }}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
-                      padding: '8px 10px', border: 'none', borderRadius: 4,
-                      background: creditTermIsCustom ? 'rgba(102,197,197,0.12)' : 'transparent',
-                      color: creditTermIsCustom ? '#004081' : '#586782',
-                      textAlign: 'left', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                      transition: 'background 0.12s',
-                    }}
-                    onMouseEnter={e => { if (!creditTermIsCustom) e.currentTarget.style.background = '#F2F6F8' }}
-                    onMouseLeave={e => { if (!creditTermIsCustom) e.currentTarget.style.background = 'transparent' }}
-                  >
-                    <span>ระบุเอง</span>
-                    {creditTermIsCustom && <Check size={14} color="#66C5C5" />}
-                  </button>
-                </div>
-              )}
-            </div>
+                style={selectStyle}
+              >
+                <option value="">— เลือกวัน —</option>
+                {CREDIT_TERM_PRESETS.map(days => (
+                  <option key={days} value={days}>{days} วัน ({CREDIT_TERM_HINTS[days]})</option>
+                ))}
+                <option value="custom">ระบุเอง</option>
+              </Select>
+            )}
           </FormGroup>
 
           <div>
@@ -524,7 +482,7 @@ export function RequestFormStepper({
 
         {/* Preset buttons */}
         <div>
-          <div style={{ fontSize: 11, color: '#586782', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>สัดส่วนที่แนะนำ</div>
+          <div style={{ fontSize: 11, color: '#586782', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>สัดส่วน</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {(INSTALLMENT_PRESETS[instCount] ?? []).slice(0, 4).map(preset => {
               const active = preset.percents.every((p, idx) => numVal(insts[idx]?.installmentPercent) === p)
@@ -604,7 +562,7 @@ export function RequestFormStepper({
                     )}
                   </FormGroup>
                   {totalAmt > 0 && (
-                    <div style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 13, fontWeight: 700, color: '#004081', textAlign: 'right', marginTop: 'auto' }}>
+                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', textAlign: 'right', marginTop: 'auto' }}>
                       {formatCurrency(totalAmt)}
                     </div>
                   )}
@@ -634,10 +592,10 @@ export function RequestFormStepper({
           <span style={{ fontSize: 13, color: '#586782', fontWeight: 700 }}>รวม {summaryLabel}</span>
           <span style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-              ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 600, color: '#586782' }}>{formatCurrency(costTotal)}</span>
+              ราคาทุน <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#586782' }}>{formatCurrency(costTotal)}</span>
             </span>
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-              ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(sellingTotal)}</span>
+              ราคาขาย <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(sellingTotal)}</span>
             </span>
           </span>
         </div>
@@ -847,7 +805,7 @@ export function RequestFormStepper({
           <tbody>
             <tr style={{ borderBottom: '1px solid #F2F6F8' }}>
               <td style={{ padding: '12px 14px' }}>
-                <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{hwQuotationNo}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#001122' }}>{hwQuotationNo}</span>
                 <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
               </td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hwCost, '#586782', undefined, 500)}</td>
@@ -855,7 +813,7 @@ export function RequestFormStepper({
             </tr>
             <tr>
               <td style={{ padding: '12px 14px' }}>
-                <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{swQuotationNo}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#001122' }}>{swQuotationNo}</span>
                 <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
               </td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782', undefined, 500)}</td>

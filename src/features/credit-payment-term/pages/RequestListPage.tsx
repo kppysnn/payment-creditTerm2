@@ -118,7 +118,7 @@ export function RequestListPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: '#F2F6F8', borderBottom: '1px solid #D0D6DF' }}>
-                {['คำขอ', 'ลูกค้า / โปรเจกต์', 'มูลค่ารวม', 'สถานะ', 'อัปเดต', ''].map(h => (
+                {['คำขอ', 'ลูกค้า / โปรเจกต์', 'เซลล์', 'มูลค่ารวม', 'สถานะ', 'อัปเดต', ''].map(h => (
                   <th key={h} style={{ padding: '12px 20px', textAlign: h === 'มูลค่ารวม' ? 'right' : 'left', fontWeight: 700, color: '#004081', fontSize: 12.5, whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -132,14 +132,15 @@ export function RequestListPage() {
                   style={{ borderBottom: '1px solid #D0D6DF', background: '#fff', transition: 'background 0.1s', cursor: 'pointer' }}
                 >
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
-                    <div style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 12, color: '#004081', fontWeight: 700 }}>{req.requestNo}</div>
-                    <div style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 11, color: '#586782', marginTop: 2 }}>{req.proposalNo}</div>
+                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 12, color: '#004081', fontWeight: 700 }}>{req.requestNo}</div>
+                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 11, color: '#586782', marginTop: 2 }}>{req.proposalNo}</div>
                   </td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', maxWidth: 220 }}>
                     <div style={{ color: '#001122', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.customerName}</div>
                     <div style={{ color: '#586782', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.projectName}</div>
                   </td>
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', textAlign: 'right', fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 13, fontWeight: 700, color: '#004081', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', color: '#505050', fontSize: 12.5, whiteSpace: 'nowrap' }}>{req.salesName}</td>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}><StatusBadge status={req.status} size="sm" /></td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', color: '#586782', fontSize: 12, whiteSpace: 'nowrap' }}>{formatDate(req.updatedAt)}</td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>

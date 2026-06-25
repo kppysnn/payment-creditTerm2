@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react'
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'success'
+type Variant = 'primary' | 'secondary' | 'danger' | 'ghost'
 type Size = 'sm' | 'md' | 'lg'
 
 const VARIANT_BASE: Record<Variant, CSSProperties> = {
@@ -10,12 +10,12 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
     border: 'none',
   },
   secondary: {
-    background: 'linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)',
-    color: '#004081',
-    border: '1.5px solid #66C5C5',
+    background: '#004081',
+    color: '#FFFFFF',
+    border: 'none',
   },
   danger: {
-    background: 'linear-gradient(135deg, #F3554F 0%, #C0392B 100%)',
+    background: '#F3554F',
     color: '#FFFFFF',
     border: 'none',
   },
@@ -24,19 +24,13 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
     color: '#586782',
     border: '1px solid transparent',
   },
-  success: {
-    background: 'linear-gradient(135deg, #A8DD8C 0%, #4F9A3A 100%)',
-    color: '#FFFFFF',
-    border: 'none',
-  },
 }
 
 const VARIANT_HOVER: Record<Variant, CSSProperties> = {
   primary:   { filter: 'brightness(1.08)', boxShadow: '0 6px 20px rgba(0,64,129,0.18)', transform: 'translateY(-1px)' },
-  secondary: { filter: 'brightness(0.97)', boxShadow: '0 4px 14px rgba(102,197,197,0.22)', transform: 'translateY(-1px)' },
-  danger:    { filter: 'brightness(1.06)', boxShadow: '0 6px 20px rgba(211,47,47,0.22)', transform: 'translateY(-1px)' },
+  secondary: { filter: 'brightness(1.15)', boxShadow: '0 6px 20px rgba(0,64,129,0.22)', transform: 'translateY(-1px)' },
+  danger:    { filter: 'brightness(1.08)', boxShadow: '0 6px 20px rgba(243,85,79,0.25)', transform: 'translateY(-1px)' },
   ghost:     { background: 'rgba(102,197,197,0.10)', color: '#004081' },
-  success:   { filter: 'brightness(1.06)', boxShadow: '0 6px 20px rgba(79,154,58,0.22)', transform: 'translateY(-1px)' },
 }
 
 const SIZE_STYLES: Record<Size, CSSProperties> = {

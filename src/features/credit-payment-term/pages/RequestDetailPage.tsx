@@ -15,7 +15,7 @@ import { Textarea } from '../../../components/ui/FormField'
 import { ApproveModal } from '../../../components/modals/ApproveModal'
 import { RejectModal } from '../../../components/modals/RejectModal'
 import { CancelModal } from '../../../components/modals/CancelModal'
-import { canApproveRequest, canRejectRequest, canEditRequest, canCancelRequest } from '../utils/permissions'
+import { canApproveRequest, canRejectRequest, canEditRequest, canCancelRequest, canViewRequest } from '../utils/permissions'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate, formatDateTime, formatCreditTerm } from '../utils/formatters'
 import { BackButton } from '../../../components/ui/BackButton'
@@ -37,7 +37,10 @@ export function RequestDetailPage() {
 
   async function loadReq() {
     if (!id) return
-    const r = await getRequestById(id)
+    const found = await getRequestById(id)
+    // A draft that isn't this user's own must not be viewable by direct URL —
+    // treat it the same as "not found" rather than leaking its contents.
+    const r = found && canViewRequest(currentUser, found) ? found : undefined
     setReq(r ?? null)
     setCustomerComment(r?.customerComment ?? '')
     setHardwareComment(r?.hardwareComment ?? '')
@@ -64,7 +67,7 @@ export function RequestDetailPage() {
   const hardwareCost = hardwareItems.reduce((sum, item) => sum + item.cost, 0)
   const serviceCost = serviceItems.reduce((sum, item) => sum + item.cost, 0)
   const summaryAmount = (value: number, color = '#001122', size?: number, weight: number = 700) => (
-    <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: weight, color, fontSize: size }}>
+    <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: weight, color, fontSize: size }}>
       {formatCurrency(value)}
     </span>
   )
@@ -116,10 +119,14 @@ export function RequestDetailPage() {
               เคยถูกปฏิเสธไว้ว่า: <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
             </div>
           )}
+          {/* A reviewer's note reads as a comment, not page data — frame it red
+              (editable and saved alike) so it's unmistakable from ordinary fields. */}
           {editable ? (
-            <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder={placeholder} />
+            <div style={{ padding: 6, background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4 }}>
+              <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder={placeholder} />
+            </div>
           ) : value.trim() ? (
-            <div style={{ padding: '10px 12px', background: '#F8F9FA', border: '1px solid #F2F6F8', borderRadius: 4, fontSize: 13, color: '#505050', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
+            <div style={{ padding: '10px 12px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 13, color: '#7F1D1D', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
           ) : null}
         </div>
       </div>
@@ -159,17 +166,17 @@ export function RequestDetailPage() {
   const totalStrip = (label: string, cost: number, selling: number) => labeledBand(`รวม ${label}`, (
     <span style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
       <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-        ราคาทุน <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 600, color: '#586782' }}>{formatCurrency(cost)}</span>
+        ราคาทุน <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#586782' }}>{formatCurrency(cost)}</span>
       </span>
       <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-        ราคาขาย <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
+        ราคาขาย <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(selling)}</span>
       </span>
     </span>
   ), true, true)
 
   const installmentStrip = (creditTermDays: number) => labeledBand('Payment Schedule', (
     <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-      Credit Term: <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
+      Credit Term: <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
     </span>
   ), true, true)
 
@@ -261,7 +268,7 @@ export function RequestDetailPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', color: '#001122' }}>{req.requestNo}</h1>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#001122' }}>{req.requestNo}</h1>
               <StatusBadge status={req.status} />
               {req.version > 1 && (
                 <span style={{ fontSize: 12, padding: '2px 8px', background: 'rgba(0,64,129,0.08)', color: '#004081', borderRadius: 9999, fontWeight: 600 }}>v{req.version}</span>
@@ -290,7 +297,7 @@ export function RequestDetailPage() {
               <Button variant="danger" size="sm" icon={<Ban size={14} />} onClick={() => setCancelOpen(true)}>ยกเลิก</Button>
             )}
             {canApproveRequest(currentUser, req) && (
-              <Button variant="success" size="sm" icon={<CheckCircle size={14} />} onClick={() => setApproveOpen(true)}>อนุมัติ</Button>
+              <Button size="sm" icon={<CheckCircle size={14} />} onClick={() => setApproveOpen(true)}>อนุมัติ</Button>
             )}
             {canRejectRequest(currentUser, req) && (
               <Button variant="danger" size="sm" icon={<XCircle size={14} />} onClick={() => setRejectOpen(true)}>ไม่อนุมัติ</Button>
@@ -300,10 +307,11 @@ export function RequestDetailPage() {
 
         {/* Rejection flag — visible to every role, not just sales, so an approver
             re-deciding a resubmitted request knows to check the section comments
-            below for why it was rejected last time */}
+            below for why it was rejected last time. Still-rejected is a blocking
+            error (red); already-resubmitted is just a historical note (yellow). */}
         {req.approvalResult?.rejectedAt && (
           <Alert
-            type="error"
+            type={req.status === 'rejected' ? 'error' : 'warning'}
             title={req.status === 'rejected' ? 'คำขอถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่' : 'เคยถูกปฏิเสธมาก่อน — แก้ไขและส่งใหม่แล้ว'}
           >
             ดูหมายเหตุของผู้พิจารณาในแต่ละหมวดด้านล่าง
@@ -382,7 +390,7 @@ export function RequestDetailPage() {
                     {hardwareItems.length > 0 && (
                       <tr style={{ borderBottom: '1px solid #F2F6F8' }}>
                         <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{hardwareQuotationNo}</span>
+                          <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#001122' }}>{hardwareQuotationNo}</span>
                           <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Hardware</span>
                         </td>
                         <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#586782', undefined, 500)}</td>
@@ -392,7 +400,7 @@ export function RequestDetailPage() {
                     {serviceItems.length > 0 && (
                       <tr style={{ borderBottom: '1px solid #F2F6F8' }}>
                         <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontFamily: 'JetBrains Mono, Noto Sans Thai, monospace', fontWeight: 700, color: '#001122' }}>{serviceQuotationNo}</span>
+                          <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#001122' }}>{serviceQuotationNo}</span>
                           <span style={{ color: '#586782', fontWeight: 500, marginLeft: 8 }}>Software &amp; Installation</span>
                         </td>
                         <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782', undefined, 500)}</td>

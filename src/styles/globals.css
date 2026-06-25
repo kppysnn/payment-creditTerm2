@@ -36,12 +36,10 @@
 
   /* Fonts — Poppins first: it has zero Thai glyph coverage, so Thai
      characters automatically cascade to Noto Sans Thai per-character,
-     even within mixed Thai/English text. Do not reverse this order. */
+     even within mixed Thai/English text. Do not reverse this order.
+     Only these two typefaces are used anywhere in the app — no third
+     (e.g. monospace) font family. */
   --font-sans: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif;
-  /* Noto Sans Thai fallback covers the ฿ glyph (U+0E3F), which JetBrains
-     Mono lacks — without it the browser substitutes an OS-default
-     monospace font per machine, causing inconsistent ฿ baseline alignment. */
-  --font-mono: 'JetBrains Mono', 'Noto Sans Thai', monospace;
 
   /* Radius — squared off app-wide in commit 98d50f4 (2026-06-23). 4px is the
      universal radius for buttons/cards/modals/alerts/stat cards; only inputs
@@ -96,9 +94,6 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
-
-/* Mono utility */
-.font-mono { font-family: var(--font-mono); }
 
 /* Focus ring — teal */
 :focus-visible {

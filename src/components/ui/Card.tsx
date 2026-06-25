@@ -83,7 +83,7 @@ export function FieldDisplay({ label, value, mono, children, preserveLabelCase, 
           fontSize: 14,
           color: '#001122',
           fontWeight: valueWeight,
-          fontFamily: mono ? 'JetBrains Mono, Noto Sans Thai, monospace' : undefined,
+          fontVariantNumeric: mono ? 'tabular-nums' : undefined,
           lineHeight: 1.5,
         }}>
           {value ?? '—'}
