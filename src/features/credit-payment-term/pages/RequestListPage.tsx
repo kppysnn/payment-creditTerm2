@@ -115,11 +115,14 @@ export function RequestListPage() {
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: '#586782' }}>ไม่พบคำขอ</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: '#F2F2F2', borderBottom: '1px solid #D0D6DF' }}>
-                {['คำขอ', 'ลูกค้า / โปรเจกต์', 'เซลล์', 'มูลค่ารวม', 'สถานะ', 'อัปเดต', ''].map(h => (
-                  <th key={h} style={{ padding: '12px 20px', textAlign: h === 'มูลค่ารวม' ? 'right' : 'left', fontWeight: 700, color: '#004081', fontSize: 12.5, whiteSpace: 'nowrap' }}>{h}</th>
+                {[
+                  ['คำขอ', '14%'], ['ลูกค้า / โปรเจกต์', '26%'], ['เซลล์', '13%'], ['มูลค่ารวม', '13%'],
+                  ['สถานะ', '12%'], ['อัปเดต', '12%'], ['', '10%'],
+                ].map(([h, w]) => (
+                  <th key={h} style={{ width: w, padding: '12px 20px', textAlign: 'left', fontWeight: 700, color: '#004081', fontSize: 12.5, whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -131,18 +134,18 @@ export function RequestListPage() {
                   className="data-row"
                   style={{ borderBottom: '1px solid #D0D6DF', background: '#fff', transition: 'background 0.1s', cursor: 'pointer' }}
                 >
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
-                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 12, color: '#004081', fontWeight: 700 }}>{req.requestNo}</div>
-                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 11, color: '#586782', marginTop: 2 }}>{req.proposalNo}</div>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 12, color: '#004081', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.requestNo}</div>
+                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 11, color: '#586782', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.proposalNo}</div>
                   </td>
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', maxWidth: 220 }}>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle' }}>
                     <div style={{ color: '#001122', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.customerName}</div>
                     <div style={{ color: '#586782', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.projectName}</div>
                   </td>
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', color: '#505050', fontSize: 12.5, whiteSpace: 'nowrap' }}>{req.salesName}</td>
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}><StatusBadge status={req.status} size="sm" /></td>
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', color: '#586782', fontSize: 12, whiteSpace: 'nowrap' }}>{formatDate(req.updatedAt)}</td>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', color: '#505050', fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.salesName}</td>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', textAlign: 'left', fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', overflow: 'hidden', whiteSpace: 'nowrap' }}><StatusBadge status={req.status} size="sm" /></td>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', color: '#586782', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatDate(req.updatedAt)}</td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
                     <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                       {currentUser.role === 'sales' && (req.status === 'draft' || req.status === 'rejected' || req.status === 'pending') && (
