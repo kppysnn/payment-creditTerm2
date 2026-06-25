@@ -87,7 +87,6 @@ export interface Request extends SectionComments {
 
   proposalNo: string
   quotationNo?: string
-  projectName: string
   saleType: SaleType
   requestPurpose?: string
   remark?: string
@@ -114,7 +113,6 @@ export interface RequestListItem {
   id: string
   requestNo: string
   proposalNo: string
-  projectName: string
   customerName: string
   customerType: string
   saleType: SaleType

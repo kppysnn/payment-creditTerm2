@@ -7,11 +7,12 @@ import type { Request } from '../../features/credit-payment-term/types/request'
 interface Props {
   open: boolean
   request: Request | null
+  customerName?: string
   onClose: () => void
   onApprove: () => Promise<void>
 }
 
-export function ApproveModal({ open, request, onClose, onApprove }: Props) {
+export function ApproveModal({ open, request, customerName, onClose, onApprove }: Props) {
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -48,7 +49,7 @@ export function ApproveModal({ open, request, onClose, onApprove }: Props) {
       {request && (
         <div style={{ marginBottom: 16, padding: '12px 14px', background: '#F2F6F8', borderRadius: 4, border: '1px solid #D0D6DF' }}>
           <div style={{ fontWeight: 700, fontSize: 14, fontVariantNumeric: 'tabular-nums', color: '#004081' }}>{request.requestNo}</div>
-          <div style={{ fontSize: 13, color: '#586782', marginTop: 3 }}>{request.projectName}</div>
+          <div style={{ fontSize: 13, color: '#586782', marginTop: 3 }}>{customerName}</div>
         </div>
       )}
 

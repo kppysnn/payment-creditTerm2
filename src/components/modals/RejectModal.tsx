@@ -8,12 +8,13 @@ import type { SectionComments } from '../../features/credit-payment-term/types/a
 interface Props {
   open: boolean
   request: Request | null
+  customerName?: string
   comments: SectionComments
   onClose: () => void
   onReject: () => Promise<void>
 }
 
-export function RejectModal({ open, request, comments, onClose, onReject }: Props) {
+export function RejectModal({ open, request, customerName, comments, onClose, onReject }: Props) {
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -58,7 +59,7 @@ export function RejectModal({ open, request, comments, onClose, onReject }: Prop
       {request && (
         <div style={{ marginBottom: 16, padding: '12px 14px', background: '#FEF2F2', borderRadius: 4, border: '1px solid #FCA5A5' }}>
           <div style={{ fontWeight: 600, fontSize: 14, color: '#7F1D1D' }}>{request.requestNo}</div>
-          <div style={{ fontSize: 13, color: '#7F1D1D', marginTop: 3 }}>{request.projectName}</div>
+          <div style={{ fontSize: 13, color: '#7F1D1D', marginTop: 3 }}>{customerName}</div>
         </div>
       )}
 

@@ -39,7 +39,7 @@ export function RequestListPage() {
   const filtered = requests.filter(r => {
     const matchStatus = !filterStatus || r.status === filterStatus
     const q = filterText.toLowerCase()
-    const matchText = !q || [r.requestNo, r.projectName, r.customerName, r.proposalNo, r.salesName].some(s => s?.toLowerCase().includes(q))
+    const matchText = !q || [r.requestNo, r.customerName, r.proposalNo, r.salesName].some(s => s?.toLowerCase().includes(q))
     return matchStatus && matchText
   })
 
@@ -119,8 +119,8 @@ export function RequestListPage() {
             <thead>
               <tr style={{ background: '#F2F2F2', borderBottom: '1px solid #D0D6DF' }}>
                 {[
-                  ['คำขอ', '14%'], ['ลูกค้า / โปรเจกต์', '26%'], ['เซลล์', '13%'], ['มูลค่ารวม', '13%'],
-                  ['สถานะ', '12%'], ['อัปเดต', '12%'], ['', '10%'],
+                  ['คำขอ', '15%'], ['ลูกค้า', '22%'], ['เซลล์', '15%'], ['มูลค่ารวม', '13%'],
+                  ['สถานะ', '12%'], ['อัปเดต', '13%'], ['', '10%'],
                 ].map(([h, w]) => (
                   <th key={h} style={{ width: w, padding: '12px 20px', textAlign: 'left', fontWeight: 700, color: '#004081', fontSize: 12.5, whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
@@ -138,10 +138,7 @@ export function RequestListPage() {
                     <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 12, color: '#004081', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.requestNo}</div>
                     <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 11, color: '#586782', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.proposalNo}</div>
                   </td>
-                  <td style={{ padding: '12px 20px', verticalAlign: 'middle' }}>
-                    <div style={{ color: '#001122', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.customerName}</div>
-                    <div style={{ color: '#586782', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.projectName}</div>
-                  </td>
+                  <td style={{ padding: '12px 20px', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#001122', fontWeight: 600 }}>{req.customerName}</td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', color: '#505050', fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.salesName}</td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', textAlign: 'left', fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatCurrency(req.totalSelling)}</td>
                   <td style={{ padding: '12px 20px', verticalAlign: 'middle', overflow: 'hidden', whiteSpace: 'nowrap' }}><StatusBadge status={req.status} size="sm" /></td>

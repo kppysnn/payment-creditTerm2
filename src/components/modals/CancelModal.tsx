@@ -8,11 +8,12 @@ import type { Request } from '../../features/credit-payment-term/types/request'
 interface Props {
   open: boolean
   request: Request | null
+  customerName?: string
   onClose: () => void
   onCancel: (reason: string) => Promise<void>
 }
 
-export function CancelModal({ open, request, onClose, onCancel }: Props) {
+export function CancelModal({ open, request, customerName, onClose, onCancel }: Props) {
   const [reason, setReason] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -57,7 +58,7 @@ export function CancelModal({ open, request, onClose, onCancel }: Props) {
       {request && (
         <div style={{ marginBottom: 16, padding: '12px 14px', background: '#FEF2F2', borderRadius: 4, border: '1px solid #FCA5A5' }}>
           <div style={{ fontWeight: 600, fontSize: 14, color: '#7F1D1D' }}>{request.requestNo}</div>
-          <div style={{ fontSize: 13, color: '#7F1D1D', marginTop: 3 }}>{request.projectName}</div>
+          <div style={{ fontSize: 13, color: '#7F1D1D', marginTop: 3 }}>{customerName}</div>
         </div>
       )}
 

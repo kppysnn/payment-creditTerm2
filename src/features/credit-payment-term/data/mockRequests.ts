@@ -11,7 +11,6 @@ export const MOCK_REQUESTS: Request[] = [
     salesName: 'สมหญิง รักงาน',
     salesId: 'u001',
     proposalNo: 'PRO-2026-001',
-    projectName: 'ระบบเครือข่ายสำนักงานใหญ่',
     saleType: 'hardware',
     customerInfo: {
       type: 'existing',
@@ -33,6 +32,24 @@ export const MOCK_REQUESTS: Request[] = [
         grossProfit: 100000,
         marginPercent: 25.00,
       },
+      {
+        itemId: 'item001b',
+        type: 'software',
+        name: 'Software',
+        sellingPrice: 150000,
+        cost: 110000,
+        grossProfit: 40000,
+        marginPercent: 26.67,
+      },
+      {
+        itemId: 'item001c',
+        type: 'installation',
+        name: 'Installation',
+        sellingPrice: 50000,
+        cost: 30000,
+        grossProfit: 20000,
+        marginPercent: 40.00,
+      },
     ],
     installmentCount: 2,
     installments: [
@@ -51,11 +68,21 @@ export const MOCK_REQUESTS: Request[] = [
         paymentCondition: 'on_delivery',
       },
     ],
+    swInstallmentCount: 1,
+    swInstallments: [
+      {
+        installmentNo: 1,
+        installmentPercent: 100,
+        installmentAmount: 200000,
+        creditTermDays: 30,
+        paymentCondition: 'on_delivery',
+      },
+    ],
     financial: {
-      totalSelling: 400000,
-      totalCost: 300000,
-      grossProfit: 100000,
-      marginPercent: 25.00,
+      totalSelling: 600000,
+      totalCost: 440000,
+      grossProfit: 160000,
+      marginPercent: 26.67,
       maxCreditTerm: 30,
     },
     status: 'approved',
@@ -115,7 +142,6 @@ export const MOCK_REQUESTS: Request[] = [
     salesName: 'สมหญิง รักงาน',
     salesId: 'u001',
     proposalNo: 'PRO-2026-002',
-    projectName: 'Software License + Installation Project',
     saleType: 'hardware_software_installation',
     customerInfo: {
       type: 'new',
@@ -257,7 +283,6 @@ export const MOCK_REQUESTS: Request[] = [
     salesName: 'วิชัย สุขสบาย',
     salesId: 'u002',
     proposalNo: 'PRO-2026-003',
-    projectName: 'Network Security Solution',
     saleType: 'hardware_software_installation',
     customerInfo: {
       type: 'reseller',
@@ -271,6 +296,15 @@ export const MOCK_REQUESTS: Request[] = [
       },
     },
     quotationItems: [
+      {
+        itemId: 'item006a',
+        type: 'hardware',
+        name: 'Hardware',
+        sellingPrice: 250000,
+        cost: 190000,
+        grossProfit: 60000,
+        marginPercent: 24.00,
+      },
       {
         itemId: 'item006',
         type: 'software',
@@ -290,8 +324,16 @@ export const MOCK_REQUESTS: Request[] = [
         marginPercent: 50.00,
       },
     ],
-    installmentCount: 0,
-    installments: [],
+    installmentCount: 1,
+    installments: [
+      {
+        installmentNo: 1,
+        installmentPercent: 100,
+        installmentAmount: 250000,
+        creditTermDays: 30,
+        paymentCondition: 'on_po',
+      },
+    ],
     swInstallmentCount: 1,
     swInstallments: [
       {
@@ -303,10 +345,10 @@ export const MOCK_REQUESTS: Request[] = [
       },
     ],
     financial: {
-      totalSelling: 430000,
-      totalCost: 310000,
-      grossProfit: 120000,
-      marginPercent: 27.91,
+      totalSelling: 680000,
+      totalCost: 500000,
+      grossProfit: 180000,
+      marginPercent: 26.47,
       maxCreditTerm: 45,
     },
     status: 'draft',
@@ -334,7 +376,6 @@ export const MOCK_REQUESTS: Request[] = [
     salesName: 'สมหญิง รักงาน',
     salesId: 'u001',
     proposalNo: 'PRO-2026-004',
-    projectName: 'Cloud Migration Project',
     saleType: 'hardware_software_installation',
     customerInfo: {
       type: 'existing',
@@ -347,6 +388,15 @@ export const MOCK_REQUESTS: Request[] = [
       },
     },
     quotationItems: [
+      {
+        itemId: 'item008a',
+        type: 'hardware',
+        name: 'Hardware',
+        sellingPrice: 300000,
+        cost: 230000,
+        grossProfit: 70000,
+        marginPercent: 23.33,
+      },
       {
         itemId: 'item008',
         type: 'software',
@@ -366,8 +416,16 @@ export const MOCK_REQUESTS: Request[] = [
         marginPercent: 46.67,
       },
     ],
-    installmentCount: 0,
-    installments: [],
+    installmentCount: 1,
+    installments: [
+      {
+        installmentNo: 1,
+        installmentPercent: 100,
+        installmentAmount: 300000,
+        creditTermDays: 45,
+        paymentCondition: 'on_po',
+      },
+    ],
     swInstallmentCount: 2,
     swInstallments: [
       {
@@ -386,10 +444,10 @@ export const MOCK_REQUESTS: Request[] = [
       },
     ],
     financial: {
-      totalSelling: 750000,
-      totalCost: 580000,
-      grossProfit: 170000,
-      marginPercent: 22.67,
+      totalSelling: 1050000,
+      totalCost: 810000,
+      grossProfit: 240000,
+      marginPercent: 22.86,
       maxCreditTerm: 45,
     },
     status: 'rejected',

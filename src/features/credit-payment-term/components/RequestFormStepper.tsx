@@ -861,7 +861,7 @@ export function RequestFormStepper({
 function getDefaults(user: CurrentUser): Record<string, unknown> {
   return {
     salesName: user.name, salesEmail: user.email, salesId: user.id,
-    proposalNo: '', projectName: '',
+    proposalNo: '',
     saleType: 'hardware',
     customerType: '',
     newCustomer: { companyName: '', contactPerson: '', contactPhone: '' },
@@ -881,7 +881,7 @@ function flattenRequest(req: Request): Record<string, unknown> {
 
   const d: Record<string, unknown> = {
     salesName: req.salesName, salesEmail: req.salesEmail, salesId: req.salesId,
-    proposalNo: req.proposalNo, projectName: req.projectName,
+    proposalNo: req.proposalNo,
     saleType: req.saleType, customerType: req.customerInfo.type,
     newCustomer: { companyName: '', contactPerson: '', contactPhone: '' },
     existingCustomerId: '',

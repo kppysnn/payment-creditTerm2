@@ -429,9 +429,9 @@ export function RequestDetailPage() {
           </div>
       </div>
 
-      <ApproveModal open={approveOpen} request={req} onClose={() => setApproveOpen(false)} onApprove={handleApprove} />
-      <RejectModal open={rejectOpen} request={req} comments={{ customerComment, hardwareComment, swComment }} onClose={() => setRejectOpen(false)} onReject={handleReject} />
-      <CancelModal open={cancelOpen} request={req} onClose={() => setCancelOpen(false)} onCancel={handleCancel} />
+      <ApproveModal open={approveOpen} request={req} customerName={customerName} onClose={() => setApproveOpen(false)} onApprove={handleApprove} />
+      <RejectModal open={rejectOpen} request={req} customerName={customerName} comments={{ customerComment, hardwareComment, swComment }} onClose={() => setRejectOpen(false)} onReject={handleReject} />
+      <CancelModal open={cancelOpen} request={req} customerName={customerName} onClose={() => setCancelOpen(false)} onCancel={handleCancel} />
     </>
   )
 }
