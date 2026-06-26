@@ -50,19 +50,22 @@ export function AppShell() {
     <div style={{ minHeight: '100vh', background: '#F8F9FA' }}>
       {/* Host chrome — same composition as the WorkX TopMenuBar (Figma node
           1371:11120 / 1317:2565: logo+profile row, then a CENTERED module
-          switcher row below). Logo is at Figma's literal size (60px); the
-          module-switcher row stays scaled down ~60%, confirmed correct at
-          that size as-is. */}
+          switcher row below). Figma's own divider between the two rows is a
+          literal 1px line ("Frame 7597", h=1px) — no drop-shadow at all — so
+          that's the only separator here too. Logo is sized to roughly match
+          Figma's logo-to-canvas-width ratio (229/1920) on our narrower
+          viewport, rather than Figma's literal 60px, which read oversized
+          against our actual screen width. Padding is more generous than the
+          first pass so the logo and tabs aren't crowding the edges. */}
       <header className="no-print" style={{ position: 'sticky', top: 0, zIndex: 10, background: '#FFFFFF' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '12px 24px',
-          boxShadow: '0 4px 15px rgba(0,64,129,0.15)',
+          padding: '18px 32px',
           boxSizing: 'border-box',
         }}>
-          <img src={workxLogo} alt="WorkX" style={{ height: 60 }} />
+          <img src={workxLogo} alt="WorkX" style={{ height: 44 }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <RoleSwitcher />
@@ -79,10 +82,10 @@ export function AppShell() {
 
         <div style={{
           display: 'flex',
-          gap: 10,
+          gap: 14,
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '8px 24px',
+          padding: '14px 28px',
           borderTop: '1px solid #D0D6DF',
           flexWrap: 'wrap',
         }}>
