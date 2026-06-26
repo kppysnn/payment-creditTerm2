@@ -6,6 +6,7 @@
  */
 import type { Request, PaymentInstallment } from '../types/request'
 import { SALE_TYPE_LABELS } from '../types/request'
+import { getStatusConfig } from '../utils/status'
 
 export function printRequest(requestId: string): void {
   window.open(`/print/${requestId}`, '_blank')
@@ -26,6 +27,7 @@ export function exportPDF(req: Request): void {
 }
 
 function buildPrintHTML(req: Request): string {
+  const statusCfg = getStatusConfig(req.status)
   const separateQuotation = req.saleType === 'hardware_software_installation'
   const hardwareQuotationNo = `${req.proposalNo}-1`
   const serviceQuotationNo = `${req.proposalNo}-${separateQuotation ? '2' : '1'}`
@@ -53,7 +55,7 @@ function buildPrintHTML(req: Request): string {
   th { background: #F2F6F8; font-weight: 600; text-align: left; padding: 5px 8px; border: 1px solid #D0D6DF; }
   td { padding: 5px 8px; border: 1px solid #D0D6DF; }
   .mono { font-family: 'Courier New', monospace; }
-  .status { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; border: 1px solid; }
+  .status { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; }
   @media print { @page { size: A4; margin: 0; } }
 </style></head><body>
 <div class="container">
@@ -62,7 +64,7 @@ function buildPrintHTML(req: Request): string {
       <h1>Credit &amp; Payment Term Approval Request</h1>
       <div class="sub">${req.requestNo} · Version ${req.version} · Created ${new Date(req.createdAt).toLocaleDateString('th-TH')}</div>
     </div>
-    <div class="status" style="background:#FFFBEB;color:#92400E;border-color:#FCD34D">${req.status.toUpperCase()}</div>
+    <div class="status" style="background:${statusCfg.bgColor};color:${statusCfg.textColor}">${statusCfg.label}</div>
   </div>
 
   <div class="section">

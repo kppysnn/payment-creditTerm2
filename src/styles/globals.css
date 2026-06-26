@@ -83,10 +83,12 @@ body {
   line-height: 1.75;
 }
 
-/* Placeholder text needs body-level contrast, not the decorative --color-muted */
+/* Placeholder text needs body-level contrast, not the decorative --color-muted.
+   Italic matches the W+ Library "Web Text field" placeholder style exactly. */
 ::placeholder {
   color: var(--color-secondary);
   opacity: 1;
+  font-style: italic;
 }
 
 /* Scrollbar */
@@ -104,11 +106,12 @@ body {
 /* Table row hover */
 .data-row:hover { background: var(--color-bg) !important; }
 
-/* Page heading */
+/* Page heading — matches the WorkX host's title-row position exactly
+   (Figma "Upcoming Visitor" text, same row as the page's main action button) */
 .page-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-ink);
+  font-size: 36px;
+  font-weight: 500;
+  color: #004081;
   margin: 0;
   line-height: 1.3;
 }

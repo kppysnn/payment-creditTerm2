@@ -10,9 +10,9 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
     border: 'none',
   },
   secondary: {
-    background: '#004081',
-    color: '#FFFFFF',
-    border: 'none',
+    background: '#FFFFFF',
+    color: '#707070',
+    border: '1px solid #D0D6DF',
   },
   danger: {
     background: '#F3554F',
@@ -28,7 +28,7 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
 
 const VARIANT_HOVER: Record<Variant, CSSProperties> = {
   primary:   { filter: 'brightness(1.08)', boxShadow: '0 6px 20px rgba(0,64,129,0.18)', transform: 'translateY(-1px)' },
-  secondary: { filter: 'brightness(1.15)', boxShadow: '0 6px 20px rgba(0,64,129,0.22)', transform: 'translateY(-1px)' },
+  secondary: { background: '#D0D6DF', border: '1px solid #D0D6DF' },
   danger:    { filter: 'brightness(1.08)', boxShadow: '0 6px 20px rgba(243,85,79,0.25)', transform: 'translateY(-1px)' },
   ghost:     { background: 'rgba(102,197,197,0.10)', color: '#004081' },
 }

@@ -10,15 +10,22 @@ import { Input, Select } from '../../../components/ui/FormField'
 import { SearchIcon, SortCarets } from '../../../components/icons/FigmaIcons'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate } from '../utils/formatters'
-import { FiPlus, FiEdit2, FiRefreshCw, FiPrinter, FiAlertTriangle } from 'react-icons/fi'
+import { FiPlus, FiEdit2, FiRefreshCw, FiPrinter } from 'react-icons/fi'
 import { exportPDF } from '../services/exportService'
 import { getRequestById } from '../services/creditTermService'
 
 const STATUSES: RequestStatus[] = ['draft', 'pending', 'approved', 'rejected', 'revised', 'cancelled']
 
-const COLUMNS: [string, string][] = [
-  ['คำขอ', '15%'], ['ลูกค้า', '22%'], ['เซลล์', '15%'], ['มูลค่ารวม', '13%'],
-  ['สถานะ', '12%'], ['อัปเดต', '13%'], ['', '10%'],
+type SortKey = 'requestNo' | 'customerName' | 'salesName' | 'totalSelling' | 'status' | 'updatedAt'
+
+const COLUMNS: { label: string; width: string; key?: SortKey }[] = [
+  { label: 'คำขอ', width: '15%', key: 'requestNo' },
+  { label: 'ลูกค้า', width: '22%', key: 'customerName' },
+  { label: 'เซลล์', width: '15%', key: 'salesName' },
+  { label: 'มูลค่ารวม', width: '13%', key: 'totalSelling' },
+  { label: 'สถานะ', width: '12%', key: 'status' },
+  { label: 'อัปเดต', width: '13%', key: 'updatedAt' },
+  { label: '', width: '10%' },
 ]
 
 export function RequestListPage() {
@@ -27,6 +34,7 @@ export function RequestListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [requests, setRequests] = useState<RequestListItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' } | null>(null)
 
   const filterStatus = searchParams.get('status') ?? ''
   const filterText = searchParams.get('q') ?? ''
@@ -49,6 +57,24 @@ export function RequestListPage() {
     return matchStatus && matchText
   })
 
+  const sorted = [...filtered]
+  if (sort) {
+    sorted.sort((a, b) => {
+      const av = a[sort.key]
+      const bv = b[sort.key]
+      const cmp = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : sort.key === 'updatedAt'
+          ? new Date(av as string).getTime() - new Date(bv as string).getTime()
+          : String(av ?? '').localeCompare(String(bv ?? ''), 'th')
+      return sort.dir === 'asc' ? cmp : -cmp
+    })
+  }
+
+  function toggleSort(key: SortKey) {
+    setSort(prev => prev?.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })
+  }
+
   async function handleExport(e: React.MouseEvent, id: string) {
     e.stopPropagation()
     const req = await getRequestById(id)
@@ -62,7 +88,7 @@ export function RequestListPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title" style={{ fontSize: 28 }}>รายการคำขอ</h1>
+        <h1 className="page-title">รายการคำขอ</h1>
         {currentUser.role === 'sales' && (
           <Link to="/requests/new"><Button icon={<FiPlus size={15} />}>สร้างคำขอใหม่</Button></Link>
         )}
@@ -98,28 +124,25 @@ export function RequestListPage() {
       </div>
 
       {/* Table block — matches the WorkX host's table pattern (Figma node
-          730:25425): an optional flat notice bar sits flush above the count/title
-          bar and the table, all inside one bordered frame, no internal borders. */}
+          730:25425): a flat notice bar (plain ⚠️ emoji, no card/border) sits
+          flush above the table, separated only by a border-top divider. No
+          count/title bar — Figma's table has none. */}
       <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden', background: '#FFFFFF' }}>
         {showBanner && (
           rejectedBanner ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 24px', background: '#FEF2F2', color: '#7F1D1D' }}>
-              <FiAlertTriangle size={16} style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
               <span style={{ fontSize: 14, flex: 1 }}>มี {counts.rejected} คำขอที่ถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่</span>
               <Button variant="ghost" size="sm" onClick={() => setSearchParams({ status: 'rejected' })}>ดูทั้งหมด</Button>
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 24px', background: '#FFFBEB', color: '#92400E' }}>
-              <FiAlertTriangle size={16} style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
               <span style={{ fontSize: 14, flex: 1 }}>มี {counts.pending} คำขอรอการพิจารณา</span>
               <Button variant="ghost" size="sm" onClick={() => setSearchParams({ status: 'pending' })}>ดูทั้งหมด</Button>
             </div>
           )
         )}
-
-        <div style={{ padding: '16px 20px', borderTop: showBanner ? '1px solid #D0D6DF' : undefined }}>
-          {!loading && <span style={{ fontSize: 14, color: '#505050' }}>แสดง {filtered.length} จาก {requests.length} รายการ</span>}
-        </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '48px 0', color: '#586782' }}>กำลังโหลด...</div>
@@ -128,21 +151,30 @@ export function RequestListPage() {
         ) : (
           <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr>
-                {COLUMNS.map(([h, w]) => (
-                  <th key={h} style={{ width: w, padding: '10px 20px', textAlign: 'left', fontWeight: 400, color: '#004081', fontSize: 13, whiteSpace: 'nowrap' }}>
-                    {h && <span style={{ display: 'inline-flex', alignItems: 'center' }}>{h}<SortCarets /></span>}
+              <tr style={{ borderTop: showBanner ? '1px solid #D0D6DF' : undefined }}>
+                {COLUMNS.map(col => (
+                  <th
+                    key={col.label || col.key || 'actions'}
+                    onClick={col.key ? () => toggleSort(col.key!) : undefined}
+                    style={{ width: col.width, padding: '10px 20px', textAlign: 'left', fontWeight: 400, color: '#004081', fontSize: 13, whiteSpace: 'nowrap', cursor: col.key ? 'pointer' : undefined, userSelect: 'none' }}
+                  >
+                    {col.label && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        {col.label}
+                        {col.key && <SortCarets sort={sort?.key === col.key ? sort.dir : undefined} />}
+                      </span>
+                    )}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((req) => (
+              {sorted.map((req) => (
                 <tr
                   key={req.id}
                   onClick={() => navigate(`/requests/${req.id}`)}
                   className="data-row"
-                  style={{ background: '#fff', transition: 'background 0.1s', cursor: 'pointer' }}
+                  style={{ background: '#fff', transition: 'background 0.1s', cursor: 'pointer', borderTop: '1px solid #F2F6F8' }}
                 >
                   <td style={{ padding: '14px 20px', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13, color: '#004081', overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.requestNo}</div>

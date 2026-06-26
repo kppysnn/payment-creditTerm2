@@ -6,6 +6,8 @@ interface Props {
   size?: 'sm' | 'md'
 }
 
+// Filled tag/chip, matching the W+ Library "table tag" component (909:1216) —
+// light tinted background per status, not the bare icon+text this used before.
 export function StatusBadge({ status, size = 'md' }: Props) {
   const cfg = getStatusConfig(status)
   const Icon = cfg.icon
@@ -15,8 +17,11 @@ export function StatusBadge({ status, size = 'md' }: Props) {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 5,
+        padding: size === 'sm' ? '3px 8px' : '4px 10px',
+        borderRadius: 4,
+        background: cfg.bgColor,
         fontSize: size === 'sm' ? 12 : 13,
-        fontWeight: 700,
+        fontWeight: 500,
         color: cfg.textColor,
         whiteSpace: 'nowrap',
       }}
