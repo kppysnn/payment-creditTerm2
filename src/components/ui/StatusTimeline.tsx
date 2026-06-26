@@ -1,17 +1,17 @@
 import type { ApprovalHistoryEntry } from '../../features/credit-payment-term/types/approval'
 import { APPROVAL_ACTION_LABELS } from '../../features/credit-payment-term/types/approval'
 import { formatDateTime } from '../../features/credit-payment-term/utils/formatters'
-import { Check, X, Clock, FileText, Send, RefreshCw, Ban } from 'lucide-react'
+import { FaCheck, FaXmark, FaClock, FaFileLines, FaPaperPlane, FaArrowsRotate, FaBan } from 'react-icons/fa6'
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
-  created: <FileText size={14} />,
-  draft_saved: <FileText size={14} />,
-  submitted: <Send size={14} />,
-  approved: <Check size={14} />,
-  rejected: <X size={14} />,
-  edited: <RefreshCw size={14} />,
-  resubmitted: <Send size={14} />,
-  cancelled: <Ban size={14} />,
+  created: <FaFileLines size={14} />,
+  draft_saved: <FaFileLines size={14} />,
+  submitted: <FaPaperPlane size={14} />,
+  approved: <FaCheck size={14} />,
+  rejected: <FaXmark size={14} />,
+  edited: <FaArrowsRotate size={14} />,
+  resubmitted: <FaPaperPlane size={14} />,
+  cancelled: <FaBan size={14} />,
 }
 
 const ACTION_COLOR: Record<string, string> = {
@@ -53,7 +53,7 @@ export function StatusTimeline({ history }: Props) {
                   flexShrink: 0,
                 }}
               >
-                {ACTION_ICONS[entry.action] ?? <Clock size={14} />}
+                {ACTION_ICONS[entry.action] ?? <FaClock size={14} />}
               </div>
               {!isLast && (
                 <div style={{ width: 2, flex: 1, background: '#D0D6DF', minHeight: 20, margin: '3px 0' }} />

@@ -9,7 +9,7 @@ import { Button } from '../../../components/ui/Button'
 import { Input, Select } from '../../../components/ui/FormField'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate } from '../utils/formatters'
-import { Plus, Search, Edit, RefreshCw, Printer } from 'lucide-react'
+import { FaPlus, FaMagnifyingGlass, FaPenToSquare, FaArrowsRotate, FaPrint } from 'react-icons/fa6'
 import { exportPDF } from '../services/exportService'
 import { getRequestById } from '../services/creditTermService'
 
@@ -70,7 +70,7 @@ export function RequestListPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title" style={{ fontSize: 28 }}>รายการคำขอ</h1>
         {currentUser.role === 'sales' && (
-          <Link to="/requests/new"><Button icon={<Plus size={15} />}>สร้างคำขอใหม่</Button></Link>
+          <Link to="/requests/new"><Button icon={<FaPlus size={15} />}>สร้างคำขอใหม่</Button></Link>
         )}
       </div>
 
@@ -98,7 +98,7 @@ export function RequestListPage() {
               placeholder="ค้นหา Request No., ลูกค้า..."
               style={{ paddingRight: 36 }}
             />
-            <Search size={15} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#929EB4', pointerEvents: 'none' }} />
+            <FaMagnifyingGlass size={15} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#929EB4', pointerEvents: 'none' }} />
           </div>
         </div>
       </div>
@@ -150,12 +150,12 @@ export function RequestListPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            icon={req.status === 'rejected' ? <RefreshCw size={13} /> : <Edit size={13} />}
+                            icon={req.status === 'rejected' ? <FaArrowsRotate size={13} /> : <FaPenToSquare size={13} />}
                             aria-label="แก้ไขคำขอ"
                           />
                         </Link>
                       )}
-                      <Button variant="ghost" size="sm" icon={<Printer size={13} />} aria-label="พิมพ์ / Export PDF" onClick={e => handleExport(e, req.id)} />
+                      <Button variant="ghost" size="sm" icon={<FaPrint size={13} />} aria-label="พิมพ์ / Export PDF" onClick={e => handleExport(e, req.id)} />
                     </div>
                   </td>
                 </tr>

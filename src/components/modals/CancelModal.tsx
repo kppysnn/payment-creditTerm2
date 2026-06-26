@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { FormGroup, Textarea } from '../ui/FormField'
-import { Ban } from 'lucide-react'
+import { FaBan } from 'react-icons/fa6'
 import type { Request } from '../../features/credit-payment-term/types/request'
 
 interface Props {
@@ -46,7 +46,7 @@ export function CancelModal({ open, request, customerName, onClose, onCancel }: 
           <Button variant="secondary" onClick={onClose} disabled={loading}>ปิด</Button>
           <Button
             variant="danger"
-            icon={<Ban size={15} />}
+            icon={<FaBan size={15} />}
             onClick={handleSubmit}
             loading={loading}
           >

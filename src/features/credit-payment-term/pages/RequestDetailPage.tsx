@@ -19,7 +19,7 @@ import { canApproveRequest, canRejectRequest, canEditRequest, canCancelRequest, 
 import { formatCurrency } from '../utils/calculations'
 import { formatDateTime, formatCreditTerm } from '../utils/formatters'
 import { BackButton } from '../../../components/ui/BackButton'
-import { Edit, RefreshCw, Printer, Send, Ban, CheckCircle, XCircle } from 'lucide-react'
+import { FaPenToSquare, FaArrowsRotate, FaPrint, FaPaperPlane, FaBan, FaCircleCheck, FaCircleXmark } from 'react-icons/fa6'
 
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -278,26 +278,26 @@ export function RequestDetailPage() {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <Button variant="secondary" size="sm" icon={<Printer size={14} />} onClick={() => exportPDF(req)}>Print / PDF</Button>
+            <Button variant="secondary" size="sm" icon={<FaPrint size={14} />} onClick={() => exportPDF(req)}>Print / PDF</Button>
 
             {currentUser.role === 'sales' && req.status === 'draft' && (
-              <Button size="sm" icon={<Send size={14} />} loading={submitLoading} onClick={handleSubmit}>ส่งขออนุมัติ</Button>
+              <Button size="sm" icon={<FaPaperPlane size={14} />} loading={submitLoading} onClick={handleSubmit}>ส่งขออนุมัติ</Button>
             )}
             {canEditRequest(currentUser, req) && (
               <Link to={`/requests/${req.id}/edit`}>
-                <Button variant="secondary" size="sm" icon={req.status === 'rejected' ? <RefreshCw size={14} /> : <Edit size={14} />}>
+                <Button variant="secondary" size="sm" icon={req.status === 'rejected' ? <FaArrowsRotate size={14} /> : <FaPenToSquare size={14} />}>
                   {req.status === 'rejected' ? 'แก้ไขและส่งใหม่' : 'แก้ไข'}
                 </Button>
               </Link>
             )}
             {canCancelRequest(currentUser, req) && (
-              <Button variant="danger" size="sm" icon={<Ban size={14} />} onClick={() => setCancelOpen(true)}>ยกเลิก</Button>
+              <Button variant="danger" size="sm" icon={<FaBan size={14} />} onClick={() => setCancelOpen(true)}>ยกเลิก</Button>
             )}
             {canApproveRequest(currentUser, req) && (
-              <Button size="sm" icon={<CheckCircle size={14} />} onClick={() => setApproveOpen(true)}>อนุมัติ</Button>
+              <Button size="sm" icon={<FaCircleCheck size={14} />} onClick={() => setApproveOpen(true)}>อนุมัติ</Button>
             )}
             {canRejectRequest(currentUser, req) && (
-              <Button variant="danger" size="sm" icon={<XCircle size={14} />} onClick={() => setRejectOpen(true)}>ไม่อนุมัติ</Button>
+              <Button variant="danger" size="sm" icon={<FaCircleXmark size={14} />} onClick={() => setRejectOpen(true)}>ไม่อนุมัติ</Button>
             )}
           </div>
         </div>

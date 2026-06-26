@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
-import { AlertTriangle, Info, CheckCircle, XCircle } from 'lucide-react'
+import type { IconType } from 'react-icons'
+import { FaTriangleExclamation, FaCircleInfo, FaCircleCheck, FaCircleXmark } from 'react-icons/fa6'
 
 type AlertType = 'warning' | 'info' | 'success' | 'error'
 
-const CONFIG: Record<AlertType, { bg: string; border: string; color: string; Icon: typeof AlertTriangle }> = {
-  warning: { bg: '#FFFBEB', border: '#FCD34D', color: '#92400E', Icon: AlertTriangle },
-  info:    { bg: '#EFF6FF', border: '#93C5FD', color: '#1E40AF', Icon: Info },
-  success: { bg: '#F0FDF4', border: '#86EFAC', color: '#14532D', Icon: CheckCircle },
-  error:   { bg: '#FEF2F2', border: '#FCA5A5', color: '#7F1D1D', Icon: XCircle },
+const CONFIG: Record<AlertType, { bg: string; border: string; color: string; Icon: IconType }> = {
+  warning: { bg: '#FFFBEB', border: '#FCD34D', color: '#92400E', Icon: FaTriangleExclamation },
+  info:    { bg: '#EFF6FF', border: '#93C5FD', color: '#1E40AF', Icon: FaCircleInfo },
+  success: { bg: '#F0FDF4', border: '#86EFAC', color: '#14532D', Icon: FaCircleCheck },
+  error:   { bg: '#FEF2F2', border: '#FCA5A5', color: '#7F1D1D', Icon: FaCircleXmark },
 }
 
 interface Props {
