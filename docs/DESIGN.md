@@ -61,9 +61,9 @@ Components use the **hardcoded hex**, not `var(--color-*)`, in inline styles —
 
 | Token | Hex | Role |
 |-------|-----|------|
-| `--color-ink` | `#001122` | Headings, card titles, field values |
+| `--color-ink` | `#586782` | **Corrected 2026-06-29** — no component actually uses a distinct near-black "ink" anymore. WorkX's own `text/title` token is `#586782` (confirmed against its real page title and a modal header title, both independently) — same value as `--color-secondary`. This token's old value (`#001122`) never matched anything real in WorkX; don't reintroduce it for new headings. |
 | `--color-body` | `#505050` | Default body text (`body{}` in globals.css), **the StatusBadge label color, always** |
-| `--color-secondary` | `#586782` | Labels, secondary text, section-band labels |
+| `--color-secondary` | `#586782` | Labels, secondary text, section-band labels, **and now all heading/title text too (see `--color-ink` above) and filled field text (`text/filled` token, confirmed via `909:1107`)** |
 | `--color-muted` | `#929EB4` | Placeholders (decorative use only — see note below), timestamps, hints |
 
 **`::placeholder` does NOT use `--color-muted`.** It's set to `--color-secondary` (`#586782`) globally in `globals.css`, confirmed against the real app draft — placeholder text needs body-level contrast, not the lighter decorative muted tone. `--color-muted` is reserved for genuinely decorative/disabled contexts (timestamps, disabled input text).
@@ -162,18 +162,18 @@ Never `rgba(0,0,0,x)`. The whole `src/` tree was swept for this — zero violati
 
 | Role | Size | Weight | Color | Where |
 |------|------|--------|-------|-------|
-| List-page title | **36px** | **500** | `#004081` | `.page-title` class (globals.css) — used only by `RequestListPage`'s `<h1>`. Matches the WorkX host's own oversized title-row convention. |
-| Form/detail page title | 22px | 700 | `#001122` | Inline `<h1>` on `CreateRequestPage`, `EditRequestPage`, `RequestDetailPage` — a different, smaller convention from the list page. Don't unify these; they're deliberately different page types. |
-| Card header | 14px | 700 | `#001122` | `Card.tsx`, `-0.01em` letter-spacing |
+| List-page title | **36px** | **500** | `#586782` | `.page-title` class (globals.css) — used only by `RequestListPage`'s `<h1>`. Matches the WorkX host's own title text exactly ("My Works", Exzy_WorkX `851:2532`) — corrected 2026-06-29, was navy. |
+| Form/detail page title | 22px | 700 | `#586782` | Inline `<h1>` on `CreateRequestPage`, `EditRequestPage`, `RequestDetailPage` — a different, smaller convention from the list page (size differs; color does not — both are WorkX's `text/title`). Don't unify the *sizes*; they're deliberately different page types. |
+| Card header / Section title | 14px / 16px | 700 | `#586782` | `Card.tsx`, `Section.tsx`, `-0.01em` letter-spacing |
 | Section band label (`labeledBand`) | 13px | 700 | `#586782` | One step below Card-header weight by design — reads as a sub-section, not a competing heading |
 | `FieldDisplay` label | 11px | 700 | `#586782` | UPPERCASE + `0.06em` letter-spacing, unless `preserveLabelCase` (then normal case, `0.01em`) |
-| `FieldDisplay` value | 14px | per-field (`valueWeight` prop, no longer hardcoded) | `#001122` | `line-height: 1.5` |
+| `FieldDisplay` value | 14px | per-field (`valueWeight` prop, no longer hardcoded) | `#586782` | `line-height: 1.5` — matches WorkX's `text/filled` token (confirmed via `909:1107`), not a distinct "ink" |
 | Form label (`FormGroup`) | 12px | 600 | `#586782` | required `*` in `#F3554F` |
 | Body text | 14px | 400 | `#505050` | `body{}` in globals.css, `line-height: 1.65` |
 | Detail-page table header | 12.5px | **400** | `#004081` | `tableHeaderCell` in `RequestDetailPage.tsx` — **not bold, not uppercase, not gray.** Explicit code comment: "Hierarchy comes from color, not boldness — the host's own tables carry no bold text at all." |
 | List-page table header | 13px | 400 | `#004081` | `RequestListPage.tsx` — same philosophy, slightly different size, with sortable carets |
 | Form entry-table header (`priceTable`) | 12px | 400 | `#586782` | `RequestFormStepper.tsx` — right-aligned column labels above price inputs |
-| Modal header | 16px | 700 | `#001122` | `Modal.tsx` |
+| Modal header | 16px | 700 | `#586782` | `Modal.tsx` |
 | Hint / muted | 11–12px | 400 | `#929EB4` | timestamps, hints |
 | StatusBadge label | 13px (12px `sm`) | 400 | `#505050` always | regardless of status — see §2.5 |
 
@@ -315,7 +315,7 @@ Loading state replaces the icon with a spinner and disables the button. A blur-o
 | | `<Card>` | `<Section>` |
 |---|---|---|
 | Use for | An actual boxed surface where one is wanted (rare in this module now) | Dividing a page into named groups of fields — the default for form/detail-page sectioning |
-| Visual | bg `#FFFFFF`, border `1px solid #D0D6DF`, radius 4, header bg `#F2F6F8` | No border, no bg — title `16px/700/#001122` + `1px solid #D0D6DF` rule underneath, `10px` padding-bottom, `16px` margin-bottom |
+| Visual | bg `#FFFFFF`, border `1px solid #D0D6DF`, radius 4, header bg `#F2F6F8` | No border, no bg — title `16px/700/#586782` + `1px solid #D0D6DF` rule underneath, `10px` padding-bottom, `16px` margin-bottom |
 | Hover | `translateY(-2px)` + `shadow-md` + teal border tint | none |
 
 `Card.tsx` still exports `FieldDisplay`/`FieldGrid` (§3.2) — those are unaffected; only the outer boxing changed. `FieldGrid` uses CSS grid `auto-fit` with `minmax(190px or 240px, 1fr)` (190 if `cols>=3`, else 240) — collapses to 2 then 1 column as the container narrows, no manual breakpoints. `gap: 16px 28px`.
@@ -347,7 +347,7 @@ Label (`FormGroup`): `12px/600/#586782` (turns **`#FF3028`** on error — a dist
 
 - Backdrop: `rgba(15,23,42,0.50)`, no blur
 - Box: `#FFFFFF`, radius 4, `shadow-lg`, sizes sm=420/md=560/lg=720 max-width
-- Header: padding `16px 20px`, `borderBottom: 1px solid #D0D6DF`, title `16px/700/#001122`, close = `FiX` 18px
+- Header: padding `16px 20px`, `borderBottom: 1px solid #D0D6DF`, title `16px/700/#586782`, close = `FiX` 18px
 - Body: padding 20px, scrolls if tall
 - Footer: padding `14px 20px`, `borderTop: 1px solid #D0D6DF`, buttons right-aligned, gap 10
 - Body scroll-locked while open (`document.body.style.overflow`)
