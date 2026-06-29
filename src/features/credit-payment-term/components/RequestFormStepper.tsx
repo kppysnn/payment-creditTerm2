@@ -64,6 +64,11 @@ function formatThousands(v: unknown): string {
 }
 
 /* ── Radio selection card styles ── */
+// Text weight 400, not 600 — this is option text for a value the user is
+// picking (functionally a radio button), the same category as every other
+// label/control text in this form, not a heading. Selection state is
+// already carried entirely by color/border/background; weight doesn't need
+// to also signal it.
 function segBtn(active: boolean): React.CSSProperties {
   return {
     flex: 1,
@@ -73,7 +78,7 @@ function segBtn(active: boolean): React.CSSProperties {
     padding: '12px 16px',
     borderRadius: 4,
     fontSize: 13,
-    fontWeight: 600,
+    fontWeight: 400,
     cursor: 'pointer',
     border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
     background: active
@@ -293,7 +298,7 @@ export function RequestFormStepper({
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#F2F6F8' }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
           >
-            <div style={{ fontWeight: 600, color: '#586782' }}>{c.companyName}</div>
+            <div style={{ fontWeight: 400, color: '#586782' }}>{c.companyName}</div>
             <div style={{ color: '#586782', fontSize: 12, marginTop: 2 }}>Net {c.defaultCreditTerm ?? 0} วัน · {c.contactPerson}</div>
           </button>
         )) : (
@@ -433,7 +438,7 @@ export function RequestFormStepper({
                   error={errors[ctErrKey]}
                   style={{ flex: 1 }}
                 />
-                <span style={{ color: '#586782', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>วัน</span>
+                <span style={{ color: '#586782', fontSize: 13, fontWeight: 400, flexShrink: 0 }}>วัน</span>
                 <button type="button" onClick={() => { setIsCustomCT(false); setCtDays('') }}
                   style={{ width: 28, height: 38, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer' }}
                   onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
@@ -477,7 +482,7 @@ export function RequestFormStepper({
                     borderRight: n < 4 ? '1px solid #D0D6DF' : 'none',
                     background: instCount === n ? 'linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)' : '#fff',
                     color: instCount === n ? '#004081' : '#586782',
-                    fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                    fontSize: 13, fontWeight: 400, cursor: 'pointer',
                     transition: 'background 0.15s, color 0.15s',
                   }}>
                   {n}
@@ -501,7 +506,7 @@ export function RequestFormStepper({
               const active = preset.percents.every((p, idx) => numVal(insts[idx]?.installmentPercent) === p)
               return (
                 <button key={preset.label} type="button" onClick={() => applyPreset(preset.percents)}
-                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
                     border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
                     background: '#fff', color: active ? '#004081' : '#586782' }}>
                   {preset.label}
@@ -509,7 +514,7 @@ export function RequestFormStepper({
               )
             })}
             <button type="button" onClick={applyCustom}
-              style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+              style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
                 border: Object.values(customPctRows).some(Boolean) ? '1.5px solid #66C5C5' : '1.5px dashed #C7CEDA',
                 background: '#fff', color: Object.values(customPctRows).some(Boolean) ? '#004081' : '#586782' }}>
               ระบุเอง
@@ -539,7 +544,7 @@ export function RequestFormStepper({
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-                    <span style={{ fontSize: 11, color: '#586782', fontWeight: 600 }}>งวดที่ {i + 1}</span>
+                    <span style={{ fontSize: 11, color: '#586782', fontWeight: 400 }}>งวดที่ {i + 1}</span>
                   </div>
                   <FormGroup error={errors[pctErrRowKey]}>
                     {pctIsCustom ? (
@@ -549,10 +554,10 @@ export function RequestFormStepper({
                             onChange={e => updateInstRow(i, 'installmentPercent', e.target.value ? Number(e.target.value) : '')}
                             placeholder="0"
                             style={{ textAlign: 'right', flex: 1 }} error={errors[pctErrRowKey]} />
-                          <span style={{ color: '#586782', fontSize: 12, fontWeight: 600 }}>%</span>
+                          <span style={{ color: '#586782', fontSize: 12, fontWeight: 400 }}>%</span>
                         </div>
                         {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
-                          <div style={{ fontSize: 10, color: '#586782', fontWeight: 600 }}>แนะนำ {suggestedPct}%</div>
+                          <div style={{ fontSize: 10, color: '#586782', fontWeight: 400 }}>แนะนำ {suggestedPct}%</div>
                         )}
                       </div>
                     ) : (
@@ -569,7 +574,7 @@ export function RequestFormStepper({
                           <option value="custom">ระบุเอง</option>
                         </Select>
                         {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
-                          <div style={{ marginTop: 3, fontSize: 10, color: '#586782', fontWeight: 600 }}>แนะนำ {suggestedPct}%</div>
+                          <div style={{ marginTop: 3, fontSize: 10, color: '#586782', fontWeight: 400 }}>แนะนำ {suggestedPct}%</div>
                         )}
                       </>
                     )}
@@ -588,7 +593,11 @@ export function RequestFormStepper({
         {/* Progress bar */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>รวมสัดส่วนงวด</span>
+            {/* Label is plain weight — the red/gray color swap on the number
+                already carries the "did this hit 100%" signal; weight
+                doesn't need to also do that job (same "color, not boldness"
+                principle as the table headers — see DESIGN.md §3.2). */}
+            <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>รวมสัดส่วนงวด</span>
             <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#586782' : '#F3554F' }}>{totalPct.toFixed(0)}%</span>
           </div>
           <div style={{ height: 6, background: '#D0D6DF', borderRadius: 6, overflow: 'hidden' }}>
@@ -602,13 +611,13 @@ export function RequestFormStepper({
           marginTop: 6, padding: '12px 14px', borderRadius: 4,
           background: '#F2F6F8',
         }}>
-          <span style={{ fontSize: 13, color: '#586782', fontWeight: 600 }}>รวม {summaryLabel}</span>
+          <span style={{ fontSize: 13, color: '#586782', fontWeight: 400 }}>รวม {summaryLabel}</span>
           <span style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-              ราคาทุน <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#586782' }}>{formatCurrency(costTotal)}</span>
+            <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>
+              ราคาทุน <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 500, color: '#586782' }}>{formatCurrency(costTotal)}</span>
             </span>
-            <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>
-              ราคาขาย <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 700, color: '#004081' }}>{formatCurrency(sellingTotal)}</span>
+            <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>
+              ราคาขาย <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#004081' }}>{formatCurrency(sellingTotal)}</span>
             </span>
           </span>
         </div>
@@ -871,7 +880,7 @@ export function RequestFormStepper({
           <Checkbox
             checked={confirmed}
             onChange={setConfirmed}
-            label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 500, lineHeight: 1.5 }}>ตรวจสอบแล้ว ข้อมูลถูกต้องครบถ้วน</span>}
+            label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 400, lineHeight: 1.5 }}>ตรวจสอบแล้ว ข้อมูลถูกต้องครบถ้วน</span>}
           />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
             {!isPendingEdit && (

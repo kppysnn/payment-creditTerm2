@@ -94,7 +94,13 @@ export function RequestDetailPage() {
   // for ordinary row dividers, not a hard structural edge.
   const labeledBand = (label: string, right?: React.ReactNode, framed = true, tinted = false) => (
     <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: framed ? '18px 14px 12px' : '18px 0 12px', borderTop: `1px solid ${framed ? '#D0D6DF' : '#F2F6F8'}`, background: tinted ? '#F8F9FA' : undefined }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#586782' }}>{label}</span>
+      {/* Plain weight — this is a label ("รวม Hardware", "Payment Schedule"),
+          the same category as every other label in the app; the top rule +
+          its own padded band already mark it as a sub-section, weight
+          doesn't need to add to that. Matches RequestFormStepper's parallel
+          "รวม {summaryLabel}" strip (see feedback_form_label_weight_drift
+          memory for why these two files have to move together). */}
+      <span style={{ fontSize: 13, fontWeight: 400, color: '#586782' }}>{label}</span>
       {right}
     </div>
   )
@@ -131,7 +137,7 @@ export function RequestDetailPage() {
         <div style={{ padding: framed ? '0 14px 18px' : '0 0 4px' }}>
           {priorComment && !value.trim() && (
             <div style={{ marginBottom: 8, paddingLeft: 10, borderLeft: '2px solid #F3554F', fontSize: 12, color: '#7F1D1D', lineHeight: 1.5 }}>
-              <span style={{ fontWeight: 600 }}>ครั้งก่อนถูกปฏิเสธว่า:</span> <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
+              <span style={{ fontWeight: 400 }}>ครั้งก่อนถูกปฏิเสธว่า:</span> <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
             </div>
           )}
           {editable ? (
@@ -184,17 +190,17 @@ export function RequestDetailPage() {
 
   const totalStrip = (label: string, cost: number, selling: number) => labeledBand(`รวม ${label}`, (
     <span style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 12, color: '#586782', fontWeight: 500 }}>
+      <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>
         ราคาทุน <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 500, color: '#586782' }}>{formatCurrency(cost)}</span>
       </span>
-      <span style={{ fontSize: 12, color: '#586782', fontWeight: 500 }}>
+      <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>
         ราคาขาย <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#004081' }}>{formatCurrency(selling)}</span>
       </span>
     </span>
   ), true, true)
 
   const installmentStrip = (creditTermDays: number) => labeledBand('Payment Schedule', (
-    <span style={{ fontSize: 12, color: '#586782', fontWeight: 500 }}>
+    <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>
       Credit Term: <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
     </span>
   ), true, true)
