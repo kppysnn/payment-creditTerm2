@@ -10,7 +10,7 @@ import { Input, Select } from '../../../components/ui/FormField'
 import { DatePicker } from '../../../components/ui/DatePicker'
 import { KebabMenu, type KebabMenuItem } from '../../../components/ui/KebabMenu'
 import { DeleteRequestModal } from '../../../components/modals/DeleteRequestModal'
-import { SearchIcon, SortCarets, AddCircleIcon, EditIcon, RefreshIcon, PrinterIcon, TrashIcon, XMarkIcon } from '../../../components/icons/FigmaIcons'
+import { SearchIcon, SortCarets, AddCircleIcon, EditIcon, PrinterIcon, TrashIcon, XMarkIcon } from '../../../components/icons/FigmaIcons'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate } from '../utils/formatters'
 import { exportPDF } from '../services/exportService'
@@ -321,17 +321,29 @@ export function RequestListPage() {
                       }
 
                       return (
-                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: 14, justifyContent: 'flex-end', alignItems: 'center' }}>
                           {/* Rejected requests get their own visible, labeled
                               button right in the row — not tucked in the
                               kebab — so "this one needs you to go fix it" is
-                              unmissable, distinct from routine edit/print.
-                              primary (solid gradient), not secondary (plain
-                              white) — secondary read as too quiet to stand
-                              out as the one row that needs action. */}
+                              unmissable, distinct from routine print. Solid
+                              navy (#004081, W+ Library "button/primary" —
+                              909:1125), not the app's usual teal-navy
+                              gradient — a deliberate one-off per Figma, not a
+                              change to Button's shared primary variant. */}
                           {canEdit && isRejected && (
                             <Link to={`/requests/${req.id}/edit`}>
-                              <Button variant="primary" size="sm" icon={<RefreshIcon size={14} />}>ส่งใหม่</Button>
+                              {/* Button's own mouseleave handler always resets
+                                  background to the primary variant's gradient
+                                  (hardcoded, ignores any style override) — so
+                                  the solid-navy fill has to be re-asserted on
+                                  leave too, not just set once on mount. */}
+                              <Button
+                                variant="primary" size="sm" icon={<EditIcon size={14} />}
+                                style={{ background: '#004081' }}
+                                onMouseLeave={e => { e.currentTarget.style.background = '#004081' }}
+                              >
+                                แก้ไข
+                              </Button>
                             </Link>
                           )}
                           <KebabMenu items={kebabItems} ariaLabel={`ตัวเลือกสำหรับ ${req.requestNo}`} />
