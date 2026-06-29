@@ -40,15 +40,19 @@ function matchesDateRange(iso: string, fromIso: string, toIso: string): boolean 
   return day >= new Date(fy, fm - 1, fd).getTime() && day <= new Date(ty, tm - 1, td).getTime()
 }
 
+// Matches the W+ Library "Tag/Small" component exactly (1049:411, "Edit"
+// state) — not an invented chip style. 24px tall (was ~20px — too small to
+// spot, per direct feedback), teal/100 bg (#D9F0F0, not a navy-tinted
+// neutral), navy text, gray dismiss icon, 8px/4px asymmetric padding.
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', background: '#F2F6F8', color: '#004081', borderRadius: 4, fontSize: 13 }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 24, padding: '0 4px 0 8px', background: '#D9F0F0', color: '#004081', borderRadius: 4, fontSize: 12 }}>
       {label}
       <button
         type="button"
         onClick={onRemove}
         aria-label={`ล้างตัวกรอง ${label}`}
-        style={{ display: 'flex', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#004081', opacity: 0.6 }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#586782' }}
       >
         <XMarkIcon size={9} />
       </button>

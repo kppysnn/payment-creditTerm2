@@ -38,14 +38,21 @@ function buildPrintHTML(req: Request): string {
 
   return `<!DOCTYPE html><html><head><title>${req.requestNo}</title>
 <style>
-  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #586782; margin: 0; padding: 0; }
+  /* Font stack, colors, and weights matched to the live app's design system
+     (src/styles/globals.css, docs/DESIGN.md) as of 2026-06-29 — this used to
+     be 'Segoe UI'/Arial with its own stale weight conventions, completely
+     disconnected from every fix made to the live screens. Table borders are
+     a deliberate, print-specific exception (kept from src/styles/print.css'
+     own convention) — printed output can't rely on the subtle background
+     tints the live tables use instead of borders. */
+  body { font-family: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif; font-size: 12px; color: #586782; margin: 0; padding: 0; }
   .container { max-width: 210mm; margin: 0 auto; padding: 16mm; }
-  h1 { font-size: 18px; color: #004081; margin: 0 0 4px; }
+  h1 { font-size: 18px; font-weight: 500; color: #586782; margin: 0 0 4px; }
   .sub { font-size: 11px; color: #586782; margin-bottom: 16px; }
   .section { margin-bottom: 18px; }
-  .section-title { font-size: 13px; font-weight: 700; color: #004081; border-bottom: 1.5px solid #004081; padding-bottom: 3px; margin-bottom: 10px; }
+  .section-title { font-size: 14px; font-weight: 500; color: #586782; border-bottom: 1px solid #D0D6DF; padding-bottom: 6px; margin-bottom: 10px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
-  .field-label { font-size: 10px; color: #586782; font-weight: 600; }
+  .field-label { font-size: 10px; color: #586782; font-weight: 400; }
   .field-val { font-size: 12px; color: #586782; margin-bottom: 6px; }
   .quote-group { border:1px solid #D0D6DF; border-radius:4px; overflow:hidden; margin:12px 0; }
   .quote-head { display:flex; justify-content:space-between; align-items:baseline; background:#004081; padding:7px 10px; font-weight:700; color:#fff; }
@@ -54,7 +61,7 @@ function buildPrintHTML(req: Request): string {
   table { width: 100%; border-collapse: collapse; font-size: 11px; }
   th { background: #F2F6F8; font-weight: 600; text-align: left; padding: 5px 8px; border: 1px solid #D0D6DF; }
   td { padding: 5px 8px; border: 1px solid #D0D6DF; }
-  .mono { font-family: 'Courier New', monospace; }
+  .mono { font-family: 'Poppins', 'Noto Sans Thai', monospace; }
   .status { display: inline-block; font-size: 11px; font-weight: 500; }
   @media print { @page { size: A4; margin: 0; } }
 </style></head><body>
@@ -88,9 +95,9 @@ function buildPrintHTML(req: Request): string {
     ${hardwareItems.length > 0 ? buildQuotationGroup(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareSelling, req.installments, req.hardwareComment) : ''}
     ${serviceItems.length > 0 ? buildQuotationGroup(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceSelling, req.swInstallments ?? [], req.swComment) : ''}
     <table>
-      <tr style="font-weight:700;background:#F2F6F8">
+      <tr style="font-weight:600;background:#F2F6F8">
         <td>รวมทั้งหมด</td>
-        <td class="mono">${req.financial.totalSelling.toLocaleString()}</td>
+        <td class="mono" style="font-weight:700">${req.financial.totalSelling.toLocaleString()}</td>
       </tr>
     </table>
   </div>
@@ -114,13 +121,13 @@ function buildQuotationGroup(no: string, title: string, gradient: string, items:
         <td>${i.name}</td>
         <td class="mono" style="text-align:right">${i.sellingPrice.toLocaleString()}</td>
       </tr>`).join('')}
-      <tr style="font-weight:700;background:#F2F6F8">
+      <tr style="font-weight:600;background:#F2F6F8">
         <td>รวม ${title}</td>
-        <td class="mono" style="text-align:right">${total.toLocaleString()}</td>
+        <td class="mono" style="text-align:right;font-weight:700">${total.toLocaleString()}</td>
       </tr>
     </table>
     ${installments.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#F2F6F8;border:1px solid #D0D6DF;border-top:none">
-      <span style="font-size:12px;font-weight:700;color:#586782">Payment Schedule</span>
+      <span style="font-size:12px;font-weight:600;color:#586782">Payment Schedule</span>
       <span style="font-size:11px;font-weight:600;color:#586782">Credit Term: <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
     </div>
     <table>

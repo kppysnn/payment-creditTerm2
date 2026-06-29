@@ -463,7 +463,12 @@ export function RequestFormStepper({
           </FormGroup>
 
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#586782', marginBottom: 5 }}>จำนวนงวด</div>
+            {/* Matches FormGroup's label exactly (12px/400/#586782) — this is
+                the same field-label role as "Credit Term" right beside it,
+                just not wrapped in <FormGroup> since the control below isn't
+                a single input. Was 13px/600, visibly heavier than its
+                row-mate for no reason. */}
+            <div style={{ fontSize: 12, fontWeight: 400, color: '#586782', marginBottom: 5 }}>จำนวนงวด</div>
             <div style={{ display: 'flex', border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden', height: 38 }}>
               {[1, 2, 3, 4].map(n => (
                 <button key={n} type="button" onClick={() => changeCount(n)}
@@ -657,8 +662,12 @@ export function RequestFormStepper({
           </FormGroup>
 
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#586782', marginBottom: 8 }}>
-              ประเภทการขาย <span style={{ color: '#F3554F' }}>*</span>
+            {/* Matches FormGroup's label exactly — same field-label role as
+                "Proposal No." right above it, just not wrapped in
+                <FormGroup> since the control below is a button group, not a
+                single input. */}
+            <div style={{ fontSize: 12, fontWeight: 400, color: '#586782', marginBottom: 8 }}>
+              ประเภทการขาย <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, marginLeft: 3 }}>*</span>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               {SALE_TYPES.map(t => (
@@ -677,8 +686,8 @@ export function RequestFormStepper({
       <Section title="2. ข้อมูลลูกค้า">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#586782', marginBottom: 8 }}>
-              ประเภทลูกค้า <span style={{ color: '#F3554F' }}>*</span>
+            <div style={{ fontSize: 12, fontWeight: 400, color: '#586782', marginBottom: 8 }}>
+              ประเภทลูกค้า <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, marginLeft: 3 }}>*</span>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               {CUSTOMER_TYPES.map(type => (

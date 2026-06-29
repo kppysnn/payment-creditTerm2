@@ -110,25 +110,39 @@ export function RequestDetailPage() {
   // record of the approver's response: hide it entirely until there's actually
   // something to show (a saved note or a past rejection), rather than reserving
   // space for "ยังไม่มีหมายเหตุ" before anyone has reviewed the request at all.
+  // Red used to mean "this is a comment field" unconditionally — every note
+  // box was red-framed even on an approved request with a perfectly
+  // positive note, AND the editable Textarea (white, per FormField.tsx's
+  // normal styling) sat inside that red frame, reading as a red box wrapped
+  // around a white box. Doubled up further whenever a prior-round rejection
+  // quote was also showing above it — two reddish boxes stacked.
+  // Red now means what it actually says: an active rejection. The editable
+  // field is just a normal <Textarea> (the label above it already says
+  // "this is a comment field," no extra frame needed). The prior-rejection
+  // quote is a left-border accent, not a competing box. A *saved* note only
+  // gets the red treatment if the request is currently rejected — an
+  // approved request's note reads as a normal saved note, not a warning.
   const sectionComment = (label: string, value: string, editable: boolean, onChange?: (v: string) => void, framed = true, priorComment?: string, placeholder = 'ระบุรายละเอียดเพิ่มเติม เช่น เหตุผล เงื่อนไข หรือข้อมูลประกอบการพิจารณา') => {
     if (!editable && !value.trim() && !priorComment) return null
+    const isRejected = req.status === 'rejected'
     return (
       <div>
         {labeledBand(label, undefined, framed)}
         <div style={{ padding: framed ? '0 14px 18px' : '0 0 4px' }}>
           {priorComment && !value.trim() && (
-            <div style={{ marginBottom: 8, padding: '7px 10px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 12, color: '#7F1D1D' }}>
-              เคยถูกปฏิเสธไว้ว่า: <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
+            <div style={{ marginBottom: 8, paddingLeft: 10, borderLeft: '2px solid #F3554F', fontSize: 12, color: '#7F1D1D', lineHeight: 1.5 }}>
+              <span style={{ fontWeight: 600 }}>ครั้งก่อนถูกปฏิเสธว่า:</span> <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
             </div>
           )}
-          {/* A reviewer's note reads as a comment, not page data — frame it red
-              (editable and saved alike) so it's unmistakable from ordinary fields. */}
           {editable ? (
-            <div style={{ padding: 6, background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4 }}>
-              <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder={placeholder} />
-            </div>
+            <Textarea value={value} onChange={e => onChange?.(e.target.value)} rows={2} placeholder={placeholder} />
           ) : value.trim() ? (
-            <div style={{ padding: '10px 12px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 13, color: '#7F1D1D', lineHeight: 1.65, whiteSpace: 'pre-wrap' as const }}>{value}</div>
+            <div style={{
+              padding: '10px 12px', borderRadius: 4, fontSize: 13, lineHeight: 1.65, whiteSpace: 'pre-wrap' as const,
+              background: isRejected ? '#FEF2F2' : '#F2F6F8',
+              border: `1px solid ${isRejected ? '#FCA5A5' : '#D0D6DF'}`,
+              color: isRejected ? '#7F1D1D' : '#586782',
+            }}>{value}</div>
           ) : null}
         </div>
       </div>
