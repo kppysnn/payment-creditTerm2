@@ -67,16 +67,23 @@ export function AppShell() {
         }}>
           <img src={workxLogo} alt="WorkX" style={{ height: 44 }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <RoleSwitcher />
-            <span style={{ fontSize: 12, color: '#586782' }}>{currentUser.name}</span>
-            <img src={avatarPlaceholder} alt="" width={22} height={22} style={{ borderRadius: '50%' }} />
-            <button
-              aria-label="เมนูผู้ใช้"
-              style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #D0D6DF', borderRadius: 4, background: 'none', cursor: 'pointer', color: '#586782' }}
-            >
-              <ChevronIcon direction="down" size={10} />
-            </button>
+            {/* Sized literally off Figma's own "UserProfile" component
+                (Exzy_WorkX 851:2488) — unlike the logo, this is fixed-scale
+                app chrome (touch target + readability), not something that
+                should shrink to a viewport ratio. 14px text, 32px avatar,
+                32px bordered chevron box, 12px gap — all literal. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 14, color: '#586782' }}>{currentUser.name}</span>
+              <img src={avatarPlaceholder} alt="" width={32} height={32} style={{ borderRadius: '50%' }} />
+              <button
+                aria-label="เมนูผู้ใช้"
+                style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #D0D6DF', borderRadius: 4, background: 'none', cursor: 'pointer', color: '#586782' }}
+              >
+                <ChevronIcon direction="down" size={12} />
+              </button>
+            </div>
           </div>
         </div>
 

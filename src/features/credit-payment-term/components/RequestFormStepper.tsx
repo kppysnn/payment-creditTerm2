@@ -6,12 +6,12 @@ import { CUSTOMER_TYPE_LABELS } from '../types/customer'
 import { type SaleType, type PaymentCondition } from '../types/request'
 import { Card } from '../../../components/ui/Card'
 import { Button } from '../../../components/ui/Button'
+import { Checkbox } from '../../../components/ui/Checkbox'
 import { FormGroup, Input, Select } from '../../../components/ui/FormField'
 import { Alert } from '../../../components/ui/Alert'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
 import { searchCustomers } from '../services/customerService'
 import { FiSave, FiX } from 'react-icons/fi'
-import { MailSendIcon } from '../../../components/icons/FigmaIcons'
 
 interface InstRow { installmentPercent: number | ''; creditTermDays: number | ''; paymentCondition: PaymentCondition | '' }
 
@@ -836,21 +836,19 @@ export function RequestFormStepper({
       <div style={{ background: '#fff', borderRadius: 4, padding: '20px 24px', border: '1px solid #D0D6DF' }}>
         {submitError && <div style={{ marginBottom: 12, fontSize: 12, color: '#F3554F' }}>{submitError}</div>}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-            <input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)}
-              style={{ width: 15, height: 15, accentColor: '#004081', cursor: 'pointer' }} />
-            <span style={{ fontSize: 13, color: '#586782', fontWeight: 500, lineHeight: 1.5 }}>
-              ตรวจสอบแล้ว ข้อมูลถูกต้องครบถ้วน
-            </span>
-          </label>
+          <Checkbox
+            checked={confirmed}
+            onChange={setConfirmed}
+            label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 500, lineHeight: 1.5 }}>ตรวจสอบแล้ว ข้อมูลถูกต้องครบถ้วน</span>}
+          />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
             {!isPendingEdit && (
               <Button variant="ghost" icon={<FiSave size={15} />} onClick={handleDraft} loading={draftLoading} disabled={submitLoading}>
                 บันทึกแบบร่าง
               </Button>
             )}
-            <Button icon={<MailSendIcon size={15} />} onClick={handleSubmit} loading={submitLoading} disabled={draftLoading || !confirmed}>
-              {isPendingEdit ? 'บันทึกการแก้ไข' : isResubmit ? 'ส่งขออนุมัติอีกครั้ง' : 'ส่งขออนุมัติ'}
+            <Button onClick={handleSubmit} loading={submitLoading} disabled={draftLoading || !confirmed}>
+              {isPendingEdit ? 'บันทึกการแก้ไข' : isResubmit ? 'ส่งคำขออนุมัติอีกครั้ง' : 'ส่งคำขออนุมัติ'}
             </Button>
           </div>
         </div>

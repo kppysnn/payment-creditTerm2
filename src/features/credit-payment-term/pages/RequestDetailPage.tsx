@@ -20,7 +20,7 @@ import { formatCurrency } from '../utils/calculations'
 import { formatDateTime, formatCreditTerm } from '../utils/formatters'
 import { BackButton } from '../../../components/ui/BackButton'
 import { FiSlash, FiCheckCircle, FiXCircle } from 'react-icons/fi'
-import { EditIcon, RefreshIcon, PrinterIcon, MailSendIcon } from '../../../components/icons/FigmaIcons'
+import { EditIcon, RefreshIcon, PrinterIcon } from '../../../components/icons/FigmaIcons'
 
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -283,7 +283,7 @@ export function RequestDetailPage() {
             <Button variant="secondary" size="sm" icon={<PrinterIcon size={15} />} onClick={() => exportPDF(req)}>Print / PDF</Button>
 
             {currentUser.role === 'sales' && req.status === 'draft' && (
-              <Button size="sm" icon={<MailSendIcon size={15} />} loading={submitLoading} onClick={handleSubmit}>ส่งขออนุมัติ</Button>
+              <Button size="sm" loading={submitLoading} onClick={handleSubmit}>ส่งคำขออนุมัติ</Button>
             )}
             {canEditRequest(currentUser, req) && (
               <Link to={`/requests/${req.id}/edit`}>

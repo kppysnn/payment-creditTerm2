@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
+import { Checkbox } from '../ui/Checkbox'
 import { FiXCircle } from 'react-icons/fi'
 import type { Request } from '../../features/credit-payment-term/types/request'
 import type { SectionComments } from '../../features/credit-payment-term/types/approval'
@@ -69,15 +70,12 @@ export function RejectModal({ open, request, customerName, comments, onClose, on
         </div>
       )}
 
-      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', fontSize: 13 }}>
-        <input
-          type="checkbox"
-          checked={confirmed}
-          onChange={e => { setConfirmed(e.target.checked); setError('') }}
-          style={{ marginTop: 2, accentColor: '#F3554F' }}
-        />
-        <span>ยืนยันไม่อนุมัติคำขอนี้</span>
-      </label>
+      <Checkbox
+        checked={confirmed}
+        onChange={c => { setConfirmed(c); setError('') }}
+        accentColor="#F3554F"
+        label="ยืนยันไม่อนุมัติคำขอนี้"
+      />
 
       {error && <div style={{ marginTop: 10, fontSize: 12, color: '#F3554F' }}>{error}</div>}
     </Modal>

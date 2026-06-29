@@ -78,7 +78,10 @@ export function Button({
         height: sz.height,
         padding: sz.padding as string,
         fontSize: sz.fontSize,
-        fontWeight: 600,
+        // WorkX buttons are all set in a regular/thin weight, not semibold —
+        // confirmed against the W+ Library's own field/checkbox text styles,
+        // which are uniformly Poppins Regular (400) app-wide.
+        fontWeight: 400,
         borderRadius: 4,
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.45 : 1,
