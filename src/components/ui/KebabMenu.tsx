@@ -43,19 +43,22 @@ export function KebabMenu({ items, ariaLabel = 'เมนู' }: Props) {
         type="button"
         aria-label={ariaLabel}
         onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
-        style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', borderRadius: 4, cursor: 'pointer', color: '#586782' }}
+        style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', borderRadius: 4, cursor: 'pointer', color: '#586782' }}
         onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
         onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
       >
-        <KebabIcon size={16} />
+        <KebabIcon size={14} />
       </button>
 
       {open && (
+        // Border-free — definition comes from the navy-tinted shadow alone,
+        // not a stroke. Matches the credit-term/percent <Select> dropdowns,
+        // which are also shadow-only against the white page background.
         <div style={{
           position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 20,
-          background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4,
-          boxShadow: '0 16px 34px rgba(0,64,129,0.10), 0 2px 6px rgba(0,64,129,0.06)',
-          minWidth: 170, overflow: 'hidden',
+          background: '#fff', borderRadius: 4,
+          boxShadow: '0 16px 34px rgba(0,64,129,0.14), 0 2px 6px rgba(0,64,129,0.08)',
+          minWidth: 160, overflow: 'hidden',
         }}>
           {items.map((item, i) => (
             <button

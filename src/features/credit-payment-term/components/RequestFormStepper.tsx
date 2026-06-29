@@ -33,6 +33,11 @@ const CUSTOMER_TYPES: CustomerType[] = ['new', 'existing', 'reseller']
 const CREDIT_TERM_PRESETS = [7, 15, 30, 60, 90, 120]
 const CREDIT_TERM_HINTS: Record<number, string> = { 7: '1 สัปดาห์', 15: '15 วัน', 30: '1 เดือน', 60: '2 เดือน', 90: '3 เดือน', 120: '4 เดือน' }
 const INSTALLMENT_PERCENT_PRESETS = [10, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]
+const INSTALLMENT_COUNT_PRESETS = [1, 2, 3, 4, 6, 12, 24, 36]
+const MAX_INSTALLMENTS = 360 // 30 years monthly — a ceiling against stray input, not a realistic expectation
+// Beyond this, curated split presets (below) run out and the card grid stops
+// being readable — the table view + auto equal-split take over instead.
+const MANY_INSTALLMENTS_THRESHOLD = 4
 const INSTALLMENT_PRESETS: Record<number, Array<{ label: string; percents: number[] }>> = {
   1: [{ label: '100', percents: [100] }],
   2: [
@@ -56,6 +61,17 @@ const INSTALLMENT_PRESETS: Record<number, Array<{ label: string; percents: numbe
 }
 
 function numVal(v: unknown): number { return Number(v) || 0 }
+
+// Even split across n installments. The last one absorbs whatever rounding
+// remainder is left over (e.g. 3 installments -> 33.33/33.33/33.34) so the
+// total always lands on exactly 100%, never 99.99 or 100.01.
+function equalSplitPercents(n: number): number[] {
+  if (n <= 0) return []
+  const base = Math.floor(10000 / n) / 100
+  const percents = Array(n).fill(base)
+  percents[n - 1] = Math.round((100 - base * (n - 1)) * 100) / 100
+  return percents
+}
 
 function formatThousands(v: unknown): string {
   if (v === '' || v === undefined || v === null) return ''
@@ -144,6 +160,7 @@ export function RequestFormStepper({
     })) ?? [{ installmentPercent: 100, creditTermDays: 0, paymentCondition: 'on_delivery' }]
   )
   const [hwCustomCreditTerm, setHwCustomCreditTerm] = useState(false)
+  const [hwCustomCount, setHwCustomCount] = useState(false)
   const [hwCustomPercentRows, setHwCustomPercentRows] = useState<Record<number, boolean>>({})
 
   // ── SW payment state ──
@@ -159,6 +176,7 @@ export function RequestFormStepper({
     })) ?? [{ installmentPercent: 100, creditTermDays: 0, paymentCondition: 'on_delivery' }]
   )
   const [swCustomCreditTerm, setSwCustomCreditTerm] = useState(false)
+  const [swCustomCount, setSwCustomCount] = useState(false)
   const [swCustomPercentRows, setSwCustomPercentRows] = useState<Record<number, boolean>>({})
 
   const fd = formData
@@ -381,10 +399,17 @@ export function RequestFormStepper({
     const setInsts     = prefix === 'hw' ? setHwInstallments       : setSwInstallments
     const isCustomCT   = prefix === 'hw' ? hwCustomCreditTerm      : swCustomCreditTerm
     const setIsCustomCT= prefix === 'hw' ? setHwCustomCreditTerm   : setSwCustomCreditTerm
+    const isCustomCount   = prefix === 'hw' ? hwCustomCount   : swCustomCount
+    const setIsCustomCount= prefix === 'hw' ? setHwCustomCount: setSwCustomCount
     const customPctRows    = prefix === 'hw' ? hwCustomPercentRows    : swCustomPercentRows
     const setCustomPctRows = prefix === 'hw' ? setHwCustomPercentRows : setSwCustomPercentRows
 
     const creditTermIsCustom = isCustomCT || (ctDays !== '' && !CREDIT_TERM_PRESETS.includes(numVal(ctDays)))
+    const countIsCustom = isCustomCount || !INSTALLMENT_COUNT_PRESETS.includes(instCount)
+    // Curated split presets (below) only exist up to 4 installments — past
+    // that, hand-picking a % per row isn't realistic at scale, so rows
+    // render as a compact table with an auto equal-split instead of cards.
+    const manyInstallments = instCount > MANY_INSTALLMENTS_THRESHOLD
     const totalPct = calcTotalInstallmentPercent(insts.slice(0, instCount))
     const pctOk    = Math.abs(totalPct - 100) < 0.01
     const ctErrKey  = prefix === 'hw' ? 'hwCreditTermDays' : 'swCreditTermDays'
@@ -414,12 +439,13 @@ export function RequestFormStepper({
       setInsts(updated)
     }
 
+    // Curated split presets exist for 1-4; beyond that there's no hand-picked
+    // option to fall back to, so the split starts as an even share across all
+    // n rows instead — see equalSplitPercents.
     function changeCount(next: number) {
-      const clamped = Math.max(1, Math.min(4, next))
-      const preset = INSTALLMENT_PRESETS[clamped]?.[0]?.percents ?? []
-      if (preset.length) { applyPreset(preset); return }
-      setCustomPctRows(prev => Object.fromEntries(Object.entries(prev).filter(([idx]) => Number(idx) < clamped)))
-      setInstCount(clamped)
+      const clamped = Math.max(1, Math.min(MAX_INSTALLMENTS, Math.round(next) || 1))
+      const curated = INSTALLMENT_PRESETS[clamped]?.[0]?.percents
+      applyPreset(curated ?? equalSplitPercents(clamped))
     }
 
     return (
@@ -467,128 +493,204 @@ export function RequestFormStepper({
             )}
           </FormGroup>
 
-          <div>
-            {/* Matches FormGroup's label exactly (12px/400/#586782) — this is
-                the same field-label role as "Credit Term" right beside it,
-                just not wrapped in <FormGroup> since the control below isn't
-                a single input. Was 13px/600, visibly heavier than its
-                row-mate for no reason. */}
-            <div style={{ fontSize: 12, fontWeight: 400, color: '#586782', marginBottom: 5 }}>จำนวนงวด</div>
-            <div style={{ display: 'flex', border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden', height: 38 }}>
-              {[1, 2, 3, 4].map(n => (
-                <button key={n} type="button" onClick={() => changeCount(n)}
-                  style={{
-                    width: 44, height: 38, border: 'none',
-                    borderRight: n < 4 ? '1px solid #D0D6DF' : 'none',
-                    background: instCount === n ? 'linear-gradient(135deg, #EBF9F9 0%, #E8F2FC 100%)' : '#fff',
-                    color: instCount === n ? '#004081' : '#586782',
-                    fontSize: 13, fontWeight: 400, cursor: 'pointer',
-                    transition: 'background 0.15s, color 0.15s',
-                  }}>
-                  {n}
+          {/* Was a hard-capped 1-4 segmented control — a request can run to
+              hundreds of installments (long-term/multi-year payment plans),
+              so this now mirrors Credit Term's own dropdown + "ระบุเอง"
+              pattern right beside it instead of a fixed button row. */}
+          <FormGroup label="จำนวนงวด" style={{ width: 170 }}>
+            {countIsCustom ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Input
+                  type="number" min="1" max={MAX_INSTALLMENTS} autoFocus
+                  value={instCount}
+                  onChange={e => changeCount(e.target.value === '' ? 1 : Number(e.target.value))}
+                  placeholder="พิมพ์จำนวนงวด"
+                  style={{ flex: 1 }}
+                />
+                <button type="button" onClick={() => { setIsCustomCount(false); changeCount(INSTALLMENT_COUNT_PRESETS[0]) }}
+                  style={{ width: 28, height: 38, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                  aria-label="เลือกจากรายการแทน">
+                  <FiX size={16} />
                 </button>
-              ))}
+              </div>
+            ) : (
+              <Select
+                value={String(instCount)}
+                onChange={e => {
+                  const v = e.target.value
+                  if (v === 'custom') { setIsCustomCount(true); return }
+                  changeCount(Number(v))
+                }}
+                style={selectStyle}
+              >
+                {INSTALLMENT_COUNT_PRESETS.map(n => <option key={n} value={n}>{n} งวด</option>)}
+                <option value="custom">ระบุเอง</option>
+              </Select>
+            )}
+          </FormGroup>
+        </div>
+
+        {!manyInstallments ? (
+          <>
+            {/* Preset buttons */}
+            <div>
+              {/* Matches FormGroup exactly — this labels a row of preset buttons,
+                  the same "label above a control group" role as Credit Term/
+                  จำนวนงวด right above. No actual reason it was uppercase/11px/700
+                  while those are 12px/400 — that was drift, not a deliberate
+                  distinct pattern (unlike FieldDisplay's read-only eyebrow
+                  label, which labels a displayed *value*, not a control). */}
+              <div style={{ fontSize: 12, color: '#586782', fontWeight: 400, marginBottom: 8 }}>สัดส่วน</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {(INSTALLMENT_PRESETS[instCount] ?? []).slice(0, 4).map(preset => {
+                  const active = preset.percents.every((p, idx) => numVal(insts[idx]?.installmentPercent) === p)
+                  return (
+                    <button key={preset.label} type="button" onClick={() => applyPreset(preset.percents)}
+                      style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
+                        border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
+                        background: '#fff', color: active ? '#004081' : '#586782' }}>
+                      {preset.label}
+                    </button>
+                  )
+                })}
+                <button type="button" onClick={applyCustom}
+                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
+                    border: Object.values(customPctRows).some(Boolean) ? '1.5px solid #66C5C5' : '1.5px dashed #C7CEDA',
+                    background: '#fff', color: Object.values(customPctRows).some(Boolean) ? '#004081' : '#586782' }}>
+                  ระบุเอง
+                </button>
+              </div>
+            </div>
+
+            {/* Installment cards */}
+            <div>
+              <div style={{ fontSize: 12, color: '#586782', fontWeight: 400, marginBottom: 8 }}>รายละเอียดงวด</div>
+              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${instCount}, minmax(0, 1fr))`, gap: 8 }}>
+                {insts.slice(0, instCount).map((row, i) => {
+                  const hasAnyFilled = insts.slice(0, instCount).some(r => r.installmentPercent !== '')
+                  const pct = numVal(row.installmentPercent)
+                  const pctIsCustom = customPctRows[i] || (row.installmentPercent !== '' && !INSTALLMENT_PERCENT_PRESETS.includes(pct))
+                  const pctSelectValue = row.installmentPercent === '' ? (customPctRows[i] ? 'custom' : '') : (INSTALLMENT_PERCENT_PRESETS.includes(pct) ? String(pct) : 'custom')
+                  const suggestedPct = Math.max(0, Math.min(100, 100 - (totalPct - pct)))
+                  const totalAmt = sellingTotal > 0 && pct > 0 ? calcInstallmentAmount(sellingTotal, pct) : 0
+                  const pctErrRowKey = `${prefix}Inst${i}.pct`
+                  return (
+                    <div key={i} style={{
+                      background: errors[pctErrRowKey] ? '#FEF2F2' : '#F2F6F8',
+                      borderRadius: 4,
+                      padding: '10px 12px',
+                      display: 'flex', flexDirection: 'column', gap: 8,
+                      ...(errors[pctErrRowKey] ? { outline: '1.5px solid #F3554F' } : {}),
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                        <span style={{ fontSize: 11, color: '#586782', fontWeight: 400 }}>งวดที่ {i + 1}</span>
+                      </div>
+                      <FormGroup error={errors[pctErrRowKey]}>
+                        {pctIsCustom ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                              <Input type="number" min="1" max="100" value={row.installmentPercent}
+                                onChange={e => updateInstRow(i, 'installmentPercent', e.target.value ? Number(e.target.value) : '')}
+                                placeholder="0"
+                                style={{ textAlign: 'right', flex: 1 }} error={errors[pctErrRowKey]} />
+                              <span style={{ color: '#586782', fontSize: 12, fontWeight: 400 }}>%</span>
+                            </div>
+                            {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
+                              <div style={{ fontSize: 10, color: '#586782', fontWeight: 400 }}>แนะนำ {suggestedPct}%</div>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <Select value={pctSelectValue}
+                              onChange={e => {
+                                const isCustom = e.target.value === 'custom'
+                                setCustomPctRows(prev => ({ ...prev, [i]: isCustom }))
+                                updateInstRow(i, 'installmentPercent', isCustom || e.target.value === '' ? '' : Number(e.target.value))
+                              }}
+                              error={errors[pctErrRowKey]} style={selectStyle}>
+                              <option value="">— เลือก % —</option>
+                              {INSTALLMENT_PERCENT_PRESETS.map(p => <option key={p} value={p}>{p}%</option>)}
+                              <option value="custom">ระบุเอง</option>
+                            </Select>
+                            {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
+                              <div style={{ marginTop: 3, fontSize: 10, color: '#586782', fontWeight: 400 }}>แนะนำ {suggestedPct}%</div>
+                            )}
+                          </>
+                        )}
+                      </FormGroup>
+                      {totalAmt > 0 && (
+                        <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', textAlign: 'right', marginTop: 'auto' }}>
+                          {formatCurrency(totalAmt)}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Many-installment path (>4, e.g. a multi-year monthly plan): a
+             square-card grid with N columns stops being readable past a
+             handful of rows, and nobody should have to hand-pick a % on
+             100+ rows one at a time. So instCount rows render as a single
+             scrollable table instead, pre-filled with an even split the
+             moment the count changes (changeCount -> equalSplitPercents) —
+             "แบ่งเท่ากันทุกงวด" just re-applies that on demand if rows have
+             since been edited away from it. Any row's % is still editable
+             individually for exceptions (e.g. a different first/last row). */
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>รายละเอียดงวด ({instCount} งวด)</span>
+              <button type="button" onClick={() => applyPreset(equalSplitPercents(instCount))}
+                style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
+                  border: '1.5px solid #D0D6DF', background: '#fff', color: '#586782' }}>
+                แบ่งเท่ากันทุกงวด
+              </button>
+            </div>
+            <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ position: 'sticky', top: 0 }}>
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'left', background: '#F2F6F8' }}>งวดที่</th>
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'right', background: '#F2F6F8', width: 130 }}>สัดส่วน (%)</th>
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'right', background: '#F2F6F8' }}>มูลค่า (THB)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {insts.slice(0, instCount).map((row, i) => {
+                      const pct = numVal(row.installmentPercent)
+                      const totalAmt = sellingTotal > 0 && pct > 0 ? calcInstallmentAmount(sellingTotal, pct) : 0
+                      const pctErrRowKey = `${prefix}Inst${i}.pct`
+                      return (
+                        <tr key={i} style={{ borderTop: '1px solid #F2F6F8', background: errors[pctErrRowKey] ? '#FEF2F2' : undefined }}>
+                          <td style={{ padding: '6px 14px', color: '#586782' }}>{i + 1}</td>
+                          <td style={{ padding: '6px 14px', textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                              <Input type="number" min="0" max="100" value={row.installmentPercent}
+                                onChange={e => updateInstRow(i, 'installmentPercent', e.target.value !== '' ? Number(e.target.value) : '')}
+                                placeholder="0"
+                                error={errors[pctErrRowKey]}
+                                style={{ width: 76, textAlign: 'right', height: 32 }} />
+                              <span style={{ color: '#586782', fontSize: 12 }}>%</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '6px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#004081', fontWeight: 500 }}>
+                            {totalAmt > 0 ? formatCurrency(totalAmt) : '—'}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Preset buttons */}
-        <div>
-          {/* Matches FormGroup exactly — this labels a row of preset buttons,
-              the same "label above a control group" role as Credit Term/
-              จำนวนงวด right above. No actual reason it was uppercase/11px/700
-              while those are 12px/400 — that was drift, not a deliberate
-              distinct pattern (unlike FieldDisplay's read-only eyebrow
-              label, which labels a displayed *value*, not a control). */}
-          <div style={{ fontSize: 12, color: '#586782', fontWeight: 400, marginBottom: 8 }}>สัดส่วน</div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {(INSTALLMENT_PRESETS[instCount] ?? []).slice(0, 4).map(preset => {
-              const active = preset.percents.every((p, idx) => numVal(insts[idx]?.installmentPercent) === p)
-              return (
-                <button key={preset.label} type="button" onClick={() => applyPreset(preset.percents)}
-                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
-                    border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
-                    background: '#fff', color: active ? '#004081' : '#586782' }}>
-                  {preset.label}
-                </button>
-              )
-            })}
-            <button type="button" onClick={applyCustom}
-              style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
-                border: Object.values(customPctRows).some(Boolean) ? '1.5px solid #66C5C5' : '1.5px dashed #C7CEDA',
-                background: '#fff', color: Object.values(customPctRows).some(Boolean) ? '#004081' : '#586782' }}>
-              ระบุเอง
-            </button>
-          </div>
-        </div>
-
-        {/* Installment cards */}
-        <div>
-          <div style={{ fontSize: 12, color: '#586782', fontWeight: 400, marginBottom: 8 }}>รายละเอียดงวด</div>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${instCount}, minmax(0, 1fr))`, gap: 8 }}>
-            {insts.slice(0, instCount).map((row, i) => {
-              const hasAnyFilled = insts.slice(0, instCount).some(r => r.installmentPercent !== '')
-              const pct = numVal(row.installmentPercent)
-              const pctIsCustom = customPctRows[i] || (row.installmentPercent !== '' && !INSTALLMENT_PERCENT_PRESETS.includes(pct))
-              const pctSelectValue = row.installmentPercent === '' ? (customPctRows[i] ? 'custom' : '') : (INSTALLMENT_PERCENT_PRESETS.includes(pct) ? String(pct) : 'custom')
-              const suggestedPct = Math.max(0, Math.min(100, 100 - (totalPct - pct)))
-              const totalAmt = sellingTotal > 0 && pct > 0 ? calcInstallmentAmount(sellingTotal, pct) : 0
-              const pctErrRowKey = `${prefix}Inst${i}.pct`
-              return (
-                <div key={i} style={{
-                  background: errors[pctErrRowKey] ? '#FEF2F2' : '#F2F6F8',
-                  borderRadius: 4,
-                  padding: '10px 12px',
-                  display: 'flex', flexDirection: 'column', gap: 8,
-                  ...(errors[pctErrRowKey] ? { outline: '1.5px solid #F3554F' } : {}),
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-                    <span style={{ fontSize: 11, color: '#586782', fontWeight: 400 }}>งวดที่ {i + 1}</span>
-                  </div>
-                  <FormGroup error={errors[pctErrRowKey]}>
-                    {pctIsCustom ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                          <Input type="number" min="1" max="100" value={row.installmentPercent}
-                            onChange={e => updateInstRow(i, 'installmentPercent', e.target.value ? Number(e.target.value) : '')}
-                            placeholder="0"
-                            style={{ textAlign: 'right', flex: 1 }} error={errors[pctErrRowKey]} />
-                          <span style={{ color: '#586782', fontSize: 12, fontWeight: 400 }}>%</span>
-                        </div>
-                        {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
-                          <div style={{ fontSize: 10, color: '#586782', fontWeight: 400 }}>แนะนำ {suggestedPct}%</div>
-                        )}
-                      </div>
-                    ) : (
-                      <>
-                        <Select value={pctSelectValue}
-                          onChange={e => {
-                            const isCustom = e.target.value === 'custom'
-                            setCustomPctRows(prev => ({ ...prev, [i]: isCustom }))
-                            updateInstRow(i, 'installmentPercent', isCustom || e.target.value === '' ? '' : Number(e.target.value))
-                          }}
-                          error={errors[pctErrRowKey]} style={selectStyle}>
-                          <option value="">— เลือก % —</option>
-                          {INSTALLMENT_PERCENT_PRESETS.map(p => <option key={p} value={p}>{p}%</option>)}
-                          <option value="custom">ระบุเอง</option>
-                        </Select>
-                        {row.installmentPercent === '' && hasAnyFilled && suggestedPct > 0 && (
-                          <div style={{ marginTop: 3, fontSize: 10, color: '#586782', fontWeight: 400 }}>แนะนำ {suggestedPct}%</div>
-                        )}
-                      </>
-                    )}
-                  </FormGroup>
-                  {totalAmt > 0 && (
-                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', textAlign: 'right', marginTop: 'auto' }}>
-                      {formatCurrency(totalAmt)}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        )}
 
         {/* Progress bar */}
         <div>

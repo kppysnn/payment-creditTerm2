@@ -325,10 +325,13 @@ export function RequestListPage() {
                           {/* Rejected requests get their own visible, labeled
                               button right in the row — not tucked in the
                               kebab — so "this one needs you to go fix it" is
-                              unmissable, distinct from routine edit/print. */}
+                              unmissable, distinct from routine edit/print.
+                              primary (solid gradient), not secondary (plain
+                              white) — secondary read as too quiet to stand
+                              out as the one row that needs action. */}
                           {canEdit && isRejected && (
                             <Link to={`/requests/${req.id}/edit`}>
-                              <Button variant="secondary" size="sm" icon={<RefreshIcon size={14} />}>ส่งใหม่</Button>
+                              <Button variant="primary" size="sm" icon={<RefreshIcon size={14} />}>ส่งใหม่</Button>
                             </Link>
                           )}
                           <KebabMenu items={kebabItems} ariaLabel={`ตัวเลือกสำหรับ ${req.requestNo}`} />
