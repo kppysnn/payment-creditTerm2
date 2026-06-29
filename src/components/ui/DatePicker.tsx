@@ -135,9 +135,9 @@ export function DatePicker({ startValue, endValue, onChange, placeholder = 'เน€เ
               onClick={() => setViewMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
               style={navBtnStyle}
             >
-              <ChevronIcon direction="left" size={11} color="#001122" />
+              <ChevronIcon direction="left" size={11} color="#586782" />
             </button>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#001122' }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#586782' }}>
               {new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'long' }).format(viewMonth)}
             </span>
             <button
@@ -146,7 +146,7 @@ export function DatePicker({ startValue, endValue, onChange, placeholder = 'เน€เ
               onClick={() => setViewMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
               style={navBtnStyle}
             >
-              <ChevronIcon direction="right" size={11} color="#001122" />
+              <ChevronIcon direction="right" size={11} color="#586782" />
             </button>
           </div>
 
@@ -176,7 +176,7 @@ export function DatePicker({ startValue, endValue, onChange, placeholder = 'เน€เ
                     border: !isEndpoint && isToday ? '1.5px solid #66C5C5' : '1.5px solid transparent',
                     borderRadius: radius,
                     background: isEndpoint ? '#004081' : isInRange ? 'rgba(0,64,129,0.08)' : 'transparent',
-                    color: isEndpoint ? '#fff' : inMonth ? '#001122' : '#D0D6DF',
+                    color: isEndpoint ? '#fff' : inMonth ? '#586782' : '#D0D6DF',
                     fontSize: 13,
                     fontFamily: 'inherit',
                     cursor: 'pointer',

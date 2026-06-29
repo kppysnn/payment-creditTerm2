@@ -40,7 +40,7 @@ export function Card({ title, children, style, actions, noPad }: CardProps) {
           background: '#F2F6F8',
         }}>
           {title && (
-            <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#001122', letterSpacing: '-0.01em' }}>
+            <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#586782', letterSpacing: '-0.01em' }}>
               {title}
             </h3>
           )}
@@ -81,7 +81,7 @@ export function FieldDisplay({ label, value, mono, children, preserveLabelCase, 
       {children ?? (
         <div style={{
           fontSize: 14,
-          color: '#001122',
+          color: '#586782',
           fontWeight: valueWeight,
           fontVariantNumeric: mono ? 'tabular-nums' : undefined,
           lineHeight: 1.5,

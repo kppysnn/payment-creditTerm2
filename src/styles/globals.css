@@ -16,8 +16,12 @@
   --color-surface-2:      #F2F6F8;
   --color-border:         #D0D6DF;
 
-  /* Text */
-  --color-ink:            #001122;
+  /* Text — no component actually uses a near-black "ink" anymore (2026-06-29):
+     WorkX's own text/title token is #586782, confirmed against its real page
+     title ("My Works", Exzy_WorkX) and modal title text — same hex as
+     --color-secondary. Kept as a separate token for now since renaming/
+     removing it touches more than this color value alone. */
+  --color-ink:            #586782;
   --color-body:           #505050;
   --color-secondary:      #586782;
   --color-muted:          #929EB4;
@@ -106,12 +110,14 @@ body {
 /* Table row hover */
 .data-row:hover { background: var(--color-bg) !important; }
 
-/* Page heading — matches the WorkX host's title-row position exactly
-   (Figma "Upcoming Visitor" text, same row as the page's main action button) */
+/* Page heading — matches the WorkX host's title-row position and exact text
+   style (Figma "My Works", Exzy_WorkX 851:2532: 36px/Poppins Medium(500)/
+   #586782 — its own "text/title" token, not navy; WorkX never colors
+   heading-level text navy or near-black). */
 .page-title {
   font-size: 36px;
   font-weight: 500;
-  color: #004081;
+  color: #586782;
   margin: 0;
   line-height: 1.3;
 }

@@ -66,7 +66,7 @@ export function StatusTimeline({ history }: Props) {
             {/* Content */}
             <div style={{ paddingBottom: isLast ? 0 : 20, paddingTop: 4, flex: 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                <span style={{ fontWeight: 600, fontSize: 13, color: '#001122' }}>
+                <span style={{ fontWeight: 600, fontSize: 13, color: '#586782' }}>
                   {APPROVAL_ACTION_LABELS[entry.action]}
                 </span>
                 <span style={{ fontSize: 11, color: '#586782', whiteSpace: 'nowrap', marginTop: 2 }}>

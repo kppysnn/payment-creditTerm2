@@ -293,7 +293,7 @@ export function RequestFormStepper({
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#F2F6F8' }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
           >
-            <div style={{ fontWeight: 600, color: '#001122' }}>{c.companyName}</div>
+            <div style={{ fontWeight: 600, color: '#586782' }}>{c.companyName}</div>
             <div style={{ color: '#586782', fontSize: 12, marginTop: 2 }}>Net {c.defaultCreditTerm ?? 0} วัน · {c.contactPerson}</div>
           </button>
         )) : (
@@ -316,7 +316,7 @@ export function RequestFormStepper({
           const sellError = spKey === 'hardwareSellingPrice' ? errors.hwSell : undefined
           return (
             <tr key={spKey}>
-              <td style={{ padding: '8px 0', fontSize: 13, fontWeight: 400, color: '#001122' }}>{label}</td>
+              <td style={{ padding: '8px 0', fontSize: 13, fontWeight: 400, color: '#586782' }}>{label}</td>
               <td style={{ padding: '8px 16px 8px 0', verticalAlign: 'top' }}>
                 <Input type="text" inputMode="numeric"
                   value={formatThousands(fd[costKey])}
@@ -348,7 +348,7 @@ export function RequestFormStepper({
     </table>
   )
 
-  const summaryAmount = (value: number, color = '#001122', size?: number, weight: number = 700) => (
+  const summaryAmount = (value: number, color = '#586782', size?: number, weight: number = 700) => (
     <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: weight, color, fontSize: size }}>
       {formatCurrency(value)}
     </span>
@@ -578,7 +578,7 @@ export function RequestFormStepper({
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 600 }}>รวมสัดส่วนงวด</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#001122' : '#F3554F' }}>{totalPct.toFixed(0)}%</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#586782' : '#F3554F' }}>{totalPct.toFixed(0)}%</span>
           </div>
           <div style={{ height: 6, background: '#D0D6DF', borderRadius: 6, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${Math.min(Math.max(totalPct, 0), 100)}%`, background: pctOk ? '#66C5C5' : '#F3554F', transition: 'width 0.2s' }} />
@@ -813,7 +813,7 @@ export function RequestFormStepper({
           <tbody>
             <tr style={{ borderTop: '1px solid #F2F6F8' }}>
               <td style={{ padding: '12px 14px' }}>
-                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#001122' }}>{hwQuotationNo}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{hwQuotationNo}</span>
                 <span style={{ color: '#586782', marginLeft: 8 }}>Hardware</span>
               </td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hwCost, '#586782', undefined, 400)}</td>
@@ -821,7 +821,7 @@ export function RequestFormStepper({
             </tr>
             <tr style={{ borderTop: '1px solid #F2F6F8' }}>
               <td style={{ padding: '12px 14px' }}>
-                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#001122' }}>{swQuotationNo}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{swQuotationNo}</span>
                 <span style={{ color: '#586782', marginLeft: 8 }}>Software &amp; Installation</span>
               </td>
               <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782', undefined, 400)}</td>
@@ -830,7 +830,7 @@ export function RequestFormStepper({
           </tbody>
           <tfoot>
             <tr style={{ borderTop: '1px solid #D0D6DF', background: '#F8F9FA' }}>
-              <td style={{ padding: '14px', fontWeight: 600, fontSize: 14, color: '#001122' }}>รวมทั้งหมด</td>
+              <td style={{ padding: '14px', fontWeight: 600, fontSize: 14, color: '#586782' }}>รวมทั้งหมด</td>
               <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(totalCost, '#586782', undefined, 500)}</td>
               <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(totalSelling, '#004081', 16, 700)}</td>
             </tr>

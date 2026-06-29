@@ -38,7 +38,7 @@ function buildPrintHTML(req: Request): string {
 
   return `<!DOCTYPE html><html><head><title>${req.requestNo}</title>
 <style>
-  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #001122; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #586782; margin: 0; padding: 0; }
   .container { max-width: 210mm; margin: 0 auto; padding: 16mm; }
   h1 { font-size: 18px; color: #004081; margin: 0 0 4px; }
   .sub { font-size: 11px; color: #586782; margin-bottom: 16px; }
@@ -46,7 +46,7 @@ function buildPrintHTML(req: Request): string {
   .section-title { font-size: 13px; font-weight: 700; color: #004081; border-bottom: 1.5px solid #004081; padding-bottom: 3px; margin-bottom: 10px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
   .field-label { font-size: 10px; color: #586782; font-weight: 600; }
-  .field-val { font-size: 12px; color: #001122; margin-bottom: 6px; }
+  .field-val { font-size: 12px; color: #586782; margin-bottom: 6px; }
   .quote-group { border:1px solid #D0D6DF; border-radius:4px; overflow:hidden; margin:12px 0; }
   .quote-head { display:flex; justify-content:space-between; align-items:baseline; background:#004081; padding:7px 10px; font-weight:700; color:#fff; }
   .quote-no { font-size:13px; }
@@ -120,7 +120,7 @@ function buildQuotationGroup(no: string, title: string, gradient: string, items:
       </tr>
     </table>
     ${installments.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#F2F6F8;border:1px solid #D0D6DF;border-top:none">
-      <span style="font-size:12px;font-weight:700;color:#001122">Payment Schedule</span>
+      <span style="font-size:12px;font-weight:700;color:#586782">Payment Schedule</span>
       <span style="font-size:11px;font-weight:600;color:#586782">Credit Term: <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
     </div>
     <table>

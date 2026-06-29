@@ -68,7 +68,7 @@ export function RequestDetailPage() {
   const serviceSelling = serviceItems.reduce((sum, item) => sum + item.sellingPrice, 0)
   const hardwareCost = hardwareItems.reduce((sum, item) => sum + item.cost, 0)
   const serviceCost = serviceItems.reduce((sum, item) => sum + item.cost, 0)
-  const summaryAmount = (value: number, color = '#001122', size?: number, weight: number = 700) => (
+  const summaryAmount = (value: number, color = '#586782', size?: number, weight: number = 700) => (
     <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: weight, color, fontSize: size }}>
       {formatCurrency(value)}
     </span>
@@ -80,7 +80,7 @@ export function RequestDetailPage() {
 
   // Every named sub-section below (total, payment schedule, note) is a peer:
   // a thin rule above + bold label, document/quotation style. Deliberately one
-  // step below Card-header weight (#586782, not #001122/14px) so these read as
+  // step below Card-header weight (#586782, not #586782/14px) so these read as
   // sub-sections of their parent card, not as competing top-level headings.
   // `tinted` gets a soft background — reserved for summary/payment data, not
   // notes, so a glance tells "this is a rolled-up figure" from "this is text."
@@ -273,7 +273,7 @@ export function RequestDetailPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#001122' }}>{req.requestNo}</h1>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{req.requestNo}</h1>
               <StatusBadge status={req.status} />
               {req.version > 1 && (
                 <span style={{ fontSize: 12, padding: '2px 8px', background: 'rgba(0,64,129,0.08)', color: '#004081', borderRadius: 4, fontWeight: 600 }}>v{req.version}</span>
@@ -397,7 +397,7 @@ export function RequestDetailPage() {
                     {hardwareItems.length > 0 && (
                       <tr style={{ borderTop: '1px solid #F2F6F8' }}>
                         <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontVariantNumeric: 'tabular-nums', color: '#001122' }}>{hardwareQuotationNo}</span>
+                          <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{hardwareQuotationNo}</span>
                           <span style={{ color: '#586782', marginLeft: 8 }}>Hardware</span>
                         </td>
                         <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#586782', undefined, 400)}</td>
@@ -407,7 +407,7 @@ export function RequestDetailPage() {
                     {serviceItems.length > 0 && (
                       <tr style={{ borderTop: '1px solid #F2F6F8' }}>
                         <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontVariantNumeric: 'tabular-nums', color: '#001122' }}>{serviceQuotationNo}</span>
+                          <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{serviceQuotationNo}</span>
                           <span style={{ color: '#586782', marginLeft: 8 }}>Software &amp; Installation</span>
                         </td>
                         <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782', undefined, 400)}</td>
@@ -417,7 +417,7 @@ export function RequestDetailPage() {
                   </tbody>
                   <tfoot>
                     <tr style={{ borderTop: '1px solid #D0D6DF', background: '#F8F9FA' }}>
-                      <td style={{ padding: '14px', fontWeight: 600, fontSize: 14, color: '#001122' }}>รวมทั้งหมด</td>
+                      <td style={{ padding: '14px', fontWeight: 600, fontSize: 14, color: '#586782' }}>รวมทั้งหมด</td>
                       <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#586782', undefined, 500)}</td>
                       <td style={{ padding: '14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalSelling, '#004081', 16, 700)}</td>
                     </tr>

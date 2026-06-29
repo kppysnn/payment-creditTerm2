@@ -63,7 +63,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
             borderBottom: '1px solid #D0D6DF',
           }}
         >
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#001122' }}>{title}</h3>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#586782' }}>{title}</h3>
           <button
             onClick={onClose}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#586782', padding: 4, borderRadius: 4, display: 'flex' }}
