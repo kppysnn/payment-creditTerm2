@@ -168,7 +168,7 @@ Never `rgba(0,0,0,x)`. The whole `src/` tree was swept for this — zero violati
 | Section band label (`labeledBand`, and its `RequestFormStepper` duplicate) | 13px | **600** | `#586782` | Softened from 700 (2026-06-29) to stay below the now-500-weight section title in the hierarchy — not pinned to a specific Figma value, a judgment call. |
 | `FieldDisplay` label | 11px | 700 | `#586782` | UPPERCASE + `0.06em` letter-spacing, unless `preserveLabelCase` (then normal case, `0.01em`). **Deliberately left at 700** — a distinct micro-label/eyebrow pattern, not directly checked against Figma, don't assume it should soften just because titles did. |
 | `FieldDisplay` value | 14px | per-field (`valueWeight` prop, no longer hardcoded) | `#586782` | `line-height: 1.5` — matches WorkX's `text/filled` token (confirmed via `909:1107`), not a distinct "ink" |
-| Form label (`FormGroup`) | 12px | **400** | `#586782` | required `*` in `#F3554F`/700 (unconditional). Was 600 — that same `909:1107` component's own field-title header is Poppins Regular. |
+| Form label (`FormGroup`) | 12px | **400** | `#586782` | required `*` in `#F3554F`/700 (unconditional). Was 600 — that same `909:1107` component's own field-title header is Poppins Regular. **Any hand-rolled label that isn't actually wrapped in `<FormGroup>` (button-group/radio-row labels like "จำนวนงวด", "ประเภทการขาย") must be styled to match this exactly** — they don't inherit the component's fix automatically and have drifted out of sync with it before. |
 | Body text | 14px | 400 | `#505050` | `body{}` in globals.css, `line-height: 1.65` |
 | Detail-page table header | 12.5px | **400** | `#004081` | `tableHeaderCell` in `RequestDetailPage.tsx` — **not bold, not uppercase, not gray.** Explicit code comment: "Hierarchy comes from color, not boldness — the host's own tables carry no bold text at all." |
 | List-page table header | 13px | 400 | `#004081` | `RequestListPage.tsx` — same philosophy, slightly different size, with sortable carets |
@@ -369,20 +369,24 @@ Label (`FormGroup`): `12px/600/#586782` (turns **`#FF3028`** on error — a dist
 
 Implemented **twice**, independently, in `RequestFormStepper.tsx` (entry form) and `RequestDetailPage.tsx` (read view) — they are not shared code, so a fix to one does not propagate to the other. Check both when touching this pattern.
 
-Structure (read-view, `quotationBlock` in `RequestDetailPage.tsx`):
+Structure (read-view, `quotationBlock` in `RequestDetailPage.tsx`), as of the 2026-06-29 de-carding + anchoring pass:
 ```
-┌─ border 1px #D0D6DF, radius 4 ──────────────────────┐
-│ gradient header (--gradient-primary), white text     │  ← Quotation No. + label
+gradient header, top-rounded only, white text  ← Quotation No. + label
+┌─ body: bg #F8F9FA, bottom-rounded only ─────────────┐
 │ items table (header 12.5px/400/#004081, rows /F2F6F8)│
-│ "รวม [label]" total strip (labeledBand, framed)       │
+│ "รวม [label]" total strip (labeledBand, framed=true)  │
 │ "Payment Schedule" strip + installment table          │
 │ optional section-comment block                        │
 └────────────────────────────────────────────────────────┘
 ```
+No stroked border anywhere — header and body read as one unit through fill/rounding alone (see §8.2). `labeledBand`: thin top rule + `13px/600/#586782` label (was 700, softened to stay below the section title's now-500 weight — see §3.2's general-bold-rule note). `framed=true` (the current setting inside this body) → rule is `#D0D6DF`, `14px` horizontal padding; this is correct *because* there's an enclosing tinted area again — don't flip it to `framed=false` thinking it's unused now.
 
-`labeledBand` (shared helper, used for both the total strip and the payment-schedule strip): thin top rule + `13px/700/#586782` label — **one step below Card-header weight**, by design, so it reads as a sub-section rather than competing with the parent Card's own header. `framed=true` → rule is `#D0D6DF` (it's echoing the quotationBlock's own border, a real structural break). `framed=false` → rule is `#F2F6F8` (used standalone inside a plain Card body, e.g. the customer note, where there's no outer box to echo).
-
-`sectionComment` (per-category reviewer note, e.g. "หมายเหตุสำหรับ Hardware"): editable red-framed `<Textarea>` for whoever currently holds decision authority on the request; read-only red box for everyone else; **hidden entirely** if empty and there's no prior-round rejection to show. If a prior round was rejected and the live field is still blank, it surfaces that old note inline ("เคยถูกปฏิเสธไว้ว่า: ..."). This live/snapshot split — `customerComment`/`hardwareComment`/`swComment` (editable, current round) vs. `req.approvalResult.*Comment` (frozen snapshot of what a past decision said) — replaced an earlier single `decisionComment`/`suggestion` field design.
+`sectionComment` (per-category reviewer note, e.g. "หมายเหตุสำหรับ Hardware") — **redesigned 2026-06-29, red no longer means "this is a comment field," it means "this request is currently rejected":**
+- Editable (whoever holds decision authority right now): a plain `<Textarea>`, no extra colored wrapper. Used to be wrapped in its own red box, which — since the `<Textarea>` itself always renders white per `FormField.tsx` — read as a red box around a white box.
+- Prior-round rejection quote (shown above the editable field when the live value is still blank): a left-border accent (`borderLeft: 2px solid #F3554F`, no fill), not a full box. Used to be its own red box, which stacked with the editable field's red box into two competing boxes on a resubmitted request.
+- Read-only saved value: red (`#FEF2F2`/`#FCA5A5`/`#7F1D1D`) **only if `req.status === 'rejected'`**; otherwise neutral (`#F2F6F8`/`#D0D6DF`/`#586782`) — an approved request's note is a normal saved note, not a warning.
+- **Hidden entirely** if empty and there's no prior-round rejection to show.
+- Live/snapshot split unchanged: `customerComment`/`hardwareComment`/`swComment` (editable, current round) vs. `req.approvalResult.*Comment` (frozen snapshot of what a past decision said) — replaced an earlier single `decisionComment`/`suggestion` field design.
 
 Form-side equivalents (`RequestFormStepper.tsx`):
 - `priceTable`: entry rows for cost/selling price, column headers `12px/400/#586782` right-aligned, no row borders (rhythm via padding only)
@@ -444,15 +448,18 @@ These files are **not imported anywhere live** and should not be treated as repr
 
 `RequestFormStepper.tsx` is the one real, live form implementation (used by both `CreateRequestPage` and `EditRequestPage`). If a fix needs to land in "the form," it goes there — not in any of the five files above.
 
+`exportService.ts`'s `printRequest()` function and the `/print/:id` route it opens are **also dead** — no such route is registered in `src/app/router.tsx`, and `printRequest` is never called from anywhere. `exportPDF()` (popup window + `window.print()`) is the only real print/export pathway.
+
 ---
 
-## 12. Print
+## 12. Print / Export
 
-`src/styles/print.css`:
-- Hides `.no-print`, `header`, `nav`, `.role-switcher` on print
-- Also references `.sidebar`/`.topbar` classes, but **neither className is actually applied anywhere in the current live markup** (`AppShell` doesn't set `class="topbar"`; `Sidebar` isn't mounted) — those two print-CSS selectors are currently inert. Not a bug to "fix," just worth knowing if print output looks different than the CSS implies.
-- Page: A4, `margin: 0`
-- Table borders become visible (`1px solid #D0D6DF`) for print only
+Two genuinely separate stylesheets, neither aware of the other:
+
+- **`src/styles/print.css`** — targets the live SPA's own DOM via `@media print`. Hides `.no-print`, `header`, `nav`, `.role-switcher`. Also references `.sidebar`/`.topbar` classes, but **neither className is actually applied anywhere in the current live markup** (`AppShell` doesn't set `class="topbar"`; `Sidebar` isn't mounted) — those two selectors are currently inert. Page: A4, `margin: 0`. Table borders become visible (`1px solid #D0D6DF`) for print only.
+- **`exportService.ts`'s `buildPrintHTML()`** — a fully separate, hand-written HTML string with its own embedded `<style>` block, used by the actual "Print / PDF" button (`exportPDF()`). **This does not inherit anything from the live React screens or from `print.css`** — it's a parallel, manually-maintained copy of the design system that silently drifts every time the live screens change, because nothing about a live-screen fix touches this file. Corrected 2026-06-29 after it was found still on `'Segoe UI', Arial` (not Poppins), 700-weight section titles with a heavy `1.5px solid #004081` underline (not `Section.tsx`'s thin `#D0D6DF` rule), and 600-weight field labels (not `FormGroup`'s `400`) — i.e. it had fallen behind every typography/color fix made this engagement. **Deliberately kept different from the live screens:** the `.quote-group` wrapper and table cells keep visible `1px solid #D0D6DF` borders — an intentional print-specific exception, matching `print.css`'s own existing convention of relying on borders rather than the live UI's subtle background-tint fills (printed/grayscale output can't lean on subtle color the way screen UI can).
+
+**Whenever a typography/color fix lands in `Section.tsx`, `Card.tsx`, `FormField.tsx`, or a live table-header/`labeledBand` convention, check whether `exportService.ts` needs the same fix — it will not pick it up automatically.**
 
 ---
 
@@ -492,7 +499,9 @@ These files are **not imported anywhere live** and should not be treated as repr
 
 `src/components/ui/DatePicker.tsx` — calendar popover supporting both a single day and a date **range** (two clicks: start, then end — auto-swaps if end is picked before start), used by `RequestListPage`'s "Date" filter (filters on `updatedAt`, which already covers "last edited" and falls back to "created" automatically since a never-edited request has `updatedAt === createdAt`; URL params are `dateFrom`/`dateTo`). Structure matches WorkX's own calendar (Exzy_WorkX `72:5368`: prev/next month header, weekday row, day grid, range start/end as a navy pill with a soft in-between fill, Cancel/Done footer) but recolored to this app's actual brand tokens (Poppins, navy `#004081` start/end, teal `#66C5C5` today ring, `rgba(0,64,129,0.08)` in-between fill) rather than the literal library-default neutrals (`#14181F`, `#DCE0E5`, Inter font, `#E0EDFF` range fill) that component's own Figma export uses — those don't appear anywhere else in WorkX's real rendered UI, strongly suggesting that specific component is an unskinned base-library widget, not WorkX's actual brand. A single day is just a range where `dateFrom === dateTo`; the Cancel/Done footer was added back (an earlier single-day-only version skipped it) since range selection genuinely benefits from an explicit confirm step.
 
-**Active-filter strip is chips, not a sentence.** Each active filter (status, date, search) renders as its own small removable tag (`#F2F6F8` bg, `#004081` text, radius 4, own `×`) rather than a `"กำลังกรอง: ..."` string — the sentence-style version read as stiff/system-y rather than friendly once shipped. A "ล้างทั้งหมด" link only appears once 2+ filters are stacked; a single chip's own `×` is enough on its own. This replaced the original `anyFilterActive` strip's text rendering; the mutual-exclusivity logic with the attention banner (§ below) is unchanged.
+**Active-filter strip is chips, not a sentence.** Each active filter (status, date, search) renders as its own small removable tag rather than a `"กำลังกรอง: ..."` string — the sentence-style version read as stiff/system-y rather than friendly once shipped. A "ล้างทั้งหมด" link only appears once 2+ filters are stacked; a single chip's own `×` is enough on its own. This replaced the original `anyFilterActive` strip's text rendering; the mutual-exclusivity logic with the attention banner (§ below) is unchanged.
+
+**Chip spec matches the W+ Library "Tag/Small" component exactly** (`60RgjevWzbKhCCjoc5kcmk`, node `1049:411`, "Edit" state) — not an invented size. An earlier ~20px-tall version was reported as too small to spot: 24px tall, bg `#D9F0F0` (teal/100 — not a navy-tinted neutral), text 12px Poppins Regular `#004081`, dismiss icon `#586782` in a 20px tap target, padding `8px` left / `4px` right, radius 4, gap 4.
 
 ---
 
