@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronIcon, XMarkIcon } from '../icons/FigmaIcons'
+import { Button } from './Button'
 
 interface Props {
-  value: string | null
-  onChange: (iso: string | null) => void
+  startValue: string | null
+  endValue: string | null
+  onChange: (start: string | null, end: string | null) => void
   placeholder?: string
   style?: React.CSSProperties
 }
 
 const WEEKDAYS = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส']
+const fmt = new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })
 
 function toISODate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -16,6 +19,10 @@ function toISODate(d: Date): string {
 
 function sameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}
+
+function dayOnly(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
 }
 
 function buildGrid(monthDate: Date): Date[] {
@@ -29,16 +36,18 @@ function buildGrid(monthDate: Date): Date[] {
   })
 }
 
-// Matches the structure of WorkX's own calendar popover (Exzy_WorkX 72:5368)
-// — prev/next month header, weekday row, 6x7 day grid, today/selected day
-// treatment — but recolored to this app's actual brand tokens (navy/teal/
-// Poppins) rather than the literal library-default neutrals (#14181F,
-// #DCE0E5, Inter) the Figma export itself uses, which don't appear anywhere
-// else in WorkX's real rendered UI. Simplified to single-day selection (no
-// Cancel/Done footer) since this filters by one date, not a range.
-export function DatePicker({ value, onChange, placeholder = 'เลือกวันที่', style }: Props) {
+// Matches WorkX's own calendar popover (Exzy_WorkX 72:5368) — prev/next
+// month header, weekday row, 6x7 day grid, range selection with a navy
+// start/end pill + a soft in-between fill, Cancel/Done footer — but
+// recolored to this app's actual brand tokens (navy/teal/Poppins) rather
+// than the literal library-default neutrals (#14181F, #DCE0E5, Inter) that
+// component's own Figma export uses, which don't appear anywhere else in
+// WorkX's real rendered UI. A single day is just a range where start===end.
+export function DatePicker({ startValue, endValue, onChange, placeholder = 'เลือกวันที่', style }: Props) {
   const [open, setOpen] = useState(false)
-  const [viewMonth, setViewMonth] = useState(() => (value ? new Date(value) : new Date()))
+  const [viewMonth, setViewMonth] = useState(() => (startValue ? new Date(startValue) : new Date()))
+  const [pendingStart, setPendingStart] = useState<Date | null>(startValue ? new Date(startValue) : null)
+  const [pendingEnd, setPendingEnd] = useState<Date | null>(endValue ? new Date(endValue) : null)
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -50,29 +59,55 @@ export function DatePicker({ value, onChange, placeholder = 'เลือกว�
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [open])
 
-  const selected = value ? new Date(value) : null
   const today = new Date()
-  const label = selected
-    ? new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(selected)
+
+  function openPicker() {
+    setPendingStart(startValue ? new Date(startValue) : null)
+    setPendingEnd(endValue ? new Date(endValue) : null)
+    setViewMonth(startValue ? new Date(startValue) : new Date())
+    setOpen(true)
+  }
+
+  function pickDay(d: Date) {
+    if (!pendingStart || pendingEnd) {
+      setPendingStart(d)
+      setPendingEnd(null)
+    } else if (d < pendingStart) {
+      setPendingEnd(pendingStart)
+      setPendingStart(d)
+    } else {
+      setPendingEnd(d)
+    }
+  }
+
+  function confirm() {
+    if (pendingStart) onChange(toISODate(pendingStart), toISODate(pendingEnd ?? pendingStart))
+    setOpen(false)
+  }
+
+  const label = startValue
+    ? (!endValue || startValue === endValue)
+      ? fmt.format(new Date(startValue))
+      : `${fmt.format(new Date(startValue))} - ${fmt.format(new Date(endValue))}`
     : placeholder
 
   return (
     <div ref={rootRef} style={{ position: 'relative', ...style }}>
       <button
         type="button"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => (open ? setOpen(false) : openPicker())}
         style={{
           width: '100%', height: 38, padding: '0 12px', border: '1px solid #D0D6DF', borderRadius: 8,
           background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          fontSize: 14, fontFamily: 'inherit', color: selected ? '#505050' : '#586782', cursor: 'pointer', gap: 8,
+          fontSize: 14, fontFamily: 'inherit', color: startValue ? '#505050' : '#586782', cursor: 'pointer', gap: 8,
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
-        {selected ? (
+        {startValue ? (
           <span
             role="button"
             aria-label="ล้างวันที่"
-            onClick={e => { e.stopPropagation(); onChange(null) }}
+            onClick={e => { e.stopPropagation(); onChange(null, null) }}
             style={{ display: 'flex', flexShrink: 0, color: '#929EB4' }}
           >
             <XMarkIcon size={11} />
@@ -89,6 +124,10 @@ export function DatePicker({ value, onChange, placeholder = 'เลือกว�
           boxShadow: '0 16px 34px rgba(0,64,129,0.10), 0 2px 6px rgba(0,64,129,0.06)',
           padding: 16, width: 280,
         }}>
+          <div style={{ fontSize: 11, color: '#929EB4', marginBottom: 8 }}>
+            {pendingStart && !pendingEnd ? 'เลือกวันสิ้นสุด (หรือกด ตกลง เพื่อเลือกวันเดียว)' : 'เลือกวันเริ่มต้น'}
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <button
               type="button"
@@ -120,31 +159,41 @@ export function DatePicker({ value, onChange, placeholder = 'เลือกว�
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
             {buildGrid(viewMonth).map(d => {
               const inMonth = d.getMonth() === viewMonth.getMonth()
-              const isSelected = selected && sameDay(d, selected)
+              const isStart = pendingStart && sameDay(d, pendingStart)
+              const isEnd = pendingEnd && sameDay(d, pendingEnd)
+              const isEndpoint = isStart || isEnd
+              const isInRange = pendingStart && pendingEnd && !isEndpoint && dayOnly(d) > dayOnly(pendingStart) && dayOnly(d) < dayOnly(pendingEnd)
               const isToday = sameDay(d, today)
+              const singleDay = isStart && isEnd
+              const radius = singleDay ? 4 : isStart ? '4px 0 0 4px' : isEnd ? '0 4px 4px 0' : 0
               return (
                 <button
                   type="button"
                   key={d.toISOString()}
-                  onClick={() => { onChange(toISODate(d)); setOpen(false) }}
+                  onClick={() => pickDay(d)}
                   style={{
                     height: 32,
-                    border: !isSelected && isToday ? '1.5px solid #66C5C5' : '1.5px solid transparent',
-                    borderRadius: 4,
-                    background: isSelected ? '#004081' : 'transparent',
-                    color: isSelected ? '#fff' : inMonth ? '#001122' : '#D0D6DF',
+                    border: !isEndpoint && isToday ? '1.5px solid #66C5C5' : '1.5px solid transparent',
+                    borderRadius: radius,
+                    background: isEndpoint ? '#004081' : isInRange ? 'rgba(0,64,129,0.08)' : 'transparent',
+                    color: isEndpoint ? '#fff' : inMonth ? '#001122' : '#D0D6DF',
                     fontSize: 13,
                     fontFamily: 'inherit',
                     cursor: 'pointer',
-                    fontWeight: isSelected || isToday ? 600 : 400,
+                    fontWeight: isEndpoint || isToday ? 600 : 400,
                   }}
-                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F2F6F8' }}
-                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
+                  onMouseEnter={e => { if (!isEndpoint) e.currentTarget.style.background = '#F2F6F8' }}
+                  onMouseLeave={e => { if (!isEndpoint) e.currentTarget.style.background = isInRange ? 'rgba(0,64,129,0.08)' : 'transparent' }}
                 >
                   {d.getDate()}
                 </button>
               )
             })}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid #D0D6DF' }}>
+            <Button variant="secondary" size="sm" onClick={() => setOpen(false)}>ยกเลิก</Button>
+            <Button size="sm" disabled={!pendingStart} onClick={confirm}>ตกลง</Button>
           </div>
         </div>
       )}

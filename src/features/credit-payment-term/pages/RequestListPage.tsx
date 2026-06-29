@@ -31,10 +31,13 @@ const COLUMNS: { label: string; width: string; key?: SortKey }[] = [
 // "อัปเดต" already shows updatedAt for every row (it defaults to createdAt on
 // a never-edited request) — so filtering by that one column covers both
 // "last edited" and "created" without a second field, matching the request.
-function matchesDate(iso: string, isoDateOnly: string): boolean {
+// A single-day pick is just a range where from === to.
+function matchesDateRange(iso: string, fromIso: string, toIso: string): boolean {
   const d = new Date(iso)
-  const [y, m, day] = isoDateOnly.split('-').map(Number)
-  return d.getFullYear() === y && d.getMonth() + 1 === m && d.getDate() === day
+  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const [fy, fm, fd] = fromIso.split('-').map(Number)
+  const [ty, tm, td] = toIso.split('-').map(Number)
+  return day >= new Date(fy, fm - 1, fd).getTime() && day <= new Date(ty, tm - 1, td).getTime()
 }
 
 export function RequestListPage() {
@@ -47,7 +50,8 @@ export function RequestListPage() {
 
   const filterStatus = searchParams.get('status') ?? ''
   const filterText = searchParams.get('q') ?? ''
-  const filterDate = searchParams.get('date') ?? ''
+  const filterDateFrom = searchParams.get('dateFrom') ?? ''
+  const filterDateTo = searchParams.get('dateTo') ?? ''
 
   const viewAll = currentUser.role === 'approver' || currentUser.role === 'accounting'
 
@@ -64,7 +68,7 @@ export function RequestListPage() {
     const matchStatus = !filterStatus || r.status === filterStatus
     const q = filterText.toLowerCase()
     const matchText = !q || [r.requestNo, r.customerName, r.proposalNo, r.salesName].some(s => s?.toLowerCase().includes(q))
-    const matchDate = !filterDate || matchesDate(r.updatedAt, filterDate)
+    const matchDate = !filterDateFrom || matchesDateRange(r.updatedAt, filterDateFrom, filterDateTo || filterDateFrom)
     return matchStatus && matchText && matchDate
   })
 
@@ -94,7 +98,7 @@ export function RequestListPage() {
 
   const rejectedBanner = currentUser.role === 'sales' && counts.rejected > 0
   const pendingBanner = currentUser.role === 'approver' && counts.pending > 0
-  const anyFilterActive = Boolean(filterStatus || filterText || filterDate)
+  const anyFilterActive = Boolean(filterStatus || filterText || filterDateFrom)
   // The attention banner ("you have N rejected/pending") and the active-filter
   // strip share one slot and are mutually exclusive: once any filter is on,
   // showing the banner too is redundant — you're already looking at exactly
@@ -116,7 +120,12 @@ export function RequestListPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#586782' }}>สถานะ</span>
+            {/* Filter-bar labels are English/regular/#707070 in WorkX's own
+                filter row (Exzy_WorkX 851:2542, "Month") — distinct from this
+                module's usual Thai/600/#586782 form labels, which still apply
+                everywhere else (FormGroup, FieldDisplay). Scoped to just this
+                bar, not a general app-wide language change. */}
+            <span style={{ fontSize: 16, fontWeight: 400, color: '#707070' }}>Status</span>
             <Select
               value={filterStatus}
               onChange={e => setSearchParams(p => { const n = new URLSearchParams(p); n.set('status', e.target.value); return n })}
@@ -127,15 +136,17 @@ export function RequestListPage() {
             </Select>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#586782' }}>วันที่อัปเดต</span>
+            <span style={{ fontSize: 16, fontWeight: 400, color: '#707070' }}>Date</span>
             <DatePicker
-              value={filterDate || null}
-              onChange={d => setSearchParams(p => {
+              startValue={filterDateFrom || null}
+              endValue={filterDateTo || null}
+              onChange={(from, to) => setSearchParams(p => {
                 const n = new URLSearchParams(p)
-                if (d) n.set('date', d); else n.delete('date')
+                if (from) { n.set('dateFrom', from); n.set('dateTo', to ?? from) }
+                else { n.delete('dateFrom'); n.delete('dateTo') }
                 return n
               })}
-              style={{ width: 170 }}
+              style={{ width: 190 }}
             />
           </div>
         </div>
@@ -161,7 +172,10 @@ export function RequestListPage() {
               กำลังกรอง:{' '}
               {[
                 filterStatus && STATUS_LABELS[filterStatus as RequestStatus],
-                filterDate && new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(filterDate)),
+                filterDateFrom && (() => {
+                  const fmt = (iso: string) => new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(iso))
+                  return !filterDateTo || filterDateFrom === filterDateTo ? fmt(filterDateFrom) : `${fmt(filterDateFrom)} - ${fmt(filterDateTo)}`
+                })(),
                 filterText && `ค้นหา "${filterText}"`,
               ].filter(Boolean).join(' · ')}
             </span>
