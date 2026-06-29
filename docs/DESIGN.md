@@ -308,15 +308,23 @@ Hover (applied via inline `onMouseEnter`/`onMouseLeave`, not CSS `:hover`):
 
 Loading state replaces the icon with a spinner and disables the button. A blur-on-mouseup handler clears the focus ring after a mouse click (so it doesn't visually stick through a React Router navigation), and a window-focus listener re-syncs hover styles after blocking calls like `window.print()`/`window.confirm()` that can cause the browser to miss the `mouseleave` event.
 
-### 8.2 Card
+### 8.2 Card vs. Section — narrower roles since 2026-06-29
 
-- bg `#FFFFFF`, border `1px solid #D0D6DF`, radius `4px`, `overflow: hidden`
-- Header (only if `title`/`actions` given): bg `#F2F6F8`, padding `14px 20px`, `borderBottom: 1px solid #D0D6DF`, title `14px/700/#001122/-0.01em`
-- Body padding `20px` (`noPad` prop removes it)
-- Hover: `translateY(-2px)` + `shadow-md` + border → `rgba(102,197,197,0.5)`
-- `FieldDisplay`/`FieldGrid` — see §3.2 and below
+**`<Card>` is no longer the default way to divide a form/detail page into sections.** It was, until a de-carding pass: every plain info section (ข้อมูลคำขอ, ข้อมูลลูกค้า, สรุปยอดรวม, ประวัติสถานะ, etc.) used a bordered, gray-headed `<Card>`, which read as visually heavier/boxier than WorkX's own multi-field forms — confirmed by direct comparison against an assembled WorkX form (Exzy_WorkX "Edit My work", `1190:5406`), which divides sections with a bold title + one thin rule, no border, no background fill, no card at all.
 
-`FieldGrid` uses CSS grid `auto-fit` with `minmax(190px or 240px, 1fr)` (190 if `cols>=3`, else 240) — it naturally collapses to 2 then 1 column as the container narrows, no manual breakpoints. `gap: 16px 28px`.
+| | `<Card>` | `<Section>` |
+|---|---|---|
+| Use for | An actual boxed surface where one is wanted (rare in this module now) | Dividing a page into named groups of fields — the default for form/detail-page sectioning |
+| Visual | bg `#FFFFFF`, border `1px solid #D0D6DF`, radius 4, header bg `#F2F6F8` | No border, no bg — title `16px/700/#001122` + `1px solid #D0D6DF` rule underneath, `10px` padding-bottom, `16px` margin-bottom |
+| Hover | `translateY(-2px)` + `shadow-md` + teal border tint | none |
+
+`Card.tsx` still exports `FieldDisplay`/`FieldGrid` (§3.2) — those are unaffected; only the outer boxing changed. `FieldGrid` uses CSS grid `auto-fit` with `minmax(190px or 240px, 1fr)` (190 if `cols>=3`, else 240) — collapses to 2 then 1 column as the container narrows, no manual breakpoints. `gap: 16px 28px`.
+
+**Section gap is 32px, not the 20–24px it was under `<Card>`.** Without a border to mark "this section ended, a new one begins," the gap between sections has to carry more of that signal on its own.
+
+**The quotation-block wrapper (`quotationBlock` in `RequestDetailPage.tsx`, `quotationCard`/`quotationHeader` in `RequestFormStepper.tsx`) also lost its outer `border`+bg.** The gradient header is the section's real anchor — it carries the quotation number, that's communicative color, not a box for boxing's sake — so it stays, now with its own `borderRadius: 4` since it no longer connects to a box below it. The `labeledBand` rule inside (total strip, payment-schedule strip) switched from `framed=true` (`#D0D6DF`, echoing an outer border that no longer exists) to `framed=false` (`#F2F6F8`, the soft row-level rule) to match.
+
+The form's footer action bar (checkbox + Save Draft/Submit buttons) similarly dropped its full box for a `borderTop: 1px solid #D0D6DF` + `paddingTop: 20`.
 
 ### 8.3 Form Fields — corrected against `909:1107` ("Web Text field") on 2026-06-29
 
@@ -471,8 +479,13 @@ These files are **not imported anywhere live** and should not be treated as repr
 3. **Mobile responsiveness** — the app is desktop-only today. The only responsive behavior anywhere is `FieldGrid`'s `auto-fit` column collapse; nothing else adapts below desktop width.
 4. **`Sidebar.tsx`'s stray pill radius + `ROLE_COLORS.accounting` reusing `#82C566`** — low priority since the component is unmounted, but worth a pass before this module is ever embedded in the real host shell (see §1.1).
 5. **Dead-code cleanup** (§11) — five unused files still sit in the repo with stale patterns. Safe to delete; not yet done, pending an explicit ask.
-6. **Card/border-heavy layout vs. WorkX's mostly-borderless convention** — open design-direction question, under active discussion as of 2026-06-29; no decision made yet, nothing to action here until one lands.
-7. **List-page filtering UX** — the rejected/pending banner's "ดูทั้งหมด" filter button and whether to add month/date filters alongside (or instead of) the status dropdown; under active discussion as of 2026-06-29.
+6. **Table column-filter affordance** (carried over from above) is still the only unresolved piece of the table audit.
+
+**Resolved 2026-06-29, same day they were raised:** the card/border-heavy layout question (§8.2 — de-carded to `<Section>`) and the list-page filtering UX question (banner reworded + unified with an active-filter strip, date filter added via `<DatePicker>` — see §8.5 below). Not open items anymore; don't re-raise them as if undecided.
+
+### 8.5 DatePicker
+
+`src/components/ui/DatePicker.tsx` — single-date calendar popover, used by `RequestListPage`'s "วันที่อัปเดต" filter (filters on `updatedAt`, which already covers "last edited" and falls back to "created" automatically since a never-edited request has `updatedAt === createdAt`). Structure matches WorkX's own calendar (Exzy_WorkX `72:5368`: prev/next month header, weekday row, day grid) but recolored to this app's actual brand tokens (Poppins, navy `#004081` selected day, teal `#66C5C5` today ring) rather than the literal library-default neutrals (`#14181F`, `#DCE0E5`, Inter font) that component's own Figma export uses — those don't appear anywhere else in WorkX's real rendered UI, strongly suggesting that specific component is an unskinned base-library widget, not WorkX's actual brand. Simplified to single-day select (click a day, popover closes immediately) rather than the Figma reference's range-select + Cancel/Done footer, since this filters by one date, not a range.
 
 ---
 
