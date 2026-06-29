@@ -205,15 +205,15 @@ Page layout: `<main>` padding `28px 32px` (`AppShell.tsx`).
 
 ---
 
-## 5. Border Radius — corrected
+## 5. Border Radius — corrected (twice — see below)
 
-**EXZY CI v3 (commit `98d50f4`): squared app-wide.** But the actual current rule has one more nuance than "4px everywhere, 6px for inputs" — that 6px claim is stale:
+**EXZY CI v3 (commit `98d50f4`): squared app-wide.** But form fields specifically follow a *different* universal radius than buttons/cards do — confirmed directly against the W+ Library's "Web Text field" component (`909:1107`) on 2026-06-29:
 
 | Element | Radius | Note |
 |---------|--------|------|
 | Buttons, Card, Modal, Alert, comboDropdown panel, quotationBlock | **4px** | universal |
-| `<Input>`, `<Textarea>` | **4px** | — not 6px. `inputBase` in `FormField.tsx` hardcodes `borderRadius: 4`. The `--radius-sm: 6px` token exists in `globals.css` but Input/Textarea don't use it. |
-| `<Select>` | **8px** | **deliberate, documented exception** — code comment: "Matches the W+ Library 'field-dropdown' component (926:425) exactly." Also gets a navy focus border/outline instead of teal (see §8.3). |
+| `<Input>`, `<Textarea>`, `<Select>` | **8px** | all three field types — confirmed via `909:1107` ("Web Text field", `rounded-lg`) and `926:425` ("field-dropdown"). `<Input>`/`<Textarea>` used to be 4px; that was this module's radius-squaring pass overshooting past what the real field component specifies. `<Select>` was already right. |
+| Checkbox (`Checkbox.tsx`) | **4px** | confirmed via `1052:450` ("MultiCheckbox") |
 | Module-switcher nav tabs (`AppShell.tsx`) | **10px** | another deliberate exception, mirrors the Figma TopMenuBar's tab shape |
 | Sidebar nav items (`Sidebar.tsx`, unmounted) | 8px | only relevant if/when Sidebar is mounted |
 | Sidebar logo mark, RoleSwitcher pills, Sidebar role badge | 10 / 9999 / 9999 | RoleSwitcher is a dev-only tool — out of scope of the squaring rule. Sidebar's pill role badge is a known stray leftover in unmounted code, not yet fixed (low priority since it never renders). |
@@ -234,7 +234,7 @@ This is the most-corrected section of this doc. There are three distinct divider
 
 **Cards always have an outer border; tables (on their own, outside a Card) never do.** `RequestListPage`'s table sits directly on the page background with zero outer frame — that's intentional, matching the host, not a missing Card wrapper.
 
-> **Open item (flagged 2026-06-29, not yet audited):** the user pointed at Exzy_WorkX node `851:2479` and asked specifically whether **row padding equals column padding**, identically between header cells and body cells, and asked about the **header-column filter affordance** — across *every* page, not just one table. This needs a dedicated pass comparing exact cell padding (header vs. body, row vs. column) against that Figma node, plus checking whether any host tables show inline column filters that this module's tables are missing. Not yet done — do this before considering tables "fully audited."
+**Header padding always equals body padding, table by table** — confirmed against Exzy_WorkX node `851:2649` (one shared padding spec, `16px/10px`, reused for header and body cells alike) and fixed everywhere on 2026-06-29: `RequestListPage` (`14px 20px`), `RequestDetailPage`'s `tableHeaderCell` (`12px 14px`), `RequestFormStepper`'s own summary table (`12px 14px`). The sort-caret gap from the column label was also widened (`marginLeft: 4` → `10`) to match Figma's effective visual spacing. **Still open:** whether the host shows an inline column-filter affordance that this module's tables lack — not yet checked.
 
 ---
 
@@ -245,7 +245,9 @@ This is the most-corrected section of this doc. There are three distinct divider
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Row 1: padding 18px 32px, justify space-between           │
-│   [WorkX logo, height 44px]      [role-switcher · user]   │
+│   [WorkX logo, height 44px]   [role-switcher · 14px name  │
+│                                 · 32px avatar · 32px       │
+│                                 bordered chevron box]      │
 ├──────────────────────────────────────────────────────────┤ ← 1px solid #D0D6DF (NOT a shadow)
 │ Row 2: padding 14px 28px, centered, gap 14, wrap          │
 │   [module tab] [module tab] ... [Payment & Credit Term*]  │
@@ -259,6 +261,8 @@ Whole header: `position: sticky; top: 0`, bg `#FFFFFF`, **no `boxShadow` at all*
 Logo sizing note: Figma's literal logo height is 60px on a 1920px-wide canvas (~3% ratio). Rendered literally at 60px on this app's narrower actual viewport, it read oversized — so the logo is instead scaled to roughly match that *ratio* (44px), not the literal Figma pixel value. This is a deliberate, viewport-relative adaptation, not a deviation to "fix."
 
 Module tabs: inactive = transparent bg, `1px solid transparent`, `#586782` text. Active = `rgba(102,197,197,0.1)` bg, `1px solid #66C5C5`, `#004081` text, radius 10.
+
+**User-profile cluster is sized literally off Figma, unlike the logo.** Confirmed against Exzy_WorkX's own "UserProfile" component (`851:2488`): name text `14px`/`#586782`, avatar `32×32` circle, chevron button `32×32` with `1px solid #D0D6DF` border + `4px` radius, `12px` gap between all three. This is fixed-scale app chrome (touch target + readability), not a brand mark — so it gets Figma's pixel values directly rather than a viewport-relative scale-down. (Was previously built at 22px across the board, which read too small against the rest of the header — fixed 2026-06-29.)
 
 ### 7.2 `Sidebar.tsx` — built, not mounted (see §1.1)
 
@@ -293,7 +297,9 @@ Module tabs: inactive = transparent bg, `1px solid transparent`, `#586782` text.
 
 **`secondary` and `danger` are flat colors, not gradients.** Older docs (including `CLAUDE.md` at time of writing) describe `secondary` as a light teal/navy gradient and `danger` as a red gradient — that's wrong; verify against `Button.tsx` directly before styling to match a doc.
 
-Sizes: `sm`=30px / `md`=38px (default) / `lg`=44px height, with matching padding/fontSize/icon-gap. All radius 4, `fontWeight: 600`, `letter-spacing: 0.01em`, `white-space: nowrap`.
+Sizes: `sm`=30px / `md`=38px (default) / `lg`=44px height, with matching padding/fontSize/icon-gap. All radius 4, `fontWeight: 400` (regular, not semibold — every WorkX button/field text style checked is Poppins Regular; this was `600` until 2026-06-29), `letter-spacing: 0.01em`, `white-space: nowrap`.
+
+The form's main submit action has no icon and reads "ส่งคำขออนุมัติ" (not "ส่งขออนุมัติ") — both the icon-removal and the wording were explicit asks, applied to both `RequestFormStepper.tsx` and the equivalent button on `RequestDetailPage.tsx`.
 
 Hover (applied via inline `onMouseEnter`/`onMouseLeave`, not CSS `:hover`):
 - `primary`/`danger`: `filter: brightness(1.08)` + navy/red-tinted shadow + `translateY(-1px)`
@@ -312,18 +318,22 @@ Loading state replaces the icon with a spinner and disables the button. A blur-o
 
 `FieldGrid` uses CSS grid `auto-fit` with `minmax(190px or 240px, 1fr)` (190 if `cols>=3`, else 240) — it naturally collapses to 2 then 1 column as the container narrows, no manual breakpoints. `gap: 16px 28px`.
 
-### 8.3 Form Fields
+### 8.3 Form Fields — corrected against `909:1107` ("Web Text field") on 2026-06-29
 
-| | `<Input>`/`<Textarea>` | `<Select>` |
-|---|---|---|
-| Height | 38px (Textarea: auto, `8px 12px` padding) | 38px |
-| Radius | **4px** | **8px** (deliberate exception, §5) |
-| Border resting | `1px solid #D0D6DF` | same |
-| Focus | border `#66C5C5` + outline `2px solid rgba(102,197,197,0.6)` | border **`#004081`** + outline `2px solid rgba(0,64,129,0.15)` |
-| Error | border `#F3554F`, bg `#FEF2F2` | same |
-| Disabled | bg `#F2F6F8`, color `#929EB4` | same |
+All three field types now share the same radius and focus color — confirmed directly from Figma, not assumed:
 
-Label (`FormGroup`): `12px/600/#586782` (turns `#F3554F` on error); required `*` is `#F3554F`/700/14px/`margin-left:3`. Hint: `11px/#586782`. Error text: `12px/#F3554F`.
+| | `<Input>`/`<Textarea>`/`<Select>` |
+|---|---|
+| Height | 38px (Textarea: auto, `8px 12px` padding) |
+| Radius | **8px**, all three (Input/Textarea were 4px until this fix — see §5) |
+| Border resting | `1px solid #D0D6DF` |
+| Focus | border **`#004081`** (navy) + outline `2px solid rgba(0,64,129,0.15)` — Input/Textarea were on a *different* (teal) focus color until this fix; Select's navy was already correct |
+| Error | border `#F3554F` — **white background, no red tint** (the red-tinted `#FEF2F2` bg was removed; Figma's error field stays white) |
+| Disabled | bg `#F2F6F8`, color `#929EB4` |
+
+Label (`FormGroup`): `12px/600/#586782` (turns **`#FF3028`** on error — a distinct, brighter red from the field border's `#F3554F`). Required `*` is `#F3554F`/700/14px/`margin-left:3` **unconditionally** — it never switches to `#FF3028` even when the field is in error. Hint: `11px/#586782`. Error message text: `12px/#FF3028`.
+
+**Checkbox** (`src/components/ui/Checkbox.tsx`, confirmed via `1052:450` "MultiCheckbox"): 18px square, radius 4, `1px solid #D0D6DF` resting border, white fill. Checked → navy (`#004081`) checkmark glyph, not a filled box. Disabled → bg `#D9D9D9`. Used everywhere a checkbox appears (Approve/Reject/Cancel modal confirmations, the form's final submit-confirmation checkbox) — modals keep their own `accentColor` (teal for approve, red for reject/cancel) as a deliberate semantic layer on top of the otherwise-identical box shape, not a deviation from the Figma spec.
 
 ### 8.4 Modal
 
@@ -437,7 +447,7 @@ These files are **not imported anywhere live** and should not be treated as repr
 
 ### ✅ DO
 - Use the shared primitives: `<Button>`, `<Card>`, `<FormGroup>`/`<Input>`/`<Select>`/`<Textarea>`, `<Modal>`, `<StatusBadge>`, `<Alert>`
-- 4px radius everywhere except `<Select>` (8px) and the module-switcher nav tabs (10px)
+- 4px radius everywhere except form fields (`<Input>`/`<Select>`/`<Textarea>`, all 8px), the module-switcher nav tabs (10px), and the checkbox (4px — same as everything else, just calling it out since it's easy to assume 8px by association with fields)
 - Navy-tinted shadows only
 - `fontVariantNumeric: 'tabular-nums'` for numbers/currency — no mono font
 - `line-height: 1.75` for Thai text blocks
@@ -446,7 +456,7 @@ These files are **not imported anywhere live** and should not be treated as repr
 ### ❌ DON'T
 - Use `rgba(0,0,0,x)` shadows
 - Reintroduce a `success` Button variant, or gradient `secondary`/`danger` buttons — verify `Button.tsx` directly, don't trust a doc's claim about variant colors
-- Give `<Input>`/`<Textarea>` a 6px radius "to match the token" — they're 4px in practice; only `<Select>` is 8px
+- Give `<Input>`/`<Textarea>` a 4px or 6px radius — all three field types (`Input`/`Textarea`/`Select`) are 8px, confirmed against Figma's "Web Text field" component
 - Give `StatusBadge` a per-status text color — the label is always `#505050`
 - Use pill radius (`9999`) on anything newly built — it survives only in two known, scoped exceptions (`RoleSwitcher`, dev-only; `Sidebar`'s role badge, unmounted)
 - Treat `lucide-react` or `react-icons/fa6` as current — both are fully migrated away from
@@ -456,11 +466,13 @@ These files are **not imported anywhere live** and should not be treated as repr
 
 ## 14. Open Items — not yet resolved
 
-1. **Table cell padding/filter audit (flagged 2026-06-29, not yet done).** Check Exzy_WorkX node `851:2479`: does header-row padding match body-row padding exactly, in both row and column directions, across every table in this module — and does the host show inline column filters in its header row that this module's tables currently lack? Scope is *every page with a table*, not just one.
+1. **Table column-filter affordance** — does the WorkX host show inline column filters in its table header rows that this module's tables currently lack? Header/body padding parity itself is resolved (§6); this specific question about filter UI is not.
 2. **Metropolis brand colors** — a secondary palette referenced in the W+ Library Figma file; exact hex values were never pinned down, and nothing in `src/` currently references them. Likely irrelevant unless a future Figma component pulls one in.
 3. **Mobile responsiveness** — the app is desktop-only today. The only responsive behavior anywhere is `FieldGrid`'s `auto-fit` column collapse; nothing else adapts below desktop width.
 4. **`Sidebar.tsx`'s stray pill radius + `ROLE_COLORS.accounting` reusing `#82C566`** — low priority since the component is unmounted, but worth a pass before this module is ever embedded in the real host shell (see §1.1).
 5. **Dead-code cleanup** (§11) — five unused files still sit in the repo with stale patterns. Safe to delete; not yet done, pending an explicit ask.
+6. **Card/border-heavy layout vs. WorkX's mostly-borderless convention** — open design-direction question, under active discussion as of 2026-06-29; no decision made yet, nothing to action here until one lands.
+7. **List-page filtering UX** — the rejected/pending banner's "ดูทั้งหมด" filter button and whether to add month/date filters alongside (or instead of) the status dropdown; under active discussion as of 2026-06-29.
 
 ---
 
