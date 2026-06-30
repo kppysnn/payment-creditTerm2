@@ -564,6 +564,29 @@ export function RequestFormStepper({
       updateInstRow(i, 'installmentPercent', amount === 0 ? '' : (sellingTotal > 0 ? (amount / sellingTotal) * 100 : 0))
     }
 
+    // Bulk counterpart to the per-row suggestion hint — typing a value into
+    // every row one at a time doesn't scale once instCount runs into the
+    // hundreds. This fills every row that's STILL blank (leaving anything
+    // already typed untouched) with an even split of whatever's left, in
+    // one action. Same last-row-absorbs-the-rounding-remainder technique as
+    // equalSplitPercents, just scoped to the empty rows' share of 100%
+    // instead of the whole 100%.
+    function distributeRemaining() {
+      const slice = insts.slice(0, instCount)
+      const emptyIdxs = slice.reduce<number[]>((acc, r, idx) => { if (r.installmentPercent === '') acc.push(idx); return acc }, [])
+      if (emptyIdxs.length === 0 || sellingTotal <= 0) return
+      const filledPct = slice.reduce((s, r) => r.installmentPercent !== '' ? s + numVal(r.installmentPercent) : s, 0)
+      const remainingPct = 100 - filledPct
+      if (remainingPct <= 0) return
+      const base = Math.floor((remainingPct / emptyIdxs.length) * 100) / 100
+      const updated = [...insts]
+      emptyIdxs.forEach((idx, j) => {
+        const isLast = j === emptyIdxs.length - 1
+        updated[idx] = { ...updated[idx], installmentPercent: isLast ? Math.round((remainingPct - base * (emptyIdxs.length - 1)) * 100) / 100 : base }
+      })
+      setInsts(updated)
+    }
+
     // Curated split presets exist for 1-4; beyond that there's no hand-picked
     // option to fall back to, so the split starts as an even share across all
     // n rows instead — see equalSplitPercents.
@@ -863,17 +886,35 @@ export function RequestFormStepper({
                 </button>
               </div>
             </div>
+            {/* Per-row "click to apply" doesn't scale once instCount runs
+                into the hundreds — this combines the same live remaining-
+                amount readout with ONE bulk action that fills every row
+                still blank at once (see distributeRemaining), instead of
+                requiring a click per row. */}
             {amountInputMode && (() => {
               const slice = insts.slice(0, instCount)
               const filledAmt = slice.reduce((s, r) => r.installmentPercent !== '' ? s + calcInstallmentAmount(sellingTotal, numVal(r.installmentPercent)) : s, 0)
               const emptyCount = slice.filter(r => r.installmentPercent === '').length
               const remaining = sellingTotal - filledAmt
+              // Once nothing's left to fill, this banner's job is done — the
+              // "รวมสัดส่วนงวด" progress bar below is the authority on
+              // completion from here. Without this guard, sub-cent rounding
+              // noise (well within the 0.01-point submit tolerance) could
+              // linger here as a confusing non-zero "remaining" figure.
+              if (emptyCount === 0) return null
               return (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', marginBottom: 8, background: '#F2F6F8', borderRadius: 4, fontSize: 12, color: '#586782' }}>
-                  <span>ยอดคงเหลือที่ยังไม่ได้กรอก</span>
-                  <span style={{ fontWeight: 700, color: remaining < 0 ? '#F3554F' : '#004081' }}>
-                    {formatCurrency(remaining)}{emptyCount > 0 ? ` จาก ${emptyCount} งวด` : ''}
-                  </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '10px 12px', marginBottom: 8, background: '#F2F6F8', borderRadius: 4, flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#586782' }}>ยอดคงเหลือที่ยังไม่ได้กรอก</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: remaining < 0 ? '#F3554F' : '#004081' }}>
+                      {formatCurrency(remaining)}{emptyCount > 0 ? ` · ${emptyCount} งวด` : ''}
+                    </div>
+                  </div>
+                  {emptyCount > 0 && remaining > 0 && (
+                    <button type="button" onClick={distributeRemaining} style={splitBtn(false)}>
+                      แบ่งให้งวดที่เหลือเท่ากัน
+                    </button>
+                  )}
                 </div>
               )
             })()}
@@ -947,39 +988,22 @@ export function RequestFormStepper({
                             )}
                             <td style={{ padding: '6px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#004081', fontWeight: 500 }}>
                               {amountInputMode ? (
-                                <div>
-                                  <Input type="text" inputMode="numeric" value={formatThousands(totalAmt || '')}
-                                    onChange={e => {
-                                      const digits = e.target.value.replace(/\D/g, '')
-                                      setAmountRow(i, digits ? Number(digits) : 0)
-                                    }}
-                                    // Muted on purpose (overrides the app-wide
-                                    // placeholder color via .suggested-placeholder
-                                    // in globals.css) — at the normal placeholder
-                                    // contrast this read as an already-typed
-                                    // value instead of a suggestion.
-                                    className={row.installmentPercent === '' && hasAnyFilledAmt && suggestedAmt > 0 ? 'suggested-placeholder' : undefined}
-                                    placeholder={row.installmentPercent === '' && hasAnyFilledAmt && suggestedAmt > 0 ? formatThousands(Math.round(suggestedAmt)) : '0'}
-                                    style={{ width: 110, textAlign: 'right', height: 32 }} />
-                                  {/* A real click target, not auto-fill-on-focus —
-                                      mutating state synchronously inside onFocus
-                                      raced against the browser's own native input
-                                      handling on the very next keystroke (confirmed
-                                      with real keyboard typing, not just .fill()),
-                                      corrupting the value. This sidesteps that
-                                      entirely: nothing touches state until the
-                                      user deliberately clicks. The number itself
-                                      already shows as the placeholder above, so
-                                      this label only needs to explain the action,
-                                      not repeat the figure. */}
-                                  {row.installmentPercent === '' && hasAnyFilledAmt && suggestedAmt > 0 && (
-                                    <button type="button"
-                                      onClick={() => setAmountRow(i, Math.round(suggestedAmt))}
-                                      style={{ display: 'block', marginTop: 3, marginLeft: 'auto', background: 'none', border: 'none', padding: 0, fontSize: 10, color: '#4AADAD', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-                                      คลิกเพื่อกรอกอัตโนมัติ
-                                    </button>
-                                  )}
-                                </div>
+                                <Input type="text" inputMode="numeric" value={formatThousands(totalAmt || '')}
+                                  onChange={e => {
+                                    const digits = e.target.value.replace(/\D/g, '')
+                                    setAmountRow(i, digits ? Number(digits) : 0)
+                                  }}
+                                  // Muted on purpose (overrides the app-wide
+                                  // placeholder color via .suggested-placeholder
+                                  // in globals.css) — at the normal placeholder
+                                  // contrast this read as an already-typed value
+                                  // instead of a hint. Purely informational now
+                                  // (no per-row click target — see
+                                  // distributeRemaining for the bulk equivalent,
+                                  // which is what actually scales to many rows).
+                                  className={row.installmentPercent === '' && hasAnyFilledAmt && suggestedAmt > 0 ? 'suggested-placeholder' : undefined}
+                                  placeholder={row.installmentPercent === '' && hasAnyFilledAmt && suggestedAmt > 0 ? formatThousands(Math.round(suggestedAmt)) : '0'}
+                                  style={{ width: 110, textAlign: 'right', height: 32 }} />
                               ) : (
                                 totalAmt > 0 ? formatCurrency(totalAmt) : '—'
                               )}
