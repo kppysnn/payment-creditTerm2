@@ -682,20 +682,16 @@ export function RequestFormStepper({
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ position: 'sticky', top: 0 }}>
-                      {/* Explicit width (matches RequestDetailPage's own
-                          installmentTable column for the same data) —
-                          without it, auto-layout handed this column ~200px
-                          of slack for a 1-2 digit value, the same class of
-                          imbalance as the % column fix below. */}
-                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'left', background: '#F2F6F8', width: 70 }}>งวดที่</th>
-                      {/* Centered, not right — matches the read-only Payment
-                          Schedule table's "%" column convention (RequestDetailPage),
-                          and a fixed, content-hugging width instead of a wide one:
-                          right-aligning a narrow input inside an oversized column
-                          left a big empty gutter that read as "shifted left" /
-                          not lined up with the header above it. */}
-                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'center', background: '#F2F6F8', width: 110 }}>สัดส่วน (%)</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'right', background: '#F2F6F8' }}>มูลค่า (THB)</th>
+                      {/* Equal thirds (explicit per the user's call, after
+                          weighing it against content-proportional widths) —
+                          each column is exactly 1/3 of the table regardless
+                          of how little "งวดที่"/"%" actually need. Alignment
+                          stays semantic either way: ID left, % centered
+                          (matches RequestDetailPage's read-only convention),
+                          amount right (universal currency convention). */}
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'left', background: '#F2F6F8', width: '33.34%' }}>งวดที่</th>
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'center', background: '#F2F6F8', width: '33.33%' }}>สัดส่วน (%)</th>
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'right', background: '#F2F6F8', width: '33.33%' }}>มูลค่า (THB)</th>
                     </tr>
                   </thead>
                   <tbody>

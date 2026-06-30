@@ -131,7 +131,7 @@ function buildQuotationGroup(no: string, title: string, gradient: string, items:
       <span style="font-size:11px;font-weight:600;color:#586782">Credit Term: <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
     </div>
     <table>
-      <tr><th style="width:50px">งวดที่</th><th style="width:60px;text-align:center">%</th><th style="text-align:right">ยอดชำระ</th></tr>
+      <tr><th style="width:33.34%">งวดที่</th><th style="width:33.33%;text-align:center">%</th><th style="width:33.33%;text-align:right">ยอดชำระ</th></tr>
       ${installments.map(i => `<tr>
         <td>${i.installmentNo}</td>
         <td style="text-align:center">${i.installmentPercent}%</td>
