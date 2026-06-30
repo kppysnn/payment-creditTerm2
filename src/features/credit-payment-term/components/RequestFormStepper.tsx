@@ -624,31 +624,41 @@ export function RequestFormStepper({
       const errKey = `${prefix}Inst${i}.ct`
       const isCustom = customCtRows[i] || (days !== '' && !CREDIT_TERM_PRESETS.includes(numVal(days)))
       if (isCustom) {
-        // Compact (table) mode: the X button is positioned absolutely,
-        // outside the input's own box, instead of sitting beside it in a
-        // flex row. A flex row's auto-centering point shifts depending on
-        // its TOTAL content width — input plus button together would
-        // center a few px off from where the 92px-wide dropdown centers
-        // alone, even with the input itself at the same 92px. Pinning the
-        // input to exactly the dropdown's width and box position, with the
-        // button purely overlaid after it, is the only way both controls
-        // land in the exact same place when a row switches modes.
+        // Same placeholder + suffix pattern as the single block-level
+        // Credit Term field's own custom-input (above): "พิมพ์จำนวนวัน"
+        // while empty, then a "วัน" unit label that stays next to whatever
+        // number gets typed — so a filled row reads "15 วัน", the same way
+        // a picked dropdown option does, instead of a bare unlabeled "15".
         if (compact) {
+          // The input is still pinned to a fixed 92px box matching the
+          // dropdown's own width/position exactly — the suffix + X button
+          // are an absolutely-positioned group laid out after it, so
+          // neither one can shift where the input box itself sits (a flex
+          // row's centering point moves with total content width, which is
+          // exactly what caused the previous misalignment).
           return (
             <div style={{ position: 'relative', display: 'inline-block', width: 92 }}>
+              {/* "พิมพ์จำนวนวัน" (the full phrase, same as the block-level
+                  field below) gets clipped to "พิมพ์จำนวนวั" at this width —
+                  92px is a hard constraint here since it's pinned to the
+                  dropdown's own width, so this column uses a shorter
+                  placeholder that actually fits instead of a truncated one. */}
               <Input type="number" min="0" value={days}
                 onChange={e => updateInstRow(i, 'creditTermDays', e.target.value !== '' ? Number(e.target.value) : '')}
-                placeholder="วัน" error={errors[errKey]}
+                placeholder="ระบุวัน" error={errors[errKey]}
                 className="no-spinner"
-                style={{ width: '100%', textAlign: 'right', height: 32 }} />
-              <button type="button"
-                onClick={() => { setCustomCtRows(prev => ({ ...prev, [i]: false })); updateInstRow(i, 'creditTermDays', CREDIT_TERM_PRESETS[0]) }}
-                style={{ position: 'absolute', top: 0, left: '100%', marginLeft: 4, width: 22, height: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                aria-label="เลือกจากรายการแทน">
-                <FiX size={13} />
-              </button>
+                style={{ width: '100%', textAlign: 'right', height: 32, fontSize: 12 }} />
+              <div style={{ position: 'absolute', top: 0, left: '100%', marginLeft: 4, height: 32, display: 'flex', alignItems: 'center', gap: 2, whiteSpace: 'nowrap' }}>
+                <span style={{ color: '#586782', fontSize: 11, fontWeight: 400 }}>วัน</span>
+                <button type="button"
+                  onClick={() => { setCustomCtRows(prev => ({ ...prev, [i]: false })); updateInstRow(i, 'creditTermDays', CREDIT_TERM_PRESETS[0]) }}
+                  style={{ width: 20, height: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                  aria-label="เลือกจากรายการแทน">
+                  <FiX size={13} />
+                </button>
+              </div>
             </div>
           )
         }
@@ -656,8 +666,9 @@ export function RequestFormStepper({
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Input type="number" min="0" value={days}
               onChange={e => updateInstRow(i, 'creditTermDays', e.target.value !== '' ? Number(e.target.value) : '')}
-              placeholder="วัน" error={errors[errKey]}
+              placeholder="พิมพ์จำนวนวัน" error={errors[errKey]}
               style={{ textAlign: 'right', flex: 1 }} />
+            <span style={{ color: '#586782', fontSize: 13, fontWeight: 400, flexShrink: 0 }}>วัน</span>
             <button type="button"
               onClick={() => { setCustomCtRows(prev => ({ ...prev, [i]: false })); updateInstRow(i, 'creditTermDays', CREDIT_TERM_PRESETS[0]) }}
               style={{ width: 28, height: 38, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer' }}
