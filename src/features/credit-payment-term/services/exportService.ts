@@ -4,7 +4,7 @@
  * PDF uses browser print-to-PDF (window.print) as the primary method.
  * html2pdf.js can be wired in here if added to dependencies.
  */
-import type { Request, PaymentInstallment } from '../types/request'
+import type { Request, PaymentInstallment, QuotationItem } from '../types/request'
 import { SALE_TYPE_LABELS } from '../types/request'
 import { getStatusConfig } from '../utils/status'
 
@@ -26,8 +26,85 @@ export function exportPDF(req: Request): void {
   }
 }
 
+// Font/color/weight tokens matched directly against the live components this
+// document mirrors (FormField.tsx's FieldDisplay, Section.tsx, StatusBadge.tsx,
+// RequestDetailPage.tsx's itemsTable/summary table) as of 2026-06-30 — this had
+// drifted back to a stale draft (thin non-uppercase labels instead of
+// FieldDisplay's 11px/700/uppercase eyebrow, status text colored directly
+// instead of FieldDisplay's "icon carries color, text stays gray" rule,
+// items table missing the cost column the live page shows). Re-synced.
+//
+// Deliberately KEPT different from the live screens, same as before: real
+// borders on every table cell, not the live tables' soft #F2F6F8 row tints —
+// printed/grayscale output can't lean on subtle background color the way
+// screen UI can.
+const PRINT_STYLES = `
+  @page { size: A4; margin: 16mm 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif; font-size: 12px; color: #505050; line-height: 1.6; margin: 0; }
+  .container { width: 100%; }
+
+  /* The single fix that matters most for "เนื้อหาเดียวกันถูกแยกหน้า": wrap any
+     block that must never be torn across a page boundary in this. A row
+     either fits whole on the current page, or moves whole to the next one —
+     it never splits with half its content stranded on each side. */
+  .keep { break-inside: avoid; page-break-inside: avoid; }
+  .no-orphan-after { break-after: avoid; page-break-after: avoid; }
+
+  .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #004081; padding-bottom: 14px; margin-bottom: 22px; }
+  h1 { font-size: 19px; font-weight: 500; color: #586782; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { font-size: 11px; color: #586782; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #505050; flex-shrink: 0; white-space: nowrap; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .block { margin-bottom: 26px; }
+  .section-title { font-size: 15px; font-weight: 500; color: #586782; border-bottom: 1px solid #D0D6DF; padding-bottom: 8px; margin-bottom: 14px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+  /* Matches FieldDisplay (Card.tsx) exactly: 11px/700/uppercase/0.06em — was
+     10px/400/sentence-case, which read as flat body text instead of a label,
+     the main reason the request/customer info read as a wall of text. */
+  .field-label { font-size: 11px; font-weight: 700; color: #586782; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .field-val { font-size: 13px; color: #586782; line-height: 1.5; }
+  .field-val.mono { font-variant-numeric: tabular-nums; }
+  .hint { font-size: 11px; color: #586782; margin-top: 10px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  th { background: #F2F6F8; font-weight: 400; text-align: left; padding: 8px 10px; border: 1px solid #D0D6DF; color: #004081; font-size: 11px; }
+  td { padding: 7px 10px; border: 1px solid #D0D6DF; color: #586782; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; } /* repeats on every page a long table spans */
+  .mono { font-variant-numeric: tabular-nums; }
+
+  .quote-group { margin: 14px 0 20px; }
+  .quote-core { border-radius: 4px; overflow: hidden; }
+  .quote-core table { border-radius: 0; }
+  .quote-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; background: linear-gradient(135deg, #66C5C5 0%, #004081 100%); padding: 9px 12px; border-radius: 4px 4px 0 0; }
+  .quote-no { font-size: 13px; font-weight: 700; color: #fff; }
+  .quote-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .schedule-strip { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; padding: 8px 10px; background: #F2F6F8; border: 1px solid #D0D6DF; border-top: none; }
+  .schedule-label { font-size: 11px; font-weight: 600; color: #586782; }
+  .credit-term { font-size: 11px; color: #586782; }
+  .credit-term .mono { font-size: 12px; font-weight: 700; color: #004081; }
+
+  .comment-box { padding: 10px; border: 1px solid #D0D6DF; border-top: none; }
+
+  /* The one bold top-tier figure on the page, matching the live detail
+     page's "สรุปยอดรวม" convention (one grand total, everything else lighter). */
+  tfoot td { padding: 12px 10px; font-weight: 600; font-size: 13px; color: #586782; background: #F8F9FA; border-top: 2px solid #D0D6DF; }
+  tfoot td.amount { color: #004081; font-size: 15px; font-weight: 700; }
+
+  .doc-footer { margin-top: 28px; padding-top: 10px; border-top: 1px solid #D0D6DF; font-size: 10px; color: #586782; text-align: center; }
+`
+
+function field(label: string, value: string, mono = false, span2 = false): string {
+  return `<div class="field keep"${span2 ? ' style="grid-column:span 2"' : ''}><div class="field-label">${label}</div><div class="field-val${mono ? ' mono' : ''}">${value}</div></div>`
+}
+
 function buildPrintHTML(req: Request): string {
   const statusCfg = getStatusConfig(req.status)
+  const isLumpSum = req.saleType === 'lump_sum'
   const separateQuotation = req.saleType === 'hardware_software_installation'
   const hardwareQuotationNo = `${req.proposalNo}-1`
   const serviceQuotationNo = `${req.proposalNo}-${separateQuotation ? '2' : '1'}`
@@ -35,111 +112,123 @@ function buildPrintHTML(req: Request): string {
   const serviceItems = req.quotationItems.filter(item => item.type === 'software' || item.type === 'installation')
   const hardwareSelling = hardwareItems.reduce((sum, item) => sum + item.sellingPrice, 0)
   const serviceSelling = serviceItems.reduce((sum, item) => sum + item.sellingPrice, 0)
+  const hardwareCost = hardwareItems.reduce((sum, item) => sum + item.cost, 0)
+  const serviceCost = serviceItems.reduce((sum, item) => sum + item.cost, 0)
 
   return `<!DOCTYPE html><html><head><title>${req.requestNo}</title>
-<style>
-  /* Font stack, colors, and weights matched to the live app's design system
-     (src/styles/globals.css, docs/DESIGN.md) as of 2026-06-29 — this used to
-     be 'Segoe UI'/Arial with its own stale weight conventions, completely
-     disconnected from every fix made to the live screens. Table borders are
-     a deliberate, print-specific exception (kept from src/styles/print.css'
-     own convention) — printed output can't rely on the subtle background
-     tints the live tables use instead of borders. */
-  body { font-family: 'Poppins', 'Noto Sans Thai', system-ui, sans-serif; font-size: 12px; color: #586782; margin: 0; padding: 0; }
-  .container { max-width: 210mm; margin: 0 auto; padding: 16mm; }
-  h1 { font-size: 18px; font-weight: 500; color: #586782; margin: 0 0 4px; }
-  .sub { font-size: 11px; color: #586782; margin-bottom: 16px; }
-  .section { margin-bottom: 18px; }
-  .section-title { font-size: 14px; font-weight: 500; color: #586782; border-bottom: 1px solid #D0D6DF; padding-bottom: 6px; margin-bottom: 10px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
-  .field-label { font-size: 10px; color: #586782; font-weight: 400; }
-  .field-val { font-size: 12px; color: #586782; margin-bottom: 6px; }
-  .quote-group { border:1px solid #D0D6DF; border-radius:4px; overflow:hidden; margin:12px 0; }
-  .quote-head { display:flex; justify-content:space-between; align-items:baseline; background:#004081; padding:7px 10px; font-weight:700; color:#fff; }
-  .quote-no { font-size:13px; }
-  .quote-label { font-size:10px; color:rgba(255,255,255,0.78); text-transform:uppercase; letter-spacing:.06em; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  th { background: #F2F6F8; font-weight: 600; text-align: left; padding: 5px 8px; border: 1px solid #D0D6DF; }
-  td { padding: 5px 8px; border: 1px solid #D0D6DF; }
-  .mono { font-family: 'Poppins', 'Noto Sans Thai', monospace; }
-  .status { display: inline-block; font-size: 11px; font-weight: 500; }
-  @media print { @page { size: A4; margin: 0; } }
-</style></head><body>
+<style>${PRINT_STYLES}</style></head><body>
 <div class="container">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #004081;padding-bottom:12px;margin-bottom:16px">
+  <div class="doc-header keep">
     <div>
       <h1>Credit &amp; Payment Term Approval Request</h1>
-      <div class="sub">${req.requestNo} · Version ${req.version} · Created ${new Date(req.createdAt).toLocaleDateString('th-TH')}</div>
+      <div class="sub">${req.requestNo} · Version ${req.version} · สร้างเมื่อ ${new Date(req.createdAt).toLocaleDateString('th-TH')}</div>
     </div>
-    <div class="status" style="color:${statusCfg.iconColor}">${statusCfg.label}</div>
+    <div class="status"><span class="status-dot" style="background:${statusCfg.iconColor}"></span>${statusCfg.label}</div>
   </div>
 
-  <div class="section">
+  <div class="block keep">
     <div class="section-title">1. ข้อมูลคำขอ</div>
     <div class="grid2">
-      <div><div class="field-label">Proposal No.</div><div class="field-val mono">${req.proposalNo}</div></div>
-      <div><div class="field-label">ประเภทการขาย</div><div class="field-val">${SALE_TYPE_LABELS[req.saleType]}</div></div>
-      <div style="grid-column:span 2"><div class="field-label">Sales</div><div class="field-val">${req.salesName} (${req.salesEmail})</div></div>
-      ${req.requestPurpose ? `<div style="grid-column:span 2"><div class="field-label">วัตถุประสงค์</div><div class="field-val">${req.requestPurpose}</div></div>` : ''}
+      ${field('Proposal No.', req.proposalNo, true)}
+      ${field('ประเภทการขาย', SALE_TYPE_LABELS[req.saleType])}
+      ${field('Sales', `${req.salesName} (${req.salesEmail})`, false, true)}
+      ${req.requestPurpose ? field('วัตถุประสงค์', req.requestPurpose, false, true) : ''}
     </div>
   </div>
 
-  <div class="section">
+  <div class="block keep">
     <div class="section-title">2. ข้อมูลลูกค้า</div>
     ${buildCustomerSection(req)}
-    ${req.customerComment ? `<div class="field-label" style="margin-top:8px">หมายเหตุข้อมูลลูกค้า</div><div class="field-val">${req.customerComment}</div>` : ''}
+    ${req.customerComment ? field('หมายเหตุข้อมูลลูกค้า', req.customerComment, false, true) : ''}
   </div>
 
-  <div class="section">
+  <div class="block">
     <div class="section-title">3. ใบเสนอราคาและ Payment Schedule</div>
-    ${hardwareItems.length > 0 ? buildQuotationGroup(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareSelling, req.installments, req.hardwareComment) : ''}
-    ${serviceItems.length > 0 ? buildQuotationGroup(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceSelling, req.swInstallments ?? [], req.swComment) : ''}
-    <table>
-      <tr style="font-weight:600;background:#F2F6F8">
-        <td>รวมทั้งหมด</td>
-        <td class="mono" style="font-weight:700">${req.financial.totalSelling.toLocaleString()}</td>
-      </tr>
-    </table>
+    ${isLumpSum
+      ? (req.quotationItems.length > 0 ? buildQuotationGroup(hardwareQuotationNo, 'รวมทุกรายการ', req.quotationItems, req.financial.totalCost, req.financial.totalSelling, req.installments, req.hardwareComment) : '')
+      : `${hardwareItems.length > 0 ? buildQuotationGroup(hardwareQuotationNo, 'Hardware', hardwareItems, hardwareCost, hardwareSelling, req.installments, req.hardwareComment) : ''}
+         ${serviceItems.length > 0 ? buildQuotationGroup(serviceQuotationNo, 'Software & Installation', serviceItems, serviceCost, serviceSelling, req.swInstallments ?? [], req.swComment) : ''}`}
+    ${isLumpSum
+      ? buildGrandTotal(req, req.quotationItems.length > 0 ? [{ label: `${hardwareQuotationNo}  รวมทุกรายการ`, cost: req.financial.totalCost, selling: req.financial.totalSelling }] : [])
+      : buildGrandTotal(req, [
+          ...(hardwareItems.length > 0 ? [{ label: `${hardwareQuotationNo}  Hardware`, cost: hardwareCost, selling: hardwareSelling }] : []),
+          ...(serviceItems.length > 0 ? [{ label: `${serviceQuotationNo}  Software &amp; Installation`, cost: serviceCost, selling: serviceSelling }] : []),
+        ])}
   </div>
 
-  ${req.approvalResult ? `<div class="section">
+  ${req.approvalResult ? `<div class="block keep">
     <div class="section-title">4. ผลการพิจารณา</div>
     <div class="grid2">
-      <div><div class="field-label">ผลการพิจารณา</div><div class="field-val">${req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ'}</div></div>
-      <div><div class="field-label">ผู้อนุมัติ</div><div class="field-val">${req.approvalResult.approverName}</div></div>
+      ${field('ผลการพิจารณา', req.approvalResult.approvedAt ? 'อนุมัติ' : 'ไม่อนุมัติ')}
+      ${field('ผู้อนุมัติ', req.approvalResult.approverName)}
     </div>
-    <div class="sub">ดูหมายเหตุของผู้พิจารณาแยกตามหมวดด้านบน</div>
+    <div class="hint">ดูหมายเหตุของผู้พิจารณาแยกตามหมวดด้านบน</div>
   </div>` : ''}
+
+  <div class="doc-footer">${req.requestNo} · พิมพ์เมื่อ ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
 </div></body></html>`
 }
 
-function buildQuotationGroup(no: string, title: string, gradient: string, items: Request['quotationItems'], total: number, installments: PaymentInstallment[], comment?: string): string {
+function buildQuotationGroup(no: string, title: string, items: QuotationItem[], cost: number, selling: number, installments: PaymentInstallment[], comment?: string): string {
   return `<div class="quote-group">
-    <div class="quote-head" style="background:${gradient}"><span class="quote-no">${no}</span><span class="quote-label">${title}</span></div>
-    <table>
-      ${items.map(i => `<tr>
-        <td>${i.name}</td>
-        <td class="mono" style="text-align:right">${i.sellingPrice.toLocaleString()}</td>
-      </tr>`).join('')}
-      <tr style="font-weight:600;background:#F2F6F8">
-        <td>รวม ${title}</td>
-        <td class="mono" style="text-align:right;font-weight:700">${total.toLocaleString()}</td>
-      </tr>
-    </table>
-    ${installments.length > 0 ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#F2F6F8;border:1px solid #D0D6DF;border-top:none">
-      <span style="font-size:12px;font-weight:600;color:#586782">Payment Schedule</span>
-      <span style="font-size:11px;font-weight:600;color:#586782">Credit Term: <span class="mono" style="font-size:12px;font-weight:700;color:#004081">Net ${installments[0].creditTermDays}</span></span>
+    <div class="quote-core keep">
+      <div class="quote-head no-orphan-after"><span class="quote-no">${no}</span><span class="quote-label">${title}</span></div>
+      <table>
+        <thead><tr><th>รายการ</th><th style="text-align:right">ราคาทุน</th><th style="text-align:right">ราคาขาย</th></tr></thead>
+        <tbody>
+          ${items.map(i => `<tr>
+            <td>${i.name}</td>
+            <td class="mono" style="text-align:right">${i.cost.toLocaleString()}</td>
+            <td class="mono" style="text-align:right">${i.sellingPrice.toLocaleString()}</td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>รวม ${title}</td>
+            <td class="mono" style="text-align:right">${cost.toLocaleString()}</td>
+            <td class="mono amount" style="text-align:right">${selling.toLocaleString()}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    ${installments.length > 0 ? (() => {
+      // Per-row credit term column only when rows actually differ — mirrors
+      // RequestDetailPage's installmentTable/hasPerRowCreditTerm convention.
+      const perRowCt = installments.length > 1 && new Set(installments.map(i => i.creditTermDays)).size > 1
+      return `<div class="schedule-strip no-orphan-after">
+      <span class="schedule-label">Payment Schedule</span>
+      ${perRowCt ? '' : `<span class="credit-term">Credit Term: <span class="mono">Net ${installments[0].creditTermDays}</span></span>`}
     </div>
     <table>
-      <tr><th style="width:33.34%">งวดที่</th><th style="width:33.33%;text-align:center">%</th><th style="width:33.33%;text-align:right">ยอดชำระ</th></tr>
-      ${installments.map(i => `<tr>
-        <td>${i.installmentNo}</td>
-        <td style="text-align:center">${i.installmentPercent}%</td>
-        <td class="mono" style="text-align:right">${i.installmentAmount.toLocaleString()}</td>
-      </tr>`).join('')}
-    </table>` : ''}
-    ${comment ? `<div style="padding:8px;border:1px solid #D0D6DF;border-top:none"><div class="field-label">หมายเหตุสำหรับ ${title}</div><div class="field-val" style="margin-bottom:0">${comment}</div></div>` : ''}
+      <thead><tr><th style="width:${perRowCt ? '20%' : '33.34%'}">งวดที่</th><th style="width:${perRowCt ? '24%' : '33.33%'};text-align:center">%</th>${perRowCt ? '<th style="width:26%;text-align:center">เครดิตเทอม</th>' : ''}<th style="width:${perRowCt ? '30%' : '33.33%'};text-align:right">ยอดชำระ</th></tr></thead>
+      <tbody>
+        ${installments.map(i => `<tr>
+          <td>${i.installmentNo}</td>
+          <td style="text-align:center">${i.installmentPercent}%</td>
+          ${perRowCt ? `<td style="text-align:center">Net ${i.creditTermDays}</td>` : ''}
+          <td class="mono" style="text-align:right">${i.installmentAmount.toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`
+    })() : ''}
+    ${comment ? `<div class="comment-box keep">${field(`หมายเหตุสำหรับ ${title}`, comment, false, true)}</div>` : ''}
   </div>`
+}
+
+function buildGrandTotal(req: Request, rows: Array<{ label: string; cost: number; selling: number }>): string {
+  return `<table class="keep">
+    <thead><tr><th>รายการ</th><th style="text-align:right">ราคาทุน</th><th style="text-align:right">ราคาขาย</th></tr></thead>
+    <tbody>
+      ${rows.map(r => `<tr><td>${r.label}</td><td class="mono" style="text-align:right">${r.cost.toLocaleString()}</td><td class="mono" style="text-align:right">${r.selling.toLocaleString()}</td></tr>`).join('')}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>รวมทั้งหมด</td>
+        <td class="mono" style="text-align:right">${req.financial.totalCost.toLocaleString()}</td>
+        <td class="mono amount" style="text-align:right">${req.financial.totalSelling.toLocaleString()}</td>
+      </tr>
+    </tfoot>
+  </table>`
 }
 
 function buildCustomerSection(req: Request): string {
@@ -147,29 +236,29 @@ function buildCustomerSection(req: Request): string {
   if (customerInfo.type === 'new') {
     const d = customerInfo.data
     return `<div class="grid2">
-      <div><div class="field-label">ประเภทลูกค้า</div><div class="field-val">ลูกค้าใหม่</div></div>
-      <div><div class="field-label">ชื่อบริษัท</div><div class="field-val">${d.companyName}</div></div>
-      ${d.contactPerson ? `<div><div class="field-label">ผู้ติดต่อ</div><div class="field-val">${d.contactPerson}</div></div>` : ''}
-      ${d.contactPhone ? `<div><div class="field-label">โทรศัพท์</div><div class="field-val">${d.contactPhone}</div></div>` : ''}
+      ${field('ประเภทลูกค้า', 'ลูกค้าใหม่')}
+      ${field('ชื่อบริษัท', d.companyName)}
+      ${d.contactPerson ? field('ผู้ติดต่อ', d.contactPerson) : ''}
+      ${d.contactPhone ? field('โทรศัพท์', d.contactPhone) : ''}
     </div>`
   }
   if (customerInfo.type === 'existing') {
     const d = customerInfo.data
     return `<div class="grid2">
-      <div><div class="field-label">ประเภทลูกค้า</div><div class="field-val">ลูกค้าเก่า</div></div>
-      <div><div class="field-label">ชื่อบริษัท</div><div class="field-val">${d.companyName}</div></div>
-      <div><div class="field-label">Default Credit Term</div><div class="field-val">${d.defaultCreditTerm ?? '—'} วัน</div></div>
-      ${d.contactPerson ? `<div><div class="field-label">ผู้ติดต่อ</div><div class="field-val">${d.contactPerson}</div></div>` : ''}
-      ${d.contactPhone ? `<div><div class="field-label">โทรศัพท์</div><div class="field-val">${d.contactPhone}</div></div>` : ''}
+      ${field('ประเภทลูกค้า', 'ลูกค้าเก่า')}
+      ${field('ชื่อบริษัท', d.companyName)}
+      ${field('Default Credit Term', `${d.defaultCreditTerm ?? '—'} วัน`)}
+      ${d.contactPerson ? field('ผู้ติดต่อ', d.contactPerson) : ''}
+      ${d.contactPhone ? field('โทรศัพท์', d.contactPhone) : ''}
     </div>`
   }
   const d = customerInfo.data
   return `<div class="grid2">
-    <div><div class="field-label">ประเภทลูกค้า</div><div class="field-val">Reseller</div></div>
-    <div><div class="field-label">Reseller</div><div class="field-val">${d.resellerCompanyName}</div></div>
-    <div><div class="field-label">Default Credit Term</div><div class="field-val">${d.defaultCreditTerm ?? '—'} วัน</div></div>
-    ${d.contactPerson ? `<div><div class="field-label">ผู้ติดต่อ</div><div class="field-val">${d.contactPerson}</div></div>` : ''}
-    ${d.contactPhone ? `<div><div class="field-label">โทรศัพท์</div><div class="field-val">${d.contactPhone}</div></div>` : ''}
-    <div><div class="field-label">End Customer</div><div class="field-val">${d.endCustomerCompanyName}</div></div>
+    ${field('ประเภทลูกค้า', 'Reseller')}
+    ${field('Reseller', d.resellerCompanyName)}
+    ${field('Default Credit Term', `${d.defaultCreditTerm ?? '—'} วัน`)}
+    ${d.contactPerson ? field('ผู้ติดต่อ', d.contactPerson) : ''}
+    ${d.contactPhone ? field('โทรศัพท์', d.contactPhone) : ''}
+    ${field('End Customer', d.endCustomerCompanyName)}
   </div>`
 }

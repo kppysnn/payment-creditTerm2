@@ -91,6 +91,7 @@ export function RequestDetailPage() {
     req.customerInfo.type === 'new'      ? req.customerInfo.data.companyName :
     req.customerInfo.data.resellerCompanyName
   const separateQuotation = req.saleType === 'hardware_software_installation'
+  const isLumpSum = req.saleType === 'lump_sum'
   const hardwareQuotationNo = `${req.proposalNo}-1`
   const serviceQuotationNo = `${req.proposalNo}-${separateQuotation ? '2' : '1'}`
   const hardwareItems = req.quotationItems.filter(item => item.type === 'hardware')
@@ -121,6 +122,12 @@ export function RequestDetailPage() {
     (req.swInstallments?.[0]?.creditTermDays ?? 0) !== (prev.swInstallments?.[0]?.creditTermDays ?? 0) ||
     JSON.stringify(normalizeInstallmentsForCompare(req.swInstallments ?? [])) !== JSON.stringify(normalizeInstallmentsForCompare(prev.swInstallments ?? []))
   )
+  // Lump sum renders hardware+software+installation as one merged block, so
+  // its "changed since last rejection" flag is just the two section flags
+  // ORed together — hardwareChanged already covers the merged installments
+  // (they live in req.installments for lump sum) and swChanged's item filter
+  // still catches software/installation item edits.
+  const lumpSumChanged = hardwareChanged || swChanged
   const changedBadge = (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#004081', background: '#D9F0F0', borderRadius: 4, padding: '2px 8px' }}>
       มีการแก้ไขจากครั้งก่อน
@@ -262,38 +269,51 @@ export function RequestDetailPage() {
     </span>
   ), true, true)
 
-  const installmentStrip = (creditTermDays: number) => labeledBand('Payment Schedule', (
-    <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>
-      Credit Term: <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
-    </span>
-  ), true, true)
+  // Per-row credit term only shows as a table column once it actually varies —
+  // when every row carries the same value, the single summary line above the
+  // table already says it once, more legibly than repeating it on every row.
+  const hasPerRowCreditTerm = (installments: PaymentInstallment[]) =>
+    installments.length > 1 && new Set(installments.map(i => i.creditTermDays)).size > 1
+
+  const installmentStrip = (creditTermDays: number, installments: PaymentInstallment[]) =>
+    hasPerRowCreditTerm(installments) ? labeledBand('Payment Schedule', null, true, true) : labeledBand('Payment Schedule', (
+      <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>
+        Credit Term: <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#004081' }}>{formatCreditTerm(creditTermDays)}</span>
+      </span>
+    ), true, true)
 
   // Equal thirds (explicit user call, weighed against content-proportional
   // widths) — matches RequestFormStepper's own many-installment table.
   // Alignment stays semantic regardless of width: ID left, % centered, amount
-  // right (universal currency convention).
-  const installmentTable = (installments: PaymentInstallment[]) => (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-        <thead>
-          <tr>
-            <th style={{ ...tableHeaderCell, textAlign: 'left', whiteSpace: 'nowrap', width: '33.34%' }}>งวดที่</th>
-            <th style={{ ...tableHeaderCell, textAlign: 'center', whiteSpace: 'nowrap', width: '33.33%' }}>%</th>
-            <th style={{ ...tableHeaderCell, textAlign: 'right', whiteSpace: 'nowrap', width: '33.33%' }}>ยอดชำระ</th>
-          </tr>
-        </thead>
-        <tbody>
-          {installments.map(inst => (
-            <tr key={inst.installmentNo} style={{ borderTop: '1px solid #F2F6F8' }}>
-              <td style={{ padding: '12px 14px' }}>{inst.installmentNo}</td>
-              <td style={{ padding: '12px 14px', color: '#505050', textAlign: 'center' }}>{inst.installmentPercent}%</td>
-              <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(inst.installmentAmount, '#004081', undefined, 400)}</td>
+  // right (universal currency convention). A 4th "เครดิตเทอม" column appears
+  // only when the rows actually carry different terms (see hasPerRowCreditTerm).
+  const installmentTable = (installments: PaymentInstallment[]) => {
+    const perRowCt = hasPerRowCreditTerm(installments)
+    return (
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr>
+              <th style={{ ...tableHeaderCell, textAlign: 'left', whiteSpace: 'nowrap', width: perRowCt ? '20%' : '33.34%' }}>งวดที่</th>
+              <th style={{ ...tableHeaderCell, textAlign: 'center', whiteSpace: 'nowrap', width: perRowCt ? '24%' : '33.33%' }}>%</th>
+              {perRowCt && <th style={{ ...tableHeaderCell, textAlign: 'center', whiteSpace: 'nowrap', width: '26%' }}>เครดิตเทอม</th>}
+              <th style={{ ...tableHeaderCell, textAlign: 'right', whiteSpace: 'nowrap', width: perRowCt ? '30%' : '33.33%' }}>ยอดชำระ</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
+          </thead>
+          <tbody>
+            {installments.map(inst => (
+              <tr key={inst.installmentNo} style={{ borderTop: '1px solid #F2F6F8' }}>
+                <td style={{ padding: '12px 14px' }}>{inst.installmentNo}</td>
+                <td style={{ padding: '12px 14px', color: '#505050', textAlign: 'center' }}>{inst.installmentPercent}%</td>
+                {perRowCt && <td style={{ padding: '12px 14px', color: '#505050', textAlign: 'center' }}>{formatCreditTerm(inst.creditTermDays)}</td>}
+                <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(inst.installmentAmount, '#004081', undefined, 400)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
 
   // No stroked border — but the gradient header still needs to read as
   // *attached* to its own content, not a rounded chip floating on the white
@@ -318,7 +338,7 @@ export function RequestDetailPage() {
         {totalStrip(label, cost, selling)}
         {installments.length > 0 && (
           <div style={{ paddingBottom: 16 }}>
-            {installmentStrip(creditTermDays)}
+            {installmentStrip(creditTermDays, installments)}
             {installmentTable(installments)}
           </div>
         )}
@@ -471,12 +491,16 @@ export function RequestDetailPage() {
               {sectionComment('หมายเหตุข้อมูลลูกค้า', customerComment, canComment, setCustomerComment, false, req.approvalResult?.customerComment)}
             </Section>
 
+            {/* Lump sum: one merged quotation block covering every item + the single payment schedule */}
+            {isLumpSum && req.quotationItems.length > 0 && quotationBlock(hardwareQuotationNo, 'รวมทุกรายการ', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', req.quotationItems, req.financial.totalCost, req.financial.totalSelling, req.installments[0]?.creditTermDays ?? 0, req.installments,
+              sectionComment('หมายเหตุ', hardwareComment, canComment, setHardwareComment, true, req.approvalResult?.hardwareComment, 'ระบุรายละเอียดเพิ่มเติมของคำขอนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'), lumpSumChanged)}
+
             {/* Hardware quotation: items + its own payment schedule */}
-            {hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareCost, hardwareSelling, req.installments[0]?.creditTermDays ?? 0, req.installments,
+            {!isLumpSum && hardwareItems.length > 0 && quotationBlock(hardwareQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', hardwareItems, hardwareCost, hardwareSelling, req.installments[0]?.creditTermDays ?? 0, req.installments,
               sectionComment('หมายเหตุสำหรับ Hardware', hardwareComment, canComment, setHardwareComment, true, req.approvalResult?.hardwareComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'), hardwareChanged)}
 
             {/* Software & Installation quotation: items + its own payment schedule */}
-            {serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceCost, serviceSelling, req.swInstallments?.[0]?.creditTermDays ?? 0, req.swInstallments ?? [],
+            {!isLumpSum && serviceItems.length > 0 && quotationBlock(serviceQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', serviceItems, serviceCost, serviceSelling, req.swInstallments?.[0]?.creditTermDays ?? 0, req.swInstallments ?? [],
               sectionComment('หมายเหตุสำหรับ Software & Installation', swComment, canComment, setSwComment, true, req.approvalResult?.swComment, 'ระบุรายละเอียดเพิ่มเติมของหมวดนี้ เช่น เงื่อนไขการขาย เหตุผลด้านราคา หรือข้อควรพิจารณา'), swChanged)}
 
             {/* Overall total */}
@@ -491,25 +515,40 @@ export function RequestDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {hardwareItems.length > 0 && (
-                      <tr style={{ borderTop: '1px solid #F2F6F8' }}>
-                        <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{hardwareQuotationNo}</span>
-                          <span style={{ color: '#586782', marginLeft: 8 }}>Hardware</span>
-                        </td>
-                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#586782', undefined, 400)}</td>
-                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareSelling, '#004081', undefined, 500)}</td>
-                      </tr>
-                    )}
-                    {serviceItems.length > 0 && (
-                      <tr style={{ borderTop: '1px solid #F2F6F8' }}>
-                        <td style={{ padding: '12px 14px' }}>
-                          <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{serviceQuotationNo}</span>
-                          <span style={{ color: '#586782', marginLeft: 8 }}>Software &amp; Installation</span>
-                        </td>
-                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782', undefined, 400)}</td>
-                        <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceSelling, '#004081', undefined, 500)}</td>
-                      </tr>
+                    {isLumpSum ? (
+                      req.quotationItems.length > 0 && (
+                        <tr style={{ borderTop: '1px solid #F2F6F8' }}>
+                          <td style={{ padding: '12px 14px' }}>
+                            <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{hardwareQuotationNo}</span>
+                            <span style={{ color: '#586782', marginLeft: 8 }}>รวมทุกรายการ</span>
+                          </td>
+                          <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalCost, '#586782', undefined, 400)}</td>
+                          <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(req.financial.totalSelling, '#004081', undefined, 500)}</td>
+                        </tr>
+                      )
+                    ) : (
+                      <>
+                        {hardwareItems.length > 0 && (
+                          <tr style={{ borderTop: '1px solid #F2F6F8' }}>
+                            <td style={{ padding: '12px 14px' }}>
+                              <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{hardwareQuotationNo}</span>
+                              <span style={{ color: '#586782', marginLeft: 8 }}>Hardware</span>
+                            </td>
+                            <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareCost, '#586782', undefined, 400)}</td>
+                            <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(hardwareSelling, '#004081', undefined, 500)}</td>
+                          </tr>
+                        )}
+                        {serviceItems.length > 0 && (
+                          <tr style={{ borderTop: '1px solid #F2F6F8' }}>
+                            <td style={{ padding: '12px 14px' }}>
+                              <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{serviceQuotationNo}</span>
+                              <span style={{ color: '#586782', marginLeft: 8 }}>Software &amp; Installation</span>
+                            </td>
+                            <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceCost, '#586782', undefined, 400)}</td>
+                            <td style={{ padding: '12px 14px', textAlign: 'right' }}>{summaryAmount(serviceSelling, '#004081', undefined, 500)}</td>
+                          </tr>
+                        )}
+                      </>
                     )}
                   </tbody>
                   <tfoot>

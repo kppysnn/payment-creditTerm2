@@ -37,24 +37,31 @@ function buildPatch(data: Record<string, unknown>, _user: { id: string; name: st
   const grossProfit = totalSelling - totalCost
   const marginPercent = calcMarginPercent(totalSelling, grossProfit)
 
-  // HW installments
+  const isLumpSum = saleType === 'lump_sum'
+
+  // HW installments (lump sum reuses this slot as the single combined plan,
+  // sized on totalSelling instead of hwSp — see RequestFormStepper's isLumpSum branch)
   const hwCreditTermDays = numVal(data.hwCreditTermDays)
+  const hwCreditTermPerInstallment = Boolean(data.hwCreditTermPerInstallment)
   const hwInstallmentCount = numVal(data.hwInstallmentCount) || 1
   const rawHwInst = (data.hwInstallments as Array<{ installmentPercent: number | ''; creditTermDays: number | ''; paymentCondition: string }>) ?? []
+  const hwBase = isLumpSum ? totalSelling : (hwSp > 0 ? hwSp : totalSelling)
   const installments: PaymentInstallment[] = rawHwInst.slice(0, hwInstallmentCount).map((row, i) => ({
     installmentNo: i + 1,
     installmentPercent: numVal(row.installmentPercent),
-    installmentAmount: calcInstallmentAmount(hwSp > 0 ? hwSp : totalSelling, numVal(row.installmentPercent)),
-    creditTermDays: hwCreditTermDays,
+    installmentAmount: calcInstallmentAmount(hwBase, numVal(row.installmentPercent)),
+    creditTermDays: hwCreditTermPerInstallment ? numVal(row.creditTermDays) : hwCreditTermDays,
     paymentCondition: (row.paymentCondition || 'on_delivery') as PaymentInstallment['paymentCondition'],
   }))
 
-  // SW installments (whenever there's software/installation value to schedule —
-  // the form always shows this block, regardless of saleType)
+  // SW installments — lump sum merges everything into the single `installments`
+  // plan above, so this block (and swInstallmentCount/swInstallments) stays
+  // undefined for that sale type.
   let swInstallments: PaymentInstallment[] | undefined
   let swInstallmentCount: number | undefined
-  if (swSp > 0 || instSp > 0) {
+  if (!isLumpSum && (swSp > 0 || instSp > 0)) {
     const swCreditTermDays = numVal(data.swCreditTermDays)
+    const swCreditTermPerInstallment = Boolean(data.swCreditTermPerInstallment)
     const swCount = numVal(data.swInstallmentCount) || 1
     swInstallmentCount = swCount
     const rawSwInst = (data.swInstallments as Array<{ installmentPercent: number | ''; creditTermDays: number | ''; paymentCondition: string }>) ?? []
@@ -63,7 +70,7 @@ function buildPatch(data: Record<string, unknown>, _user: { id: string; name: st
       installmentNo: i + 1,
       installmentPercent: numVal(row.installmentPercent),
       installmentAmount: calcInstallmentAmount(swTotal, numVal(row.installmentPercent)),
-      creditTermDays: swCreditTermDays,
+      creditTermDays: swCreditTermPerInstallment ? numVal(row.creditTermDays) : swCreditTermDays,
       paymentCondition: (row.paymentCondition || 'on_delivery') as PaymentInstallment['paymentCondition'],
     }))
   }

@@ -18,11 +18,12 @@ export const STATUS_LABELS: Record<RequestStatus, string> = {
   cancelled: 'ยกเลิก',
 }
 
-export type SaleType = 'hardware' | 'hardware_software_installation'
+export type SaleType = 'hardware' | 'hardware_software_installation' | 'lump_sum'
 
 export const SALE_TYPE_LABELS: Record<SaleType, string> = {
   hardware: 'Quotation เดียว',
   hardware_software_installation: 'แยกตาม Quotation',
+  lump_sum: 'เหมารวม (Lump Sum)',
 }
 
 export type PaymentCondition =
