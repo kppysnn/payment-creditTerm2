@@ -7,7 +7,6 @@ import { type SaleType, type PaymentCondition } from '../types/request'
 import { Section } from '../../../components/ui/Section'
 import { Button } from '../../../components/ui/Button'
 import { Checkbox } from '../../../components/ui/Checkbox'
-import { Toggle } from '../../../components/ui/Toggle'
 import { Modal } from '../../../components/ui/Modal'
 import { FormGroup, Input, Select } from '../../../components/ui/FormField'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
@@ -176,7 +175,7 @@ export function RequestFormStepper({
       installmentPercent: i.installmentPercent,
       creditTermDays: i.creditTermDays,
       paymentCondition: i.paymentCondition,
-    })) ?? [{ installmentPercent: 100, creditTermDays: 0, paymentCondition: 'on_delivery' }]
+    })) ?? [{ installmentPercent: 100, creditTermDays: '', paymentCondition: 'on_delivery' }]
   )
   const [hwCustomCreditTerm, setHwCustomCreditTerm] = useState(false)
   const [hwCustomCount, setHwCustomCount] = useState(false)
@@ -205,7 +204,7 @@ export function RequestFormStepper({
       installmentPercent: i.installmentPercent,
       creditTermDays: i.creditTermDays,
       paymentCondition: i.paymentCondition,
-    })) ?? [{ installmentPercent: 100, creditTermDays: 0, paymentCondition: 'on_delivery' }]
+    })) ?? [{ installmentPercent: 100, creditTermDays: '', paymentCondition: 'on_delivery' }]
   )
   const [swCustomCreditTerm, setSwCustomCreditTerm] = useState(false)
   const [swCustomCount, setSwCustomCount] = useState(false)
@@ -232,14 +231,14 @@ export function RequestFormStepper({
 
   useEffect(() => {
     const current = [...hwInstallments]
-    while (current.length < hwInstallmentCount) current.push({ installmentPercent: '', creditTermDays: 0, paymentCondition: 'on_delivery' })
+    while (current.length < hwInstallmentCount) current.push({ installmentPercent: '', creditTermDays: '', paymentCondition: 'on_delivery' })
     setHwInstallments(current.slice(0, hwInstallmentCount))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hwInstallmentCount])
 
   useEffect(() => {
     const current = [...swInstallments]
-    while (current.length < swInstallmentCount) current.push({ installmentPercent: '', creditTermDays: 0, paymentCondition: 'on_delivery' })
+    while (current.length < swInstallmentCount) current.push({ installmentPercent: '', creditTermDays: '', paymentCondition: 'on_delivery' })
     setSwInstallments(current.slice(0, swInstallmentCount))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [swInstallmentCount])
@@ -499,14 +498,14 @@ export function RequestFormStepper({
 
     function updateInstRow(i: number, field: keyof InstRow, value: unknown) {
       const updated = [...insts]
-      if (!updated[i]) updated[i] = { installmentPercent: '', creditTermDays: 0, paymentCondition: 'on_delivery' }
+      if (!updated[i]) updated[i] = { installmentPercent: '', creditTermDays: '', paymentCondition: 'on_delivery' }
       updated[i] = { ...updated[i], [field]: value }
       setInsts(updated)
     }
 
     function applyPreset(percents: number[]) {
       const updated = percents.map((percent, idx) => ({
-        ...(insts[idx] || { creditTermDays: 0, paymentCondition: 'on_delivery' as PaymentCondition }),
+        ...(insts[idx] || { creditTermDays: '', paymentCondition: 'on_delivery' as PaymentCondition }),
         installmentPercent: percent,
       }))
       setCustomPctRows({}); setInstCount(percents.length); setInsts(updated)
@@ -514,7 +513,7 @@ export function RequestFormStepper({
 
     function applyCustom() {
       const updated = Array.from({ length: instCount }, (_, idx) => ({
-        ...(insts[idx] || { creditTermDays: 0, paymentCondition: 'on_delivery' as PaymentCondition }),
+        ...(insts[idx] || { creditTermDays: '', paymentCondition: 'on_delivery' as PaymentCondition }),
         installmentPercent: '' as '',
       }))
       setCustomPctRows(Object.fromEntries(Array.from({ length: instCount }, (_, idx) => [idx, true])))
@@ -522,11 +521,13 @@ export function RequestFormStepper({
     }
 
     // Switching from UNIFORM_MODE to CUSTOM_MODE seeds every row from the
-    // single value that was in use so far, instead of starting every row at
-    // 0/blank.
+    // single value that was in use so far (if any was picked) so rows start
+    // as a real dropdown selection, not a 0-day custom-input fallback — '',
+    // not 0, is the "nothing chosen yet" seed (0 isn't a preset, so it would
+    // render as a custom-typed field instead of an unselected dropdown).
     function toggleCreditTermMode(uniform: boolean) {
       if (!uniform) {
-        const seed = ctDays === '' ? 0 : numVal(ctDays)
+        const seed = ctDays === '' ? '' : numVal(ctDays)
         setInsts(insts.map(row => ({ ...row, creditTermDays: row.creditTermDays === '' ? seed : row.creditTermDays })))
       }
       setCtUniform(uniform)
@@ -539,7 +540,7 @@ export function RequestFormStepper({
     function setAmountRow(i: number, amount: number) {
       const lastIdx = instCount - 1
       const updated = [...insts]
-      const ensureRow = (idx: number) => { if (!updated[idx]) updated[idx] = { installmentPercent: '', creditTermDays: 0, paymentCondition: 'on_delivery' } }
+      const ensureRow = (idx: number) => { if (!updated[idx]) updated[idx] = { installmentPercent: '', creditTermDays: '', paymentCondition: 'on_delivery' } }
       ensureRow(i)
       const pct = sellingTotal > 0 ? (amount / sellingTotal) * 100 : 0
       updated[i] = { ...updated[i], installmentPercent: amount === 0 ? '' : pct }
@@ -612,11 +613,7 @@ export function RequestFormStepper({
         {/* Credit Term + Count */}
         <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <FormGroup label="Credit Term" required={ctUniform} error={errors[ctErrKey]} style={{ width: 200 }}>
-            {!ctUniform ? (
-              <div style={{ height: 38, display: 'flex', alignItems: 'center', fontSize: 13, color: '#929EB4', fontStyle: 'italic' }}>
-                กำหนดแยกต่องวด
-              </div>
-            ) : creditTermIsCustom ? (
+            {ctUniform && creditTermIsCustom ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Input
                   type="number" min="0" autoFocus
@@ -637,11 +634,12 @@ export function RequestFormStepper({
               </div>
             ) : (
               <Select
-                value={ctDays === '' ? '' : String(ctDays)}
+                value={!ctUniform ? 'per_installment' : (ctDays === '' ? '' : String(ctDays))}
                 onChange={e => {
                   const v = e.target.value
-                  if (v === 'custom') { setIsCustomCT(true); setCtDays('') }
-                  else setCtDays(v === '' ? '' : Number(v))
+                  if (v === 'custom') { setIsCustomCT(true); setCtDays(''); if (!ctUniform) setCtUniform(true) }
+                  else if (v === 'per_installment') { toggleCreditTermMode(false) }
+                  else { setCtDays(v === '' ? '' : Number(v)); if (!ctUniform) setCtUniform(true) }
                 }}
                 error={errors[ctErrKey]}
                 style={selectStyle}
@@ -651,6 +649,7 @@ export function RequestFormStepper({
                   <option key={days} value={days}>{days} วัน ({CREDIT_TERM_HINTS[days]})</option>
                 ))}
                 <option value="custom">ระบุเอง</option>
+                <option value="per_installment">ระบุเองทุกงวด</option>
               </Select>
             )}
           </FormGroup>
@@ -711,12 +710,6 @@ export function RequestFormStepper({
             )}
           </FormGroup>
         </div>
-
-        <Toggle
-          checked={ctUniform}
-          onChange={toggleCreditTermMode}
-          label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 400 }}>ใช้เครดิตเทอมเดียวกันทุกงวด</span>}
-        />
 
         {!manyInstallments ? (
           <>
@@ -833,22 +826,18 @@ export function RequestFormStepper({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>รายละเอียดงวด ({instCount} งวด)</span>
               <div style={{ display: 'flex', gap: 6 }}>
-                <button type="button" onClick={() => { applyPreset(equalSplitPercents(instCount)); setAmountInputMode(false) }}
-                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
-                    border: !amountInputMode ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
-                    background: '#fff', color: !amountInputMode ? '#004081' : '#586782' }}>
+                <Button type="button" size="sm" variant={!amountInputMode ? 'primary' : 'secondary'}
+                  onClick={() => { applyPreset(equalSplitPercents(instCount)); setAmountInputMode(false) }}>
                   แบ่งเท่ากันทุกงวด
-                </button>
+                </Button>
                 {/* Flips which column is the editable source — the % column
                     keeps owning installmentPercent either way (see
                     onChange below), so the existing 100%-sum validation and
                     progress bar downstream need no changes for this mode. */}
-                <button type="button" onClick={() => setAmountInputMode(true)}
-                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
-                    border: amountInputMode ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
-                    background: '#fff', color: amountInputMode ? '#004081' : '#586782' }}>
+                <Button type="button" size="sm" variant={amountInputMode ? 'primary' : 'secondary'}
+                  onClick={() => setAmountInputMode(true)}>
                   กรอกอิสระ
-                </button>
+                </Button>
               </div>
             </div>
             {amountInputMode && (
@@ -858,7 +847,12 @@ export function RequestFormStepper({
             )}
             <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
               <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                {/* table-layout: fixed — without it, the body's widest cell
+                    (the credit-term dropdown/amount inputs) silently
+                    overrides the % widths set on <th>, so header and body
+                    columns drift out of alignment. Fixed locks column widths
+                    to the header row regardless of what the body renders. */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
                   <thead>
                     <tr style={{ position: 'sticky', top: 0 }}>
                       {/* Equal thirds (explicit per the user's call, after

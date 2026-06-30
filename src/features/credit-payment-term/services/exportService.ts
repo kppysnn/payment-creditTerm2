@@ -199,7 +199,7 @@ function buildQuotationGroup(no: string, title: string, items: QuotationItem[], 
       <span class="schedule-label">Payment Schedule</span>
       ${perRowCt ? '' : `<span class="credit-term">Credit Term: <span class="mono">Net ${installments[0].creditTermDays}</span></span>`}
     </div>
-    <table>
+    <table style="table-layout:fixed">
       <thead><tr><th style="width:${perRowCt ? '20%' : '33.34%'}">งวดที่</th><th style="width:${perRowCt ? '24%' : '33.33%'};text-align:center">%</th>${perRowCt ? '<th style="width:26%;text-align:center">เครดิตเทอม</th>' : ''}<th style="width:${perRowCt ? '30%' : '33.33%'};text-align:right">ยอดชำระ</th></tr></thead>
       <tbody>
         ${installments.map(i => `<tr>

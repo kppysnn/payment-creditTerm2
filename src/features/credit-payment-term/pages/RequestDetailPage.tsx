@@ -291,7 +291,11 @@ export function RequestDetailPage() {
     const perRowCt = hasPerRowCreditTerm(installments)
     return (
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        {/* table-layout: fixed locks column widths to the header row's %
+            values — without it the body's widest cell (the credit-term
+            cell) silently overrides them and the header drifts out of
+            alignment with the body. */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
           <thead>
             <tr>
               <th style={{ ...tableHeaderCell, textAlign: 'left', whiteSpace: 'nowrap', width: perRowCt ? '20%' : '33.34%' }}>งวดที่</th>
