@@ -205,14 +205,19 @@ export function RequestDetailPage() {
     </span>
   ), true, true)
 
+  // Column widths pinned explicitly (not left to auto-layout) so "งวดที่"
+  // and "%" stay snug to their actual content instead of soaking up leftover
+  // table width as slack — the same imbalance fixed in the form's editable
+  // installment table (RequestFormStepper.tsx) applies here too, since
+  // auto-layout was handing this narrow column ~170px for a 2-3 char value.
   const installmentTable = (installments: PaymentInstallment[]) => (
     <div style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
           <tr>
-            {['งวดที่', '%', 'ยอดชำระ'].map(h => (
-              <th key={h} style={{ ...tableHeaderCell, textAlign: h === 'ยอดชำระ' ? 'right' : h === '%' ? 'center' : 'left', whiteSpace: 'nowrap' }}>{h}</th>
-            ))}
+            <th style={{ ...tableHeaderCell, textAlign: 'left', whiteSpace: 'nowrap', width: 70 }}>งวดที่</th>
+            <th style={{ ...tableHeaderCell, textAlign: 'center', whiteSpace: 'nowrap', width: 90 }}>%</th>
+            <th style={{ ...tableHeaderCell, textAlign: 'right', whiteSpace: 'nowrap' }}>ยอดชำระ</th>
           </tr>
         </thead>
         <tbody>

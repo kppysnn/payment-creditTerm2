@@ -315,7 +315,7 @@ export function RequestListPage() {
                       if (canEdit && !isRejected) {
                         kebabItems.push({ label: 'แก้ไข', icon: <EditIcon size={15} />, onClick: () => navigate(`/requests/${req.id}/edit`) })
                       }
-                      kebabItems.push({ label: 'พิมพ์ / Export PDF', icon: <PrinterIcon size={15} />, onClick: () => handleExport(req.id) })
+                      kebabItems.push({ label: 'พิมพ์', icon: <PrinterIcon size={15} />, onClick: () => handleExport(req.id) })
                       if (isSales && req.status === 'draft') {
                         kebabItems.push({ label: 'ลบคำขอ', icon: <TrashIcon size={15} />, onClick: () => handleDeleteClick(req.id), danger: true })
                       }

@@ -540,7 +540,13 @@ export function RequestFormStepper({
                 value={String(instCount)}
                 onChange={e => {
                   const v = e.target.value
-                  if (v === 'custom') { setIsCustomCount(true); setCountDraft(instCount); return }
+                  // Starts genuinely blank (placeholder visible), not
+                  // pre-filled with the current count — switching into
+                  // "ระบุเอง" should read as "type a number," not "edit this
+                  // existing one." instCount itself doesn't change here, so
+                  // the card/table preview still shows whatever it last did
+                  // until a real number is typed.
+                  if (v === 'custom') { setIsCustomCount(true); setCountDraft(''); return }
                   changeCount(Number(v))
                 }}
                 style={selectStyle}
