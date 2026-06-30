@@ -818,11 +818,16 @@ export function RequestFormStepper({
                   const pctErrRowKey = `${prefix}Inst${i}.pct`
                   return (
                     <div key={i} style={{
-                      background: errors[pctErrRowKey] ? '#FEF2F2' : '#F2F6F8',
+                      // White, not the old #F2F6F8 fill — that was nearly
+                      // indistinguishable from the #F8F9FA block body it
+                      // sits on, so every card read as one undifferentiated
+                      // pale-blue mass. A real border now does the job of
+                      // marking each card as its own unit instead.
+                      background: errors[pctErrRowKey] ? '#FEF2F2' : '#FFFFFF',
+                      border: `1.5px solid ${errors[pctErrRowKey] ? '#F3554F' : '#D0D6DF'}`,
                       borderRadius: 4,
-                      padding: '10px 12px',
+                      padding: '12px',
                       display: 'flex', flexDirection: 'column', gap: 8,
-                      ...(errors[pctErrRowKey] ? { outline: '1.5px solid #F3554F' } : {}),
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#004081', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
@@ -863,7 +868,10 @@ export function RequestFormStepper({
                       </FormGroup>
                       {!ctUniform && creditTermRowControl(i, row, false)}
                       {totalAmt > 0 && (
-                        <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 700, color: '#004081', textAlign: 'right', marginTop: 'auto' }}>
+                        // The figure each card exists to show — sized up
+                        // and set off by its own divider so it reads as
+                        // the card's headline, not just another line of text.
+                        <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 16, fontWeight: 700, color: '#004081', textAlign: 'right', marginTop: 'auto', paddingTop: 8, borderTop: '1px solid #F2F6F8' }}>
                           {formatCurrency(totalAmt)}
                         </div>
                       )}
@@ -999,16 +1007,21 @@ export function RequestFormStepper({
                           amount right (universal currency convention). With
                           the credit-term column on, the 3 original columns
                           shrink to make room rather than keeping equal thirds. */}
-                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'left', background: '#F2F6F8', width: !ctUniform ? '14%' : '33.34%' }}>งวดที่</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'center', background: '#F2F6F8', width: !ctUniform ? '20%' : '33.33%' }}>สัดส่วน (%)</th>
+                      {/* borderBottom 2px, not the old 1px row-divider weight
+                          — at the same pale tone as everything else, the
+                          header barely registered as a header. A visibly
+                          heavier rule under it (still the same border color,
+                          no new hue) is enough to anchor it as its own row. */}
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'left', background: '#F2F6F8', borderBottom: '2px solid #D0D6DF', width: !ctUniform ? '14%' : '33.34%' }}>งวดที่</th>
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'center', background: '#F2F6F8', borderBottom: '2px solid #D0D6DF', width: !ctUniform ? '20%' : '33.33%' }}>สัดส่วน (%)</th>
                       {!ctUniform && (
                         // Just wide enough for the dropdown itself (92px,
                         // see creditTermRowControl) — it was previously
                         // stretched to fill a much wider column than "30
                         // วัน" ever needs, the rest now goes to มูลค่า below.
-                        <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'center', background: '#F2F6F8', width: '22%' }}>เครดิตเทอม (วัน)</th>
+                        <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'center', background: '#F2F6F8', borderBottom: '2px solid #D0D6DF', width: '22%' }}>เครดิตเทอม (วัน)</th>
                       )}
-                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'right', background: '#F2F6F8', width: !ctUniform ? '44%' : '33.33%' }}>มูลค่า (THB)</th>
+                      <th style={{ padding: '10px 14px', fontWeight: 400, color: '#004081', fontSize: 12.5, textAlign: 'right', background: '#F2F6F8', borderBottom: '2px solid #D0D6DF', width: !ctUniform ? '44%' : '33.33%' }}>มูลค่า (THB)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1028,8 +1041,13 @@ export function RequestFormStepper({
                         // happens, not just after a failed submit.
                         const isNegative = pct < 0
                         const negativeError = isNegative ? 'ติดลบ' : undefined
+                        // Faint zebra striping — barely-there alternating
+                        // rows so a long table stays scannable without
+                        // reaching for a new color; error/negative state
+                        // still wins outright when present.
+                        const rowBg = errors[pctErrRowKey] || isNegative ? '#FEF2F2' : (i % 2 === 1 ? '#FAFBFC' : undefined)
                         return (
-                          <tr key={i} style={{ borderTop: '1px solid #F2F6F8', background: (errors[pctErrRowKey] || isNegative) ? '#FEF2F2' : undefined }}>
+                          <tr key={i} style={{ borderTop: '1px solid #F2F6F8', background: rowBg }}>
                             <td style={{ padding: '6px 14px', color: '#586782' }}>{i + 1}</td>
                             <td style={{ padding: '6px 14px', textAlign: 'center' }}>
                               {amountInputMode ? (
