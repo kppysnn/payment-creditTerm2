@@ -7,6 +7,7 @@ import { type SaleType, type PaymentCondition } from '../types/request'
 import { Section } from '../../../components/ui/Section'
 import { Button } from '../../../components/ui/Button'
 import { Checkbox } from '../../../components/ui/Checkbox'
+import { Toggle } from '../../../components/ui/Toggle'
 import { Modal } from '../../../components/ui/Modal'
 import { FormGroup, Input, Select } from '../../../components/ui/FormField'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
@@ -116,6 +117,26 @@ function segBtn(active: boolean): React.CSSProperties {
     transition: 'border-color 0.15s, color 0.15s, background 0.15s',
     boxShadow: active ? '0 1px 5px rgba(0,64,129,0.2)' : 'none',
     textAlign: 'left',
+  }
+}
+
+// Matches the W+ Library "Button" component (909:1125), Primary/Secondary
+// states at size S, exactly: solid navy (not the app's usual teal->navy
+// gradient) at 8px radius — deliberately different from the rest of this
+// form's controls per that direct reference.
+function splitBtn(active: boolean): React.CSSProperties {
+  return {
+    height: 32,
+    padding: '0 16px',
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 400,
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+    border: active ? 'none' : '1px solid #D0D6DF',
+    background: active ? '#004081' : '#FFFFFF',
+    color: active ? '#FFFFFF' : '#586782',
+    transition: 'background 0.15s, color 0.15s, border-color 0.15s',
   }
 }
 
@@ -533,25 +554,14 @@ export function RequestFormStepper({
       setCtUniform(uniform)
     }
 
-    // กรอกอิสระ (free-amount entry): editing any row except the last one
-    // recomputes the last row as whatever's left over, so the rows always
-    // sum to exactly 100% by construction — no manual recalculation needed.
-    // The last row itself is read-only display, not editable.
+    // กรอกอิสระ (free-amount entry): every row is independently editable —
+    // no row is auto-computed. The empty rows show a live "แนะนำ" suggestion
+    // (remaining amount split evenly across however many are still blank)
+    // as guidance, not a default — same pattern as the card view's
+    // suggestedPct hint. The existing total-% validation is the actual
+    // correctness check at submit time.
     function setAmountRow(i: number, amount: number) {
-      const lastIdx = instCount - 1
-      const updated = [...insts]
-      const ensureRow = (idx: number) => { if (!updated[idx]) updated[idx] = { installmentPercent: '', creditTermDays: '', paymentCondition: 'on_delivery' } }
-      ensureRow(i)
-      const pct = sellingTotal > 0 ? (amount / sellingTotal) * 100 : 0
-      updated[i] = { ...updated[i], installmentPercent: amount === 0 ? '' : pct }
-      if (i !== lastIdx && lastIdx >= 0) {
-        ensureRow(lastIdx)
-        const sumOthers = updated.slice(0, lastIdx).reduce((s, r) => s + calcInstallmentAmount(sellingTotal, numVal(r.installmentPercent)), 0)
-        const remainder = sellingTotal - sumOthers
-        const remainderPct = sellingTotal > 0 ? (remainder / sellingTotal) * 100 : 0
-        updated[lastIdx] = { ...updated[lastIdx], installmentPercent: remainderPct }
-      }
-      setInsts(updated)
+      updateInstRow(i, 'installmentPercent', amount === 0 ? '' : (sellingTotal > 0 ? (amount / sellingTotal) * 100 : 0))
     }
 
     // Curated split presets exist for 1-4; beyond that there's no hand-picked
@@ -613,7 +623,11 @@ export function RequestFormStepper({
         {/* Credit Term + Count */}
         <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <FormGroup label="Credit Term" required={ctUniform} error={errors[ctErrKey]} style={{ width: 200 }}>
-            {ctUniform && creditTermIsCustom ? (
+            {!ctUniform ? (
+              <div style={{ height: 38, display: 'flex', alignItems: 'center', fontSize: 13, color: '#929EB4', fontStyle: 'italic' }}>
+                กำหนดแยกต่องวด
+              </div>
+            ) : creditTermIsCustom ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Input
                   type="number" min="0" autoFocus
@@ -634,12 +648,11 @@ export function RequestFormStepper({
               </div>
             ) : (
               <Select
-                value={!ctUniform ? 'per_installment' : (ctDays === '' ? '' : String(ctDays))}
+                value={ctDays === '' ? '' : String(ctDays)}
                 onChange={e => {
                   const v = e.target.value
-                  if (v === 'custom') { setIsCustomCT(true); setCtDays(''); if (!ctUniform) setCtUniform(true) }
-                  else if (v === 'per_installment') { toggleCreditTermMode(false) }
-                  else { setCtDays(v === '' ? '' : Number(v)); if (!ctUniform) setCtUniform(true) }
+                  if (v === 'custom') { setIsCustomCT(true); setCtDays('') }
+                  else setCtDays(v === '' ? '' : Number(v))
                 }}
                 error={errors[ctErrKey]}
                 style={selectStyle}
@@ -649,7 +662,6 @@ export function RequestFormStepper({
                   <option key={days} value={days}>{days} วัน ({CREDIT_TERM_HINTS[days]})</option>
                 ))}
                 <option value="custom">ระบุเอง</option>
-                <option value="per_installment">ระบุเองทุกงวด</option>
               </Select>
             )}
           </FormGroup>
@@ -710,6 +722,12 @@ export function RequestFormStepper({
             )}
           </FormGroup>
         </div>
+
+        <Toggle
+          checked={!ctUniform}
+          onChange={on => toggleCreditTermMode(!on)}
+          label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 400 }}>ระบุเองทุกงวด</span>}
+        />
 
         {!manyInstallments ? (
           <>
@@ -826,25 +844,25 @@ export function RequestFormStepper({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>รายละเอียดงวด ({instCount} งวด)</span>
               <div style={{ display: 'flex', gap: 6 }}>
-                <Button type="button" size="sm" variant={!amountInputMode ? 'primary' : 'secondary'}
+                <button type="button" style={splitBtn(!amountInputMode)}
                   onClick={() => { applyPreset(equalSplitPercents(instCount)); setAmountInputMode(false) }}>
                   แบ่งเท่ากันทุกงวด
-                </Button>
+                </button>
                 {/* Flips which column is the editable source — the % column
                     keeps owning installmentPercent either way (see
                     onChange below), so the existing 100%-sum validation and
-                    progress bar downstream need no changes for this mode. */}
-                <Button type="button" size="sm" variant={amountInputMode ? 'primary' : 'secondary'}
-                  onClick={() => setAmountInputMode(true)}>
+                    progress bar downstream need no changes for this mode.
+                    Starts every row blank rather than seeding an equal
+                    split — typing one amount then shows the others a live
+                    "แนะนำ" suggestion (the remainder split evenly across
+                    whatever's still blank) instead of a default value the
+                    user has to notice and undo. */}
+                <button type="button" style={splitBtn(amountInputMode)}
+                  onClick={() => { setInsts(insts.map(r => ({ ...r, installmentPercent: '' }))); setAmountInputMode(true) }}>
                   กรอกอิสระ
-                </Button>
+                </button>
               </div>
             </div>
-            {amountInputMode && (
-              <div style={{ fontSize: 11, color: '#929EB4', marginTop: -4 }}>
-                งวดสุดท้ายคำนวณยอดคงเหลือให้อัตโนมัติ ไม่ต้องคิดเองให้ครบ 100%
-              </div>
-            )}
             <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
               <div style={{ maxHeight: 320, overflowY: 'auto' }}>
                 {/* table-layout: fixed — without it, the body's widest cell
@@ -873,64 +891,64 @@ export function RequestFormStepper({
                     </tr>
                   </thead>
                   <tbody>
-                    {insts.slice(0, instCount).map((row, i) => {
-                      const pct = numVal(row.installmentPercent)
-                      const totalAmt = sellingTotal > 0 ? calcInstallmentAmount(sellingTotal, pct) : 0
-                      const pctErrRowKey = `${prefix}Inst${i}.pct`
-                      const isLastRow = i === instCount - 1
-                      const isOverallocated = pct < 0
-                      return (
-                        <tr key={i} style={{ borderTop: '1px solid #F2F6F8', background: errors[pctErrRowKey] ? '#FEF2F2' : undefined }}>
-                          <td style={{ padding: '6px 14px', color: '#586782' }}>{i + 1}</td>
-                          <td style={{ padding: '6px 14px', textAlign: 'center' }}>
-                            {amountInputMode ? (
-                              <span style={{ fontVariantNumeric: 'tabular-nums', color: isOverallocated ? '#F3554F' : '#586782' }}>{pct ? `${pct.toFixed(2)}%` : '—'}</span>
-                            ) : (
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                {/* no-spinner: the native up/down arrows ate into
-                                    this 64px box and pushed the digits off-center,
-                                    which was the other half of the alignment bug. */}
-                                <Input type="number" min="0" max="100" value={row.installmentPercent}
-                                  onChange={e => updateInstRow(i, 'installmentPercent', e.target.value !== '' ? Number(e.target.value) : '')}
-                                  placeholder="0"
-                                  error={errors[pctErrRowKey]}
-                                  className="no-spinner"
-                                  style={{ width: 64, textAlign: 'right', height: 32 }} />
-                                <span style={{ color: '#586782', fontSize: 12 }}>%</span>
-                              </div>
-                            )}
-                          </td>
-                          {!ctUniform && (
+                    {(() => {
+                      const slice = insts.slice(0, instCount)
+                      const hasAnyFilledAmt = slice.some(r => r.installmentPercent !== '')
+                      const filledAmt = slice.reduce((s, r) => r.installmentPercent !== '' ? s + calcInstallmentAmount(sellingTotal, numVal(r.installmentPercent)) : s, 0)
+                      const emptyCount = slice.filter(r => r.installmentPercent === '').length
+                      const suggestedAmt = emptyCount > 0 ? (sellingTotal - filledAmt) / emptyCount : 0
+                      return slice.map((row, i) => {
+                        const pct = numVal(row.installmentPercent)
+                        const totalAmt = sellingTotal > 0 ? calcInstallmentAmount(sellingTotal, pct) : 0
+                        const pctErrRowKey = `${prefix}Inst${i}.pct`
+                        return (
+                          <tr key={i} style={{ borderTop: '1px solid #F2F6F8', background: errors[pctErrRowKey] ? '#FEF2F2' : undefined }}>
+                            <td style={{ padding: '6px 14px', color: '#586782' }}>{i + 1}</td>
                             <td style={{ padding: '6px 14px', textAlign: 'center' }}>
-                              {creditTermRowControl(i, row, true)}
+                              {amountInputMode ? (
+                                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{pct ? `${pct.toFixed(2)}%` : '—'}</span>
+                              ) : (
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  {/* no-spinner: the native up/down arrows ate into
+                                      this 64px box and pushed the digits off-center,
+                                      which was the other half of the alignment bug. */}
+                                  <Input type="number" min="0" max="100" value={row.installmentPercent}
+                                    onChange={e => updateInstRow(i, 'installmentPercent', e.target.value !== '' ? Number(e.target.value) : '')}
+                                    placeholder="0"
+                                    error={errors[pctErrRowKey]}
+                                    className="no-spinner"
+                                    style={{ width: 64, textAlign: 'right', height: 32 }} />
+                                  <span style={{ color: '#586782', fontSize: 12 }}>%</span>
+                                </div>
+                              )}
                             </td>
-                          )}
-                          <td style={{ padding: '6px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: isOverallocated ? '#F3554F' : '#004081', fontWeight: 500 }}>
-                            {amountInputMode ? (
-                              isLastRow ? (
-                                // Auto-balanced remainder — read-only by design
-                                // (see setAmountRow), styled like the disabled
-                                // fields spec (bg #F2F6F8) so it reads as "not
-                                // yours to type into" at a glance.
-                                <div style={{ width: 110, marginLeft: 'auto', height: 32, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 10px', borderRadius: 6, background: '#F2F6F8', color: isOverallocated ? '#F3554F' : '#586782' }}>
-                                  {formatThousands(Math.round(totalAmt))}
+                            {!ctUniform && (
+                              <td style={{ padding: '6px 14px', textAlign: 'center' }}>
+                                {creditTermRowControl(i, row, true)}
+                              </td>
+                            )}
+                            <td style={{ padding: '6px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#004081', fontWeight: 500 }}>
+                              {amountInputMode ? (
+                                <div>
+                                  <Input type="text" inputMode="numeric" value={formatThousands(totalAmt || '')}
+                                    onChange={e => {
+                                      const digits = e.target.value.replace(/\D/g, '')
+                                      setAmountRow(i, digits ? Number(digits) : 0)
+                                    }}
+                                    placeholder="0"
+                                    style={{ width: 110, textAlign: 'right', height: 32 }} />
+                                  {row.installmentPercent === '' && hasAnyFilledAmt && suggestedAmt > 0 && (
+                                    <div style={{ marginTop: 3, fontSize: 10, color: '#586782', fontWeight: 400 }}>แนะนำ {formatThousands(Math.round(suggestedAmt))}</div>
+                                  )}
                                 </div>
                               ) : (
-                                <Input type="text" inputMode="numeric" value={formatThousands(totalAmt || '')}
-                                  onChange={e => {
-                                    const digits = e.target.value.replace(/\D/g, '')
-                                    setAmountRow(i, digits ? Number(digits) : 0)
-                                  }}
-                                  placeholder="0"
-                                  style={{ width: 110, textAlign: 'right', height: 32 }} />
-                              )
-                            ) : (
-                              totalAmt > 0 ? formatCurrency(totalAmt) : '—'
-                            )}
-                          </td>
-                        </tr>
-                      )
-                    })}
+                                totalAmt > 0 ? formatCurrency(totalAmt) : '—'
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      })
+                    })()}
                   </tbody>
                 </table>
               </div>
