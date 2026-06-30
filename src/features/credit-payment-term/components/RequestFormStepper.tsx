@@ -635,11 +635,19 @@ export function RequestFormStepper({
           // the "วัน" placeholder to render was a real fix too, but on its
           // own it couldn't have centered this.
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            {/* Same width as the dropdown it replaces (92px) — the input
+                itself is the thing that should read as "the same control,
+                different mode", not a smaller box. The "วัน" suffix stays
+                visible once a number's been typed too, not just as a
+                placeholder before — a bare "10" doesn't say what unit
+                that's in. The X button afterward isn't squeezed to make
+                room; it's extra, on top of the input's own full width. */}
             <Input type="number" min="0" value={days}
               onChange={e => updateInstRow(i, 'creditTermDays', e.target.value !== '' ? Number(e.target.value) : '')}
               placeholder="วัน" error={errors[errKey]}
               className={compact ? 'no-spinner' : undefined}
-              style={compact ? { width: 66, textAlign: 'right', height: 32 } : { textAlign: 'right', flex: 1 }} />
+              style={compact ? { width: 92, textAlign: 'right', height: 32 } : { textAlign: 'right', flex: 1 }} />
+            <span style={{ color: '#586782', fontSize: compact ? 11 : 13, fontWeight: 400, flexShrink: 0 }}>วัน</span>
             <button type="button"
               onClick={() => { setCustomCtRows(prev => ({ ...prev, [i]: false })); updateInstRow(i, 'creditTermDays', CREDIT_TERM_PRESETS[0]) }}
               style={{ width: compact ? 22 : 28, height: compact ? 32 : 38, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 4, background: 'transparent', color: '#586782', cursor: 'pointer' }}
