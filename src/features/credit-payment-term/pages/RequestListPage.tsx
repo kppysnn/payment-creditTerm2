@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useCurrentUser } from '../../../app/UserContext'
-import { getRequests, getRequestById, deleteRequest } from '../services/creditTermService'
+import { getRequests, getRequestById, deleteRequest, cancelRequest } from '../services/creditTermService'
 import type { RequestListItem, RequestStatus } from '../types/request'
 import { STATUS_LABELS } from '../types/request'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -10,7 +10,9 @@ import { Input, Select } from '../../../components/ui/FormField'
 import { DatePicker } from '../../../components/ui/DatePicker'
 import { KebabMenu, type KebabMenuItem } from '../../../components/ui/KebabMenu'
 import { DeleteRequestModal } from '../../../components/modals/DeleteRequestModal'
+import { CancelModal } from '../../../components/modals/CancelModal'
 import { SearchIcon, SortCarets, AddCircleIcon, EditIcon, PrinterIcon, TrashIcon, XMarkIcon } from '../../../components/icons/FigmaIcons'
+import { FiSlash } from 'react-icons/fi'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate } from '../utils/formatters'
 import { exportPDF } from '../services/exportService'
@@ -73,6 +75,13 @@ export function RequestListPage() {
   const [loading, setLoading] = useState(true)
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Request | null>(null)
+  // A pending request has already been submitted (and may be under active
+  // approver review) — unlike a draft, it has real history worth keeping, so
+  // "delete" for a pending row routes through the existing Cancel flow
+  // (reason required, audit trail preserved) rather than a silent hard
+  // delete. customerName comes from the row itself (already computed by
+  // getRequests) instead of re-deriving it from the fetched Request.
+  const [cancelTarget, setCancelTarget] = useState<{ request: Request; customerName: string } | null>(null)
 
   const filterStatus = searchParams.get('status') ?? ''
   const filterText = searchParams.get('q') ?? ''
@@ -134,6 +143,17 @@ export function RequestListPage() {
   async function confirmDelete() {
     if (!deleteTarget) return
     await deleteRequest(deleteTarget.id, currentUser)
+    loadRequests()
+  }
+
+  async function handleCancelClick(id: string, customerName: string) {
+    const req = await getRequestById(id)
+    if (req) setCancelTarget({ request: req, customerName })
+  }
+
+  async function confirmCancel(reason: string) {
+    if (!cancelTarget) return
+    await cancelRequest(cancelTarget.request.id, reason, currentUser)
     loadRequests()
   }
 
@@ -319,6 +339,15 @@ export function RequestListPage() {
                       if (isSales && req.status === 'draft') {
                         kebabItems.push({ label: 'ลบคำขอ', icon: <TrashIcon size={15} />, onClick: () => handleDeleteClick(req.id), danger: true })
                       }
+                      // Pending is a real submission (an approver may already
+                      // be reviewing it), unlike a draft — so its "remove"
+                      // action routes through the existing Cancel flow
+                      // (reason required, history kept) instead of a silent
+                      // hard delete. Different label on purpose: this isn't
+                      // the same action as "ลบคำขอ" above.
+                      if (isSales && req.status === 'pending') {
+                        kebabItems.push({ label: 'ยกเลิกคำขอ', icon: <FiSlash size={15} />, onClick: () => handleCancelClick(req.id, req.customerName), danger: true })
+                      }
 
                       return (
                         <div style={{ display: 'flex', gap: 14, justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -363,6 +392,14 @@ export function RequestListPage() {
         request={deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onDelete={confirmDelete}
+      />
+
+      <CancelModal
+        open={cancelTarget !== null}
+        request={cancelTarget?.request ?? null}
+        customerName={cancelTarget?.customerName}
+        onClose={() => setCancelTarget(null)}
+        onCancel={confirmCancel}
       />
     </div>
   )

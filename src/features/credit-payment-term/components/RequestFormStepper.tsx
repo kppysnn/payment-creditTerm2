@@ -8,7 +8,6 @@ import { Section } from '../../../components/ui/Section'
 import { Button } from '../../../components/ui/Button'
 import { Checkbox } from '../../../components/ui/Checkbox'
 import { FormGroup, Input, Select } from '../../../components/ui/FormField'
-import { Alert } from '../../../components/ui/Alert'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
 import { searchCustomers } from '../services/customerService'
 import { FiSave, FiX } from 'react-icons/fi'
@@ -781,22 +780,23 @@ export function RequestFormStepper({
     </div>
   )
 
+  // Was one consolidated Alert at the top of the whole form, bundling all 3
+  // sections' rejection reasons together — meant scrolling back up to it
+  // while editing each section separately. Now each comment renders right
+  // where its own section starts, matching RequestDetailPage's own
+  // sectionComment left-border-accent convention (no fill, not a competing
+  // box) instead of inventing a different style for the editable form.
+  const rejectionQuote = (comment?: string) => {
+    if (!isResubmit || !comment) return null
+    return (
+      <div style={{ marginBottom: 14, paddingLeft: 10, borderLeft: '2px solid #F3554F', fontSize: 12, color: '#7F1D1D', lineHeight: 1.5 }}>
+        <span style={{ fontWeight: 400 }}>ครั้งก่อนถูกปฏิเสธว่า:</span> <span style={{ fontStyle: 'italic' }}>"{comment}"</span>
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 760, margin: '0 auto' }}>
-
-      {isResubmit && initialRequest?.approvalResult && (
-        <Alert type="error" title="เหตุผลที่ถูก Reject ครั้งก่อน">
-          {initialRequest.approvalResult.customerComment && (
-            <div style={{ marginTop: 4 }}><strong>ลูกค้า:</strong> {initialRequest.approvalResult.customerComment}</div>
-          )}
-          {initialRequest.approvalResult.hardwareComment && (
-            <div style={{ marginTop: 4 }}><strong>Hardware:</strong> {initialRequest.approvalResult.hardwareComment}</div>
-          )}
-          {initialRequest.approvalResult.swComment && (
-            <div style={{ marginTop: 4 }}><strong>Software &amp; Installation:</strong> {initialRequest.approvalResult.swComment}</div>
-          )}
-        </Alert>
-      )}
 
       {/* One white panel for the whole form, matching WorkX's own assembled
           form (Exzy_WorkX "Edit My work", 1190:5406) — a single continuous
@@ -839,6 +839,7 @@ export function RequestFormStepper({
       {/* ─── 2. ข้อมูลลูกค้า ─── */}
       <Section title="2. ข้อมูลลูกค้า">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {rejectionQuote(initialRequest?.approvalResult?.customerComment)}
           <div>
             <div style={{ fontSize: 12, fontWeight: 400, color: '#586782', marginBottom: 8 }}>
               ประเภทลูกค้า <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, marginLeft: 3 }}>*</span>
@@ -956,6 +957,7 @@ export function RequestFormStepper({
       {quotationCard(hwQuotationNo, 'Hardware', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', (
         <>
           <div style={{ padding: '18px 16px 0' }}>
+            {rejectionQuote(initialRequest?.approvalResult?.hardwareComment)}
             {priceTable([{ label: 'Hardware', spKey: 'hardwareSellingPrice', costKey: 'hardwareCost' }])}
           </div>
           {renderPaymentBlock('hw', hwSelling, hwCost, 'Hardware')}
@@ -965,6 +967,7 @@ export function RequestFormStepper({
       {quotationCard(swQuotationNo, 'Software & Installation', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', (
         <>
           <div style={{ padding: '18px 16px 0' }}>
+            {rejectionQuote(initialRequest?.approvalResult?.swComment)}
             {priceTable([
               { label: 'Software', spKey: 'softwareSellingPrice', costKey: 'softwareCost' },
               { label: 'Installation', spKey: 'installationSellingPrice', costKey: 'installationCost' },
