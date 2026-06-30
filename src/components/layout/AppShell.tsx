@@ -87,7 +87,7 @@ export function AppShell() {
           </div>
         </div>
 
-        <div style={{
+        <nav aria-label="เมนูโมดูล" style={{
           display: 'flex',
           gap: 14,
           alignItems: 'center',
@@ -98,7 +98,7 @@ export function AppShell() {
         }}>
           {OTHER_MODULES.map(m => <ModuleTab key={m.label} icon={m.icon} label={m.label} />)}
           <ModuleTab icon={tabPaymentCreditTerm} label="Payment & Credit Term" active to="/requests" />
-        </div>
+        </nav>
       </header>
 
       {/* Page content */}

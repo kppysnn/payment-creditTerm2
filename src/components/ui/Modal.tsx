@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { FiX } from 'react-icons/fi'
 
 interface Props {
@@ -13,10 +13,32 @@ interface Props {
 const SIZE_WIDTH: Record<string, number> = { sm: 420, md: 560, lg: 720 }
 
 export function Modal({ open, onClose, title, children, footer, size = 'md' }: Props) {
+  const titleId = useId()
+  const boxRef = useRef<HTMLDivElement>(null)
+  const previouslyFocused = useRef<HTMLElement | null>(null)
+
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden'
     else document.body.style.overflow = ''
     return () => { document.body.style.overflow = '' }
+  }, [open])
+
+  // Escape closes the dialog (standard dialog behavior) and focus moves onto
+  // the dialog box itself on open, then back to whatever triggered it on
+  // close — minimal version of the ARIA dialog pattern's focus handling.
+  useEffect(() => {
+    if (!open) return
+    previouslyFocused.current = document.activeElement as HTMLElement | null
+    boxRef.current?.focus()
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      previouslyFocused.current?.focus?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
   if (!open) return null
@@ -39,6 +61,11 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
 
       {/* Box */}
       <div
+        ref={boxRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         style={{
           position: 'relative',
           background: '#fff',
@@ -50,6 +77,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
           flexDirection: 'column',
           maxHeight: 'calc(100vh - 32px)',
           overflow: 'hidden',
+          outline: 'none',
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -66,9 +94,10 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
           {/* Weight 500 (Medium), not 700 — confirmed against a real WorkX
               modal header ("ไม่อนุมัติ Internal Memo", 1319:3275): Poppins
               Medium, never bold. */}
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 500, color: '#586782' }}>{title}</h3>
+          <h3 id={titleId} style={{ margin: 0, fontSize: 16, fontWeight: 500, color: '#586782' }}>{title}</h3>
           <button
             onClick={onClose}
+            aria-label="ปิด"
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#586782', padding: 4, borderRadius: 4, display: 'flex' }}
           >
             <FiX size={18} />

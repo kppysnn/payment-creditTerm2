@@ -20,7 +20,9 @@ export function StatusBadge({ status, size = 'md', subtitle }: Props) {
       <Icon size={size === 'sm' ? 13 : 14} color={cfg.iconColor} style={{ flexShrink: 0 }} />
       <span style={{ display: 'flex', flexDirection: 'column' }}>
         <span style={{ fontSize: size === 'sm' ? 12 : 13, fontWeight: 400, color: '#505050' }}>{cfg.label}</span>
-        {subtitle && <span style={{ fontSize: 11, color: '#929EB4' }}>{subtitle}</span>}
+        {/* #586782 (token), not #929EB4 — real text (approver name), needs
+            the 4.5:1 body-text minimum, not the decorative/non-text shade. */}
+        {subtitle && <span style={{ fontSize: 11, color: '#586782' }}>{subtitle}</span>}
       </span>
     </span>
   )

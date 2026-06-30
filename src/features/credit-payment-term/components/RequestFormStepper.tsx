@@ -762,8 +762,11 @@ export function RequestFormStepper({
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>รวมสัดส่วนงวด</span>
             <span style={{ fontSize: 12, fontWeight: 700, color: pctOk ? '#586782' : '#F3554F' }}>{totalPct.toFixed(0)}%</span>
           </div>
+          {/* transform: scaleX(), not width — same visual result (the
+              rounded track clips it identically) without animating a layout
+              property on every percent change. */}
           <div style={{ height: 6, background: '#D0D6DF', borderRadius: 6, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${Math.min(Math.max(totalPct, 0), 100)}%`, background: pctOk ? '#66C5C5' : '#F3554F', transition: 'width 0.2s' }} />
+            <div style={{ height: '100%', width: '100%', transformOrigin: 'left', transform: `scaleX(${Math.min(Math.max(totalPct, 0), 100) / 100})`, background: pctOk ? '#66C5C5' : '#F3554F', transition: 'transform 0.2s' }} />
           </div>
         </div>
 

@@ -313,7 +313,11 @@ export function RequestListPage() {
                 >
                   <td style={{ padding: '14px 20px', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13, color: '#004081', overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.requestNo}</div>
-                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 11, color: '#929EB4', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.proposalNo}</div>
+                    {/* #586782 (token), not #929EB4 — this is real text
+                        (proposal number), not a decorative/non-text element;
+                        #929EB4 measures 2.7:1 on white, below WCAG AA's
+                        4.5:1 minimum for body text. */}
+                    <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 11, color: '#586782', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{req.proposalNo}</div>
                   </td>
                   <td style={{ padding: '14px 20px', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#586782' }}>{req.customerName}</td>
                   <td style={{ padding: '14px 20px', verticalAlign: 'middle', color: '#505050', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.salesName}</td>
