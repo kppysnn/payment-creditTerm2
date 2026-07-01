@@ -97,7 +97,7 @@ export function AppShell() {
           flexWrap: 'wrap',
         }}>
           {OTHER_MODULES.map(m => <ModuleTab key={m.label} icon={m.icon} label={m.label} />)}
-          <ModuleTab icon={tabPaymentCreditTerm} label="Payment & Credit Term" active to="/requests" />
+          <ModuleTab icon={tabPaymentCreditTerm} label="Credit & Payment Term" active to="/requests" />
         </nav>
       </header>
 

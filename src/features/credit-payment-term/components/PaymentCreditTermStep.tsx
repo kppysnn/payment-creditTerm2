@@ -71,7 +71,7 @@ export function PaymentCreditTermStep({ data, onChange, onNext, onBack }: Props)
   }
 
   return (
-    <Card title="Step 4 — Payment & Credit Term">
+    <Card title="Step 4 — Credit & Payment Term">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Count + reason */}
         <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '0 20px' }}>
