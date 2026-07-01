@@ -765,12 +765,6 @@ export function RequestFormStepper({
           </FormGroup>
         </div>
 
-        <Toggle
-          checked={!ctUniform}
-          onChange={on => toggleCreditTermMode(!on)}
-          label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 400 }}>ระบุเครดิตเทอมแยกแต่ละงวด</span>}
-        />
-
         {/* Preset buttons — shown for any count that has presets defined */}
         {(INSTALLMENT_PRESETS[instCount] ?? []).length > 0 && (
           <div>
@@ -796,19 +790,26 @@ export function RequestFormStepper({
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontSize: 12, color: '#586782', fontWeight: 400 }}>รายละเอียดงวด</span>
-            <Toggle
-              checked={amountInputMode}
-              onChange={on => {
-                if (on) {
-                  setInsts(insts.map(r => ({ ...r, installmentPercent: '' })))
-                  setAmountInputMode(true)
-                } else {
-                  applyPreset(equalSplitPercents(instCount))
-                  setAmountInputMode(false)
-                }
-              }}
-              label={<span style={{ fontSize: 13 }}>กรอกอิสระ</span>}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <Toggle
+                checked={!ctUniform}
+                onChange={on => toggleCreditTermMode(!on)}
+                label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 400 }}>ระบุเครดิตเทอมแยกแต่ละงวด</span>}
+              />
+              <Toggle
+                checked={amountInputMode}
+                onChange={on => {
+                  if (on) {
+                    setInsts(insts.map(r => ({ ...r, installmentPercent: '' })))
+                    setAmountInputMode(true)
+                  } else {
+                    applyPreset(equalSplitPercents(instCount))
+                    setAmountInputMode(false)
+                  }
+                }}
+                label={<span style={{ fontSize: 13 }}>กรอกอิสระ</span>}
+              />
+            </div>
           </div>
           <div style={{ border: '1px solid #D0D6DF', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{ maxHeight: 320, overflowY: 'auto' }}>
