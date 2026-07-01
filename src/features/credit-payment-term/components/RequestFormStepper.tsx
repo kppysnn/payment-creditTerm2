@@ -773,18 +773,25 @@ export function RequestFormStepper({
                   return (
                     <button key={preset.label} type="button" onClick={() => applyPreset(preset.percents)}
                       style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
-                        border: active ? '1.5px solid #66C5C5' : '1.5px solid #D0D6DF',
-                        background: '#fff', color: active ? '#004081' : '#586782' }}>
+                        border: active ? '1.5px solid #004081' : '1.5px solid #D0D6DF',
+                        background: active ? '#004081' : '#FFFFFF',
+                        color: active ? '#FFFFFF' : '#586782' }}>
                       {preset.label}
                     </button>
                   )
                 })}
-                <button type="button" onClick={applyCustom}
-                  style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
-                    border: Object.values(customPctRows).some(Boolean) ? '1.5px solid #66C5C5' : '1.5px dashed #C7CEDA',
-                    background: '#fff', color: Object.values(customPctRows).some(Boolean) ? '#004081' : '#586782' }}>
-                  ระบุเอง
-                </button>
+                {(() => {
+                  const customActive = Object.values(customPctRows).some(Boolean)
+                  return (
+                    <button type="button" onClick={applyCustom}
+                      style={{ padding: '5px 12px', borderRadius: 4, fontSize: 12, fontWeight: 400, cursor: 'pointer',
+                        border: customActive ? '1.5px solid #004081' : '1.5px dashed #C7CEDA',
+                        background: customActive ? '#004081' : '#FFFFFF',
+                        color: customActive ? '#FFFFFF' : '#586782' }}>
+                      กรอกอิสระ
+                    </button>
+                  )
+                })()}
               </div>
             </div>
 
