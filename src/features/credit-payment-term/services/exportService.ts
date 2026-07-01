@@ -247,7 +247,7 @@ function buildCustomerSection(req: Request): string {
     return `<div class="grid2">
       ${field('ประเภทลูกค้า', 'ลูกค้าเก่า')}
       ${field('ชื่อบริษัท', d.companyName)}
-      ${field('Default Credit Term', `${d.defaultCreditTerm ?? '—'} วัน`)}
+      ${field('Default Credit Term', d.defaultCreditTerm != null ? `${d.defaultCreditTerm} วัน` : 'ไม่ระบุ')}
       ${d.contactPerson ? field('ผู้ติดต่อ', d.contactPerson) : ''}
       ${d.contactPhone ? field('โทรศัพท์', d.contactPhone) : ''}
     </div>`
@@ -256,7 +256,7 @@ function buildCustomerSection(req: Request): string {
   return `<div class="grid2">
     ${field('ประเภทลูกค้า', 'Reseller')}
     ${field('Reseller', d.resellerCompanyName)}
-    ${field('Default Credit Term', `${d.defaultCreditTerm ?? '—'} วัน`)}
+    ${field('Default Credit Term', d.defaultCreditTerm != null ? `${d.defaultCreditTerm} วัน` : 'ไม่ระบุ')}
     ${d.contactPerson ? field('ผู้ติดต่อ', d.contactPerson) : ''}
     ${d.contactPhone ? field('โทรศัพท์', d.contactPhone) : ''}
     ${field('End Customer', d.endCustomerCompanyName)}

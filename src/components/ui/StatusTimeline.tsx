@@ -1,18 +1,18 @@
 import type { ApprovalHistoryEntry } from '../../features/credit-payment-term/types/approval'
 import { APPROVAL_ACTION_LABELS } from '../../features/credit-payment-term/types/approval'
 import { formatDateTime } from '../../features/credit-payment-term/utils/formatters'
-import { FiCheck, FiX, FiClock, FiFileText, FiSlash } from 'react-icons/fi'
+import { FaCheck, FaXmark, FaHourglass, FaFileLines, FaBan } from 'react-icons/fa6'
 import { MailSendIcon, RefreshIcon } from '../icons/FigmaIcons'
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
-  created: <FiFileText size={15} />,
-  draft_saved: <FiFileText size={15} />,
+  created: <FaFileLines size={14} aria-hidden="true" />,
+  draft_saved: <FaFileLines size={14} aria-hidden="true" />,
   submitted: <MailSendIcon size={15} />,
-  approved: <FiCheck size={15} />,
-  rejected: <FiX size={15} />,
+  approved: <FaCheck size={13} aria-hidden="true" />,
+  rejected: <FaXmark size={14} aria-hidden="true" />,
   edited: <RefreshIcon size={15} />,
   resubmitted: <MailSendIcon size={15} />,
-  cancelled: <FiSlash size={15} />,
+  cancelled: <FaBan size={13} aria-hidden="true" />,
 }
 
 // "approved" matches StatusBadge's teal exactly (#66C5C5, not green) — the
@@ -56,7 +56,7 @@ export function StatusTimeline({ history }: Props) {
                   flexShrink: 0,
                 }}
               >
-                {ACTION_ICONS[entry.action] ?? <FiClock size={15} />}
+                {ACTION_ICONS[entry.action] ?? <FaHourglass size={13} aria-hidden="true" />}
               </div>
               {!isLast && (
                 <div style={{ width: 2, flex: 1, background: '#D0D6DF', minHeight: 20, margin: '3px 0' }} />

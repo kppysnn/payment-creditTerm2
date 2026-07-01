@@ -31,42 +31,55 @@ npm run preview  # serve dist/
 ## 2. Project Structure
 
 ```
-src/
-├── app/
-│   ├── router.tsx          # createBrowserRouter — routes + AppShell wrapper
-│   └── UserContext.tsx     # Current user + role context
-├── assets/                 # Static images (hero.png, SVGs)
-├── components/
-│   ├── layout/
-│   │   ├── AppShell.tsx    # Sticky topbar + <Outlet /> — main shell
-│   │   ├── Sidebar.tsx     # Navy sidebar (defined but mounted separately)
-│   │   └── RoleSwitcher.tsx# Dev-only role switcher (no-print)
-│   ├── modals/
-│   │   ├── ApproveModal.tsx
-│   │   └── RejectModal.tsx
-│   └── ui/                 # ← Shared UI primitives (always use these)
-│       ├── Alert.tsx
-│       ├── BackButton.tsx
-│       ├── Button.tsx
-│       ├── Card.tsx        # also exports FieldDisplay, FieldGrid
-│       ├── FormField.tsx   # exports FormGroup, Input, Select, Textarea
-│       ├── Modal.tsx
-│       ├── StatusBadge.tsx
-│       └── StatusTimeline.tsx
-├── features/
-│   └── credit-payment-term/
-│       ├── components/     # Form steps (RequestFormStepper, step sub-components)
-│       ├── data/           # Mock data (mockCustomers, mockRequests, mockUsers)
-│       ├── pages/          # CreateRequestPage, EditRequestPage, RequestDetailPage, RequestListPage
-│       ├── services/       # creditTermService, customerService, exportService
-│       ├── types/          # TypeScript types: approval, customer, request, user
-│       └── utils/          # calculations, formatters, permissions, status, validation
-├── styles/
-│   ├── globals.css         # ← Master token definitions + global CSS utilities
-│   └── print.css           # @media print rules
-├── App.css                 # Vite template CSS (ignore for app UI)
-├── index.css               # Vite template CSS (ignore for app UI)
-└── main.tsx
+project root/
+├── src/                    # ← ALL app code lives here
+│   ├── App.tsx             # Root component: UserProvider + RouterProvider
+│   ├── main.tsx            # Entry point — mounts App, imports globals.css + print.css
+│   ├── app/
+│   │   ├── router.tsx      # createBrowserRouter — routes + AppShell wrapper
+│   │   └── UserContext.tsx # Current user + role context
+│   ├── assets/
+│   │   └── hero.png        # Placeholder image (not currently used in app UI)
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AppShell.tsx     # Sticky topbar + <Outlet /> — main shell
+│   │   │   ├── Sidebar.tsx      # Navy sidebar (defined but mounted by parent W+ app)
+│   │   │   └── RoleSwitcher.tsx # Dev-only role switcher (no-print)
+│   │   ├── modals/
+│   │   │   ├── ApproveModal.tsx
+│   │   │   ├── CancelModal.tsx
+│   │   │   └── RejectModal.tsx
+│   │   └── ui/             # ← Shared UI primitives (ALWAYS use these, never raw HTML)
+│   │       ├── Alert.tsx
+│   │       ├── BackButton.tsx
+│   │       ├── Button.tsx
+│   │       ├── Card.tsx        # also exports FieldDisplay, FieldGrid
+│   │       ├── FormField.tsx   # exports FormGroup, Input, Select, Textarea
+│   │       ├── Modal.tsx
+│   │       ├── StatusBadge.tsx
+│   │       └── StatusTimeline.tsx
+│   ├── features/
+│   │   └── credit-payment-term/
+│   │       ├── components/ # Form steps (RequestFormStepper + step sub-components)
+│   │       ├── data/       # Mock data (mockCustomers, mockRequests, mockUsers)
+│   │       ├── pages/      # CreateRequestPage, EditRequestPage, RequestDetailPage, RequestListPage
+│   │       ├── services/   # creditTermService, customerService, exportService
+│   │       ├── types/      # TypeScript types: approval, customer, request, user
+│   │       └── utils/      # calculations, formatters, permissions, status, validation
+│   └── styles/
+│       ├── globals.css     # ← Master token definitions + global CSS utilities (imported by main.tsx)
+│       └── print.css       # @media print rules (imported by main.tsx)
+├── docs/                   # Reference documentation (design, requirements, product, workflow)
+├── _figma/                 # Figma API data dumps + fetch scripts (gitignored, design reference only)
+├── _prototype/             # Old vanilla JS/CSS prototype (gitignored, not part of the React app)
+├── public/                 # Static assets served as-is (favicon.svg, icons.svg)
+├── index.html              # Vite entry HTML (lang=th, Google Fonts, mounts #root)
+├── vite.config.ts
+├── tsconfig.json / tsconfig.app.json / tsconfig.node.json
+├── eslint.config.js
+├── package.json
+├── CLAUDE.md               # ← This file — AI context + design system reference
+└── README.md               # Project overview for developers
 ```
 
 **Route tree** (`src/app/router.tsx`):
@@ -388,10 +401,10 @@ Defined globally in `:focus-visible` (globals.css). Inputs also set it imperativ
 
 ## 7. Icon System
 
-**Library:** `lucide-react` (stroke-based, no filled icons)
+**Library:** `react-icons/fa6` — FontAwesome 6 Solid (filled style, matches W+ design system icon grid)
 
 ```tsx
-import { Save, Send, Search, Plus, ChevronDown, Check, X } from 'lucide-react'
+import { FaFloppyDisk, FaPaperPlane, FaMagnifyingGlass, FaPlus, FaXmark } from 'react-icons/fa6'
 
 // Button inline:   size={15}
 // Form/nav:        size={16}
@@ -400,9 +413,34 @@ import { Save, Send, Search, Plus, ChevronDown, Check, X } from 'lucide-react'
 // Nav (Sidebar):   size={16}
 ```
 
-Icons inherit `color` from their parent's `style.color`. Pass `color="#66C5C5"` for teal accents.
+Icons accept `size`, `color`, and `style` props — same API as the old Lucide icons.
+Pass `color="#66C5C5"` for teal accents; icons inherit CSS `color` by default.
 
-**No custom SVG sprite system** — `public/icons.svg` is the Vite starter template and is not used by the app components.
+### Lucide → FA6 mapping (full reference)
+
+| Old (Lucide) | New (FA6) | Usage |
+|---|---|---|
+| `Save` | `FaFloppyDisk` | Save draft button |
+| `Send` | `FaPaperPlane` | Submit button |
+| `Search` | `FaMagnifyingGlass` | Search field button |
+| `Plus` | `FaPlus` | Add item, new request |
+| `X` | `FaXmark` | Clear/dismiss inline |
+| `ChevronLeft` | `FaChevronLeft` | Back / prev step |
+| `ChevronRight` | `FaChevronRight` | Next step |
+| `Edit` | `FaPenToSquare` | Edit request |
+| `RefreshCw` | `FaArrowsRotate` | Revised status / resubmit |
+| `Printer` | `FaPrint` | Print / PDF export |
+| `Trash2` | `FaTrashCan` | Delete row |
+| `Ban` | `FaBan` | Cancel action / cancelled status |
+| `CheckCircle` | `FaCircleCheck` | Approve action |
+| `XCircle` | `FaCircleXmark` | Reject action / rejected status |
+| `FileText` | `FaFileLines` | Draft status |
+| `Hourglass` | `FaHourglass` | Pending status |
+| `Grid2x2` | `FaTableCellsLarge` | Dashboard nav |
+| `ClipboardCheck` | `FaClipboardCheck` | Requests nav |
+| `LucideIcon` (type) | `IconType` (from `react-icons`) | Type for icon prop |
+
+**No custom SVG sprite system** — `public/icons.svg` is a Vite starter template file and is not used by the app.
 
 ---
 
@@ -411,7 +449,7 @@ Icons inherit `color` from their parent's `style.color`. Pass `color="#66C5C5"` 
 - **Source assets:** `src/assets/` (imported by components; Vite hashes and bundles them)
 - **Public static:** `public/` (served as-is at `/`)
 - **No CDN** configured
-- **Images:** Only `src/assets/hero.png` (Vite template, not used in app UI)
+- **Images:** Only `src/assets/hero.png` (placeholder, not currently used in app UI)
 - **Build output:** `dist/assets/` (content-hashed bundles)
 
 ---

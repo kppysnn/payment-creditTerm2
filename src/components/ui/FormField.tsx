@@ -34,7 +34,7 @@ export function FormGroup({ label, error, hint, required, children, style }: Bas
 
 const inputBase: React.CSSProperties = {
   width: '100%',
-  height: 38,
+  minHeight: 38,
   padding: '0 12px',
   border: '1px solid #D0D6DF',
   // 8px — matches the W+ Library "Web Text field" component (909:1107)

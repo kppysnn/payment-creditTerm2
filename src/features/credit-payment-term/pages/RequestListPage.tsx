@@ -11,11 +11,11 @@ import { DatePicker } from '../../../components/ui/DatePicker'
 import { KebabMenu, type KebabMenuItem } from '../../../components/ui/KebabMenu'
 import { DeleteRequestModal } from '../../../components/modals/DeleteRequestModal'
 import { CancelModal } from '../../../components/modals/CancelModal'
-import { SearchIcon, SortCarets, AddCircleIcon, EditIcon, PrinterIcon, TrashIcon, XMarkIcon } from '../../../components/icons/FigmaIcons'
-import { FiSlash } from 'react-icons/fi'
+import { SearchIcon, SortCarets, AddCircleIcon, EditIcon, PrinterIcon, TrashIcon, XMarkIcon, BanIcon } from '../../../components/icons/FigmaIcons'
 import { formatCurrency } from '../utils/calculations'
 import { formatDate } from '../utils/formatters'
 import { exportPDF } from '../services/exportService'
+import { useBreakpoint } from '../../../hooks/useBreakpoint'
 import type { Request } from '../types/request'
 
 const STATUSES: RequestStatus[] = ['draft', 'pending', 'approved', 'rejected', 'revised', 'cancelled']
@@ -53,13 +53,13 @@ function matchesDateRange(iso: string, fromIso: string, toIso: string): boolean 
 // neutral), navy text, gray dismiss icon, 8px/4px asymmetric padding.
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 24, padding: '0 4px 0 8px', background: '#D9F0F0', color: '#004081', borderRadius: 4, fontSize: 12 }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minHeight: 24, padding: '0 2px 0 8px', background: '#D9F0F0', color: '#004081', borderRadius: 4, fontSize: 12, flexShrink: 0 }}>
       {label}
       <button
         type="button"
         onClick={onRemove}
         aria-label={`ล้างตัวกรอง ${label}`}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#586782' }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#586782', flexShrink: 0 }}
       >
         <XMarkIcon size={9} />
       </button>
@@ -82,6 +82,8 @@ export function RequestListPage() {
   // delete. customerName comes from the row itself (already computed by
   // getRequests) instead of re-deriving it from the fetched Request.
   const [cancelTarget, setCancelTarget] = useState<{ request: Request; customerName: string } | null>(null)
+
+  const { isMobile } = useBreakpoint()
 
   const filterStatus = searchParams.get('status') ?? ''
   const filterText = searchParams.get('q') ?? ''
@@ -168,36 +170,131 @@ export function RequestListPage() {
   // (banner click, status dropdown, search, or date picker).
   const showBanner = !anyFilterActive && (rejectedBanner || pendingBanner)
 
+  // Build kebab items for a given row — shared between the table view (desktop)
+  // and the card view (mobile).
+  function buildKebabItems(req: RequestListItem): KebabMenuItem[] {
+    const isSales = currentUser.role === 'sales'
+    const isRejected = req.status === 'rejected'
+    const canEdit = isSales && (req.status === 'draft' || req.status === 'pending' || isRejected)
+    const items: KebabMenuItem[] = []
+    if (canEdit && !isRejected) {
+      items.push({ label: 'แก้ไข', icon: <EditIcon size={15} />, onClick: () => navigate(`/requests/${req.id}/edit`) })
+    }
+    items.push({ label: 'พิมพ์', icon: <PrinterIcon size={15} />, onClick: () => handleExport(req.id) })
+    if (isSales && req.status === 'draft') {
+      items.push({ label: 'ลบคำขอ', icon: <TrashIcon size={15} />, onClick: () => handleDeleteClick(req.id), danger: true })
+    }
+    if (isSales && req.status === 'pending') {
+      items.push({ label: 'ยกเลิกคำขอ', icon: <BanIcon size={15} />, onClick: () => handleCancelClick(req.id, req.customerName), danger: true })
+    }
+    return items
+  }
+
+  // Mobile card view for a single request row
+  const renderCard = (req: RequestListItem) => {
+    const isSales = currentUser.role === 'sales'
+    const isRejected = req.status === 'rejected'
+    const canEdit = isSales && (req.status === 'draft' || req.status === 'pending' || isRejected)
+    const kebabItems = buildKebabItems(req)
+
+    return (
+      <div
+        key={req.id}
+        className="req-card"
+        onClick={() => navigate(`/requests/${req.id}`)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') navigate(`/requests/${req.id}`) }}
+        aria-label={`คำขอ ${req.requestNo}`}
+      >
+        {/* Top row: request number + status */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+          <div>
+            <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 14, fontWeight: 600, color: '#004081' }}>{req.requestNo}</div>
+            <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 11, color: '#586782', marginTop: 2 }}>{req.proposalNo}</div>
+          </div>
+          <StatusBadge status={req.status} size="sm" subtitle={req.status === 'approved' ? req.approverName : undefined} />
+        </div>
+
+        {/* Customer + sales */}
+        <div style={{ fontSize: 13, color: '#586782', marginBottom: 2 }}>{req.customerName}</div>
+        <div style={{ fontSize: 12, color: '#929EB4', marginBottom: 8 }}>{req.salesName}</div>
+
+        {/* Amount + date + actions */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }} onClick={e => e.stopPropagation()}>
+          <div style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13, fontWeight: 600, color: '#004081' }}>
+            {formatCurrency(req.totalSelling)}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 11, color: '#586782' }}>{formatDate(req.updatedAt)}</span>
+            {canEdit && isRejected && (
+              <Link to={`/requests/${req.id}/edit`} onClick={e => e.stopPropagation()}>
+                <Button
+                  variant="primary" size="sm" icon={<EditIcon size={14} />}
+                  style={{ background: '#004081' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#004081' }}
+                >
+                  แก้ไข
+                </Button>
+              </Link>
+            )}
+            <KebabMenu items={kebabItems} ariaLabel={`ตัวเลือกสำหรับ ${req.requestNo}`} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Title + New Request — stack on mobile */}
+      <div style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        justifyContent: 'space-between',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        gap: 12,
+      }}>
         <h1 className="page-title">Credit & Payment Term</h1>
         {currentUser.role === 'sales' && (
-          <Link to="/requests/new"><Button icon={<AddCircleIcon size={15} />}>สร้างคำขอใหม่</Button></Link>
+          <Link to="/requests/new" style={isMobile ? { width: '100%' } : {}}>
+            <Button icon={<AddCircleIcon size={15} />} style={isMobile ? { width: '100%', justifyContent: 'center' } : {}}>
+              สร้างคำขอใหม่
+            </Button>
+          </Link>
         )}
       </div>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      {/* Filters — on mobile: column layout, full width */}
+      <div style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        justifyContent: 'space-between',
+        alignItems: isMobile ? 'stretch' : 'center',
+        gap: 12,
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center',
+          gap: 12,
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Filter-bar labels are English/regular/#707070 in WorkX's own
-                filter row (Exzy_WorkX 851:2542, "Month") — distinct from this
-                module's usual Thai/600/#586782 form labels, which still apply
-                everywhere else (FormGroup, FieldDisplay). Scoped to just this
-                bar, not a general app-wide language change. */}
-            <span style={{ fontSize: 16, fontWeight: 400, color: '#707070' }}>Status</span>
+            {/* Filter-bar labels match WorkX's own filter row (Exzy_WorkX 851:2542) —
+                English text, regular weight, same #586782 as other labels but
+                lighter-feeling due to font size 16px context. */}
+            <span style={{ fontSize: 16, fontWeight: 400, color: '#586782', flexShrink: 0 }}>Status</span>
             <Select
               value={filterStatus}
               onChange={e => setSearchParams(p => { const n = new URLSearchParams(p); n.set('status', e.target.value); return n })}
-              style={{ width: 170 }}
+              style={{ flex: 1, minWidth: 0, width: isMobile ? undefined : 170 }}
             >
               <option value="">ทุกสถานะ</option>
               {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
             </Select>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 16, fontWeight: 400, color: '#707070' }}>Date</span>
+            <span style={{ fontSize: 16, fontWeight: 400, color: '#586782', flexShrink: 0 }}>Date</span>
             <DatePicker
               startValue={filterDateFrom || null}
               endValue={filterDateTo || null}
@@ -207,16 +304,16 @@ export function RequestListPage() {
                 else { n.delete('dateFrom'); n.delete('dateTo') }
                 return n
               })}
-              style={{ width: 190 }}
+              style={{ flex: 1, minWidth: 0, width: isMobile ? undefined : 190 }}
             />
           </div>
         </div>
-        <div style={{ position: 'relative', width: 280 }}>
+        <div style={{ position: 'relative', width: isMobile ? '100%' : 280 }}>
           <Input
             value={filterText}
             onChange={e => setSearchParams(p => { const n = new URLSearchParams(p); n.set('q', e.target.value); return n })}
             placeholder="ค้นหา Request No., ลูกค้า..."
-            style={{ paddingRight: 36 }}
+            style={{ paddingRight: 36, width: '100%' }}
           />
           <SearchIcon size={15} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
         </div>
@@ -225,12 +322,13 @@ export function RequestListPage() {
       {/* Table block — matches the WorkX host's table pattern (Figma node
           730:25425) exactly: no outer border/box around the table at all, just
           a flat notice bar flush above it, separated only by a thin
-          border-top divider. No count/title bar — Figma's table has none. */}
+          border-top divider. No count/title bar — Figma's table has none.
+          On mobile this becomes a card list. */}
       <div style={{ background: '#FFFFFF' }}>
         {anyFilterActive ? (
           // Tags, not a status sentence — reads as "here's what you've
           // picked," not a system reporting its own state back at you.
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', flexWrap: 'wrap' }}>
             {filterStatus && (
               <FilterChip
                 label={STATUS_LABELS[filterStatus as RequestStatus]}
@@ -258,9 +356,9 @@ export function RequestListPage() {
           </div>
         ) : showBanner && (
           rejectedBanner ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 24px', background: '#FEF2F2', color: '#7F1D1D' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: '#FEF2F2', color: '#7F1D1D', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
-              <span style={{ fontSize: 14, flex: 1 }}>มี {counts.rejected} คำขอที่ถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่</span>
+              <span style={{ fontSize: 14, flex: 1, minWidth: 140 }}>มี {counts.rejected} คำขอที่ถูกปฏิเสธ — กรุณาแก้ไขและส่งใหม่</span>
               {/* secondary, not ghost — ghost is transparent with a
                   transparent border, invisible against a tinted banner bg
                   and unrecognizable as a button. secondary's solid white +
@@ -268,19 +366,94 @@ export function RequestListPage() {
               <Button variant="secondary" size="sm" onClick={() => setSearchParams({ status: 'rejected' })}>ดูคำขอที่ถูกปฏิเสธ</Button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 24px', background: '#FFFBEB', color: '#92400E' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: '#FFFBEB', color: '#92400E', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
-              <span style={{ fontSize: 14, flex: 1 }}>มี {counts.pending} คำขอที่รอคุณพิจารณา</span>
+              <span style={{ fontSize: 14, flex: 1, minWidth: 140 }}>มี {counts.pending} คำขอที่รอคุณพิจารณา</span>
               <Button variant="secondary" size="sm" onClick={() => setSearchParams({ status: 'pending' })}>ดูคำขอที่รอพิจารณา</Button>
             </div>
           )
         )}
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#586782' }}>กำลังโหลด...</div>
+          isMobile ? (
+            // Mobile skeleton
+            <div>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="req-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div className="skeleton" style={{ width: 120, height: 14 }} />
+                      <div className="skeleton" style={{ width: 80, height: 11 }} />
+                    </div>
+                    <div className="skeleton" style={{ width: 60, height: 20 }} />
+                  </div>
+                  <div className="skeleton" style={{ width: '70%', height: 13, marginBottom: 4 }} />
+                  <div className="skeleton" style={{ width: '50%', height: 11, marginBottom: 10 }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="skeleton" style={{ width: 100, height: 13 }} />
+                    <div className="skeleton" style={{ width: 60, height: 11 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr>
+                  {COLUMNS.map(col => (
+                    <th key={col.label || col.key || 'actions'} style={{ width: col.width, padding: '14px 20px', textAlign: 'left', fontWeight: 400, color: '#004081', fontSize: 13 }}>
+                      {col.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} style={{ borderTop: '1px solid #F2F6F8' }}>
+                    <td style={{ padding: '14px 20px' }}>
+                      <div className="skeleton" style={{ width: '80%', height: 13, marginBottom: 6 }} />
+                      <div className="skeleton" style={{ width: '55%', height: 11 }} />
+                    </td>
+                    {[70, 60, 80, 55, 65].map((w, j) => (
+                      <td key={j} style={{ padding: '14px 20px' }}>
+                        <div className="skeleton" style={{ width: `${w}%`, height: 13 }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#586782' }}>ไม่พบคำขอ</div>
+          anyFilterActive ? (
+            <div style={{ textAlign: 'center', padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" stroke="#D0D6DF" strokeWidth="2"/><path d="M13 20h14M20 13v14" stroke="#D0D6DF" strokeWidth="2" strokeLinecap="round" transform="rotate(45 20 20)"/></svg>
+              <div style={{ fontSize: 14, color: '#586782', fontWeight: 500 }}>ไม่พบคำขอที่ตรงกับเงื่อนไขนี้</div>
+              <div style={{ fontSize: 12, color: '#929EB4' }}>ลองเปลี่ยน filter หรือล้างเงื่อนไขออก</div>
+              <Button variant="secondary" size="sm" onClick={() => setSearchParams({})}>ล้าง filter ทั้งหมด</Button>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '56px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="10" width="32" height="28" rx="3" stroke="#D0D6DF" strokeWidth="2"/><path d="M16 20h16M16 27h10" stroke="#D0D6DF" strokeWidth="2" strokeLinecap="round"/><path d="M24 2v8M20 4l4-4 4 4" stroke="#66C5C5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <div style={{ fontSize: 15, color: '#586782', fontWeight: 500 }}>ยังไม่มีคำขออนุมัติ</div>
+              {currentUser.role === 'sales' ? (
+                <>
+                  <div style={{ fontSize: 13, color: '#929EB4' }}>สร้างคำขอแรกเพื่อเริ่มกระบวนการอนุมัติ Credit &amp; Payment Term</div>
+                  <Link to="/requests/new"><Button icon={<AddCircleIcon size={15} />}>สร้างคำขอแรก</Button></Link>
+                </>
+              ) : (
+                <div style={{ fontSize: 13, color: '#929EB4' }}>คำขอที่รอพิจารณาจะปรากฏที่นี่เมื่อ Sales ส่งคำขอเข้ามา</div>
+              )}
+            </div>
+          )
+        ) : isMobile ? (
+          // ── Mobile: card list ──────────────────────────────────────
+          <div>
+            {sorted.map(req => renderCard(req))}
+          </div>
         ) : (
+          // ── Desktop: table ─────────────────────────────────────────
+          <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderTop: (showBanner || anyFilterActive) ? '1px solid #D0D6DF' : undefined }}>
@@ -308,6 +481,9 @@ export function RequestListPage() {
                 <tr
                   key={req.id}
                   onClick={() => navigate(`/requests/${req.id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/requests/${req.id}`) } }}
+                  tabIndex={0}
+                  aria-label={`คำขอ ${req.requestNo}`}
                   className="data-row"
                   style={{ background: '#fff', transition: 'background 0.1s', cursor: 'pointer', borderTop: '1px solid #F2F6F8' }}
                 >
@@ -335,23 +511,7 @@ export function RequestListPage() {
                       // 1317:2856 "option_dropdown" + 934:7551's dropdown list)
                       // — order is deliberate: the common, safe actions first,
                       // the one destructive action last and visually split off.
-                      const kebabItems: KebabMenuItem[] = []
-                      if (canEdit && !isRejected) {
-                        kebabItems.push({ label: 'แก้ไข', icon: <EditIcon size={15} />, onClick: () => navigate(`/requests/${req.id}/edit`) })
-                      }
-                      kebabItems.push({ label: 'พิมพ์', icon: <PrinterIcon size={15} />, onClick: () => handleExport(req.id) })
-                      if (isSales && req.status === 'draft') {
-                        kebabItems.push({ label: 'ลบคำขอ', icon: <TrashIcon size={15} />, onClick: () => handleDeleteClick(req.id), danger: true })
-                      }
-                      // Pending is a real submission (an approver may already
-                      // be reviewing it), unlike a draft — so its "remove"
-                      // action routes through the existing Cancel flow
-                      // (reason required, history kept) instead of a silent
-                      // hard delete. Different label on purpose: this isn't
-                      // the same action as "ลบคำขอ" above.
-                      if (isSales && req.status === 'pending') {
-                        kebabItems.push({ label: 'ยกเลิกคำขอ', icon: <FiSlash size={15} />, onClick: () => handleCancelClick(req.id, req.customerName), danger: true })
-                      }
+                      const kebabItems = buildKebabItems(req)
 
                       return (
                         <div style={{ display: 'flex', gap: 14, justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -388,6 +548,7 @@ export function RequestListPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

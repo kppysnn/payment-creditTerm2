@@ -3,7 +3,7 @@ import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { Checkbox } from '../ui/Checkbox'
 import { FormGroup, Textarea } from '../ui/FormField'
-import { FiSlash } from 'react-icons/fi'
+import { FaBan } from 'react-icons/fa6'
 import type { Request } from '../../features/credit-payment-term/types/request'
 
 interface Props {
@@ -47,7 +47,7 @@ export function CancelModal({ open, request, customerName, onClose, onCancel }: 
           <Button variant="secondary" onClick={onClose} disabled={loading}>ปิด</Button>
           <Button
             variant="danger"
-            icon={<FiSlash size={15} />}
+            icon={<FaBan size={15} aria-hidden="true" />}
             onClick={handleSubmit}
             loading={loading}
           >

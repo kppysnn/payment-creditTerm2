@@ -11,7 +11,7 @@ const VARIANT_BASE: Record<Variant, CSSProperties> = {
   },
   secondary: {
     background: '#FFFFFF',
-    color: '#707070',
+    color: '#586782',
     border: '1px solid #D0D6DF',
   },
   danger: {
@@ -127,9 +127,10 @@ export function Button({
         onClick?.(e)
         // Actions like window.print()/window.confirm() can block the event loop long
         // enough that the browser drops the mouseleave event, leaving the hover style
-        // stuck until refresh. Re-check once the window regains focus.
+        // stuck until refresh. Re-check once the window regains focus, and clean up
+        // the listener via blur so listeners don't accumulate if window focus never fires.
         const el = e.currentTarget
-        window.addEventListener('focus', () => {
+        const resetStyle = () => {
           if (!el.matches(':hover')) {
             Object.assign(el.style, {
               filter: '',
@@ -140,7 +141,9 @@ export function Button({
               color: (base.color as string) ?? '',
             })
           }
-        }, { once: true })
+        }
+        window.addEventListener('focus', resetStyle, { once: true })
+        el.addEventListener('blur', () => { window.removeEventListener('focus', resetStyle); resetStyle() }, { once: true })
       }}
     >
       {loading ? (

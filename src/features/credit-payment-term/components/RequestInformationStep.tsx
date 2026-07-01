@@ -5,7 +5,7 @@ import { FormGroup, Input } from '../../../components/ui/FormField'
 import { searchCustomers } from '../services/customerService'
 import type { Customer, CustomerType } from '../types/customer'
 import { CUSTOMER_TYPE_LABELS } from '../types/customer'
-import { FiX } from 'react-icons/fi'
+import { FaXmark } from 'react-icons/fa6'
 import { ChevronIcon, SearchIcon } from '../../../components/icons/FigmaIcons'
 
 interface Props {
@@ -210,7 +210,7 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
                   <div style={{ fontSize: 12, color: '#586782', marginTop: 3 }}>Net {numVal(ec.defaultCreditTerm)} · {String(ec.contactPerson ?? '')}</div>
                 </div>
                 <button onClick={() => onChange({ existingCustomerId: '', existingCustomer: {} })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#929EB4', padding: 4 }}>
-                  <FiX size={16} />
+                  <FaXmark size={16} />
                 </button>
               </div>
             ) : (
@@ -243,7 +243,7 @@ export function RequestInformationStep({ data, onChange, onNext }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(0,64,129,0.05)', borderRadius: 6, border: '1px solid rgba(0,64,129,0.14)', marginBottom: 14 }}>
                 <span style={{ fontWeight: 700, color: '#004081', fontSize: 14 }}>{rs.resellerCompanyName}</span>
                 <button onClick={() => { onChange({ reseller: { ...rs, resellerId: '', resellerCompanyName: '' } }); clearSearch() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#929EB4', padding: 4 }}>
-                  <FiX size={16} />
+                  <FaXmark size={16} />
                 </button>
               </div>
             ) : (

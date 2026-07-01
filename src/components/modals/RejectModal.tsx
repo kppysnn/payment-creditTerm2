@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { Checkbox } from '../ui/Checkbox'
-import { FiXCircle } from 'react-icons/fi'
+import { FaCircleXmark } from 'react-icons/fa6'
 import type { Request } from '../../features/credit-payment-term/types/request'
 import type { SectionComments } from '../../features/credit-payment-term/types/approval'
 
@@ -48,7 +48,7 @@ export function RejectModal({ open, request, customerName, comments, onClose, on
           <Button variant="secondary" onClick={onClose} disabled={loading}>ยกเลิก</Button>
           <Button
             variant="danger"
-            icon={<FiXCircle size={15} />}
+            icon={<FaCircleXmark size={15} aria-hidden="true" />}
             onClick={handleSubmit}
             loading={loading}
           >

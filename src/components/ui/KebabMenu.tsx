@@ -69,7 +69,7 @@ export function KebabMenu({ items, ariaLabel = 'เมนู' }: Props) {
                 display: 'flex', alignItems: 'center', gap: 10, width: '100%',
                 padding: '10px 16px', border: 'none', background: 'none', cursor: 'pointer',
                 fontSize: 14, fontFamily: 'inherit', textAlign: 'left',
-                color: item.danger ? '#F3554F' : '#707070',
+                color: item.danger ? '#F3554F' : '#586782',
                 borderTop: item.danger ? '1px solid #D0D6DF' : 'none',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}

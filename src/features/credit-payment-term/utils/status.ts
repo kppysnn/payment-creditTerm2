@@ -1,5 +1,5 @@
 import type { IconType } from 'react-icons'
-import { FiFileText, FiSlash } from 'react-icons/fi'
+import { FaFileLines, FaBan } from 'react-icons/fa6'
 import { XMarkIcon, HourglassIcon, CheckCircleIcon, RefreshIcon } from '../../../components/icons/FigmaIcons'
 import type { RequestStatus } from '../types/request'
 import { STATUS_LABELS } from '../types/request'
@@ -17,7 +17,7 @@ export const STATUS_CONFIG: Record<RequestStatus, StatusConfig> = {
   draft: {
     label: STATUS_LABELS.draft,
     iconColor: '#929EB4',
-    icon: FiFileText,
+    icon: FaFileLines,
   },
   pending: {
     label: STATUS_LABELS.pending,
@@ -42,7 +42,7 @@ export const STATUS_CONFIG: Record<RequestStatus, StatusConfig> = {
   cancelled: {
     label: STATUS_LABELS.cancelled,
     iconColor: '#6B7280',
-    icon: FiSlash,
+    icon: FaBan,
   },
 }
 

@@ -157,9 +157,61 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* Skeleton shimmer for loading states */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #F2F6F8 25%, #E8EDF2 50%, #F2F6F8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  display: inline-block;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+
+/* Module tab row: always horizontally scrollable so it never wraps
+   or clips on any viewport. overscroll-behavior prevents the page
+   from chain-scrolling when the strip hits its edge. */
+.module-tabs-row {
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.module-tabs-row::-webkit-scrollbar { display: none; }
+
+/* Request list card (table → card transform on mobile) */
+.req-card {
+  background: #fff;
+  border-bottom: 1px solid #F2F6F8;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.req-card:hover { background: #F8F9FA; }
+.req-card:active { background: #F2F6F8; }
+
+@media (max-width: 639px) {
+  /* AppShell main padding */
+  .app-main { padding: 16px !important; }
+
+  /* Page title scale-down */
+  .page-title { font-size: 24px !important; }
+
+  /* White content panels inside pages */
+  .content-panel { padding: 20px 16px !important; }
+
+  /* Section gap tighter on mobile */
+  .content-panel-inner { gap: 24px !important; }
 }

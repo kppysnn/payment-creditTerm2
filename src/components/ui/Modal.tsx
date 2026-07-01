@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
-import { FiX } from 'react-icons/fi'
+import { FaXmark } from 'react-icons/fa6'
 
 interface Props {
   open: boolean
@@ -31,7 +31,27 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
     previouslyFocused.current = document.activeElement as HTMLElement | null
     boxRef.current?.focus()
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') { onClose(); return }
+      if (e.key !== 'Tab') return
+      const box = boxRef.current
+      if (!box) return
+      const focusable = Array.from(
+        box.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      )
+      if (focusable.length === 0) { e.preventDefault(); return }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first || document.activeElement === box) {
+          e.preventDefault(); last.focus()
+        }
+      } else {
+        if (document.activeElement === last || document.activeElement === box) {
+          e.preventDefault(); first.focus()
+        }
+      }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => {
@@ -100,7 +120,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: P
             aria-label="ปิด"
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#586782', padding: 4, borderRadius: 4, display: 'flex' }}
           >
-            <FiX size={18} />
+            <FaXmark size={18} aria-hidden="true" />
           </button>
         </div>
 

@@ -6,9 +6,12 @@ interface CardProps {
   style?: CSSProperties
   actions?: ReactNode
   noPad?: boolean
+  /** Set to false on purely informational cards that are not clickable/interactive,
+   *  to prevent the lift-hover from implying clickability. Defaults to true. */
+  interactive?: boolean
 }
 
-export function Card({ title, children, style, actions, noPad }: CardProps) {
+export function Card({ title, children, style, actions, noPad, interactive = true }: CardProps) {
   return (
     <div
       style={{
@@ -16,19 +19,19 @@ export function Card({ title, children, style, actions, noPad }: CardProps) {
         border: '1px solid #D0D6DF',
         borderRadius: 4,
         overflow: 'hidden',
-        transition: 'box-shadow 0.15s, transform 0.12s, border-color 0.15s',
+        transition: interactive ? 'box-shadow 0.15s, transform 0.12s, border-color 0.15s' : undefined,
         ...style,
       }}
-      onMouseEnter={e => {
+      onMouseEnter={interactive ? e => {
         e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,64,129,0.07)'
         e.currentTarget.style.transform = 'translateY(-2px)'
         e.currentTarget.style.borderColor = 'rgba(102,197,197,0.5)'
-      }}
-      onMouseLeave={e => {
+      } : undefined}
+      onMouseLeave={interactive ? e => {
         e.currentTarget.style.boxShadow = ''
         e.currentTarget.style.transform = ''
         e.currentTarget.style.borderColor = '#D0D6DF'
-      }}
+      } : undefined}
     >
       {(title || actions) && (
         <div style={{

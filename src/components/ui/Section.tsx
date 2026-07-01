@@ -23,7 +23,7 @@ export function Section({ title, children, style, actions }: SectionProps) {
           {/* Weight 500 (Medium), not 700 — WorkX's own text/title is Poppins
               Medium everywhere checked (page title, modal header); it never
               goes as heavy as bold. */}
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 500, color: '#586782', letterSpacing: '-0.01em' }}>{title}</h3>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 500, color: '#586782', letterSpacing: '-0.01em' }}>{title}</h2>
           {actions && <div style={{ display: 'flex', gap: 8 }}>{actions}</div>}
         </div>
       )}

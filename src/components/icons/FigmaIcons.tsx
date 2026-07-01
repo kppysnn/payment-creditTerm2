@@ -143,14 +143,25 @@ export function PrinterIcon({ size = 15, color = 'currentColor', style }: IconPr
   )
 }
 
-/** Pencil/edit — Figma's "icon_Edit" (937:1064), exact path. */
+/** Pencil/edit — Figma's "icon_Edit" (937:1064). The frame's border used to be
+ * drawn as a single fill path via fillRule="evenodd" (outer rect minus inner
+ * rect) — that construction silently dropped the entire right edge in every
+ * browser tested (not a cross-machine rendering quirk; confirmed broken here
+ * too once rendered in isolation), leaving the icon looking like an open "C"
+ * instead of a frame with just the top-right corner open for the pencil.
+ * Rebuilt as a single open stroke path tracing the same outer/inner bounds
+ * the original fill used — same visual thickness and corner radius, just a
+ * construction that can't have a fill region silently cancel out. */
 export function EditIcon({ size = 15, color = 'currentColor', style }: IconProps) {
   const n = Number(size)
   return (
     <svg width={n} height={n * (14.5 / 14.648)} viewBox="0 0 14.648 14.5" style={style}>
       <path d="M14.5016 1.43934C14.6969 1.6346 14.6969 1.95118 14.5016 2.14645L13.4587 3.18933L11.4587 1.18933L12.5016 0.146447C12.6969 -0.0488156 13.0134 -0.0488154 13.2087 0.146447L14.5016 1.43934Z" fill={color} />
       <path d="M12.7516 3.89644L10.7516 1.89644L3.93861 8.70943C3.88372 8.76432 3.84237 8.83123 3.81782 8.90487L3.01326 11.3186C2.94812 11.514 3.13405 11.6999 3.32949 11.6348L5.74317 10.8302C5.81681 10.8057 5.88372 10.7643 5.93861 10.7094L12.7516 3.89644Z" fill={color} />
-      <path fillRule="evenodd" clipRule="evenodd" d="M0 13C0 13.8284 0.671573 14.5 1.5 14.5H12.5C13.3284 14.5 14 13.8284 14 13V7C14 6.72386 13.7761 6.5 13.5 6.5C13.2239 6.5 13 6.72386 13 7V13C13 13.2761 12.7761 13.5 12.5 13.5H1.5C1.22386 13.5 1 13.2761 1 13V2C1 1.72386 1.22386 1.5 1.5 1.5H8C8.27614 1.5 8.5 1.27614 8.5 1C8.5 0.723858 8.27614 0.5 8 0.5H1.5C0.671573 0.5 0 1.17157 0 2V13Z" fill={color} />
+      <path
+        d="M8,1 L1.5,1 A0.5,0.5 0 0 0 1,1.5 L1,13.5 A0.5,0.5 0 0 0 1.5,14 L12.5,14 A0.5,0.5 0 0 0 13,13.5 L13,7"
+        fill="none" stroke={color} strokeWidth="1" strokeLinecap="round"
+      />
     </svg>
   )
 }
@@ -161,6 +172,24 @@ export function TrashIcon({ size = 15, color = 'currentColor', style }: IconProp
   return (
     <svg width={n} height={n * (18 / 14)} viewBox="0 0 14 18" style={style}>
       <path d="M9.12 7.47L7 9.59L4.87 7.47L3.46 8.88L5.59 11L3.47 13.12L4.88 14.53L7 12.41L9.12 14.53L10.53 13.12L8.41 11L10.53 8.88L9.12 7.47ZM10.5 1L9.5 0H4.5L3.5 1H0V3H14V1H10.5ZM1 16C1 17.1 1.9 18 3 18H11C12.1 18 13 17.1 13 16V4H1V16ZM3 6H11V16H3V6Z" fill={color} />
+    </svg>
+  )
+}
+
+/** Solid filled circle with X inside — mirror of CheckCircleIcon for rejection/error states. */
+export function XCircleIcon({ size = 14, color = '#F3554F', style }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 18" style={style}>
+      <path d="M9 0C4.02944 0 0 4.02944 0 9C0 13.9706 4.02944 18 9 18C13.9706 18 18 13.9706 18 9C18 4.02944 13.9706 0 9 0ZM12.5355 12.5355C12.2426 12.8284 11.7574 12.8284 11.4645 12.5355L9 10.0711L6.53553 12.5355C6.24264 12.8284 5.75736 12.8284 5.46447 12.5355C5.17157 12.2426 5.17157 11.7574 5.46447 11.4645L7.92893 9L5.46447 6.53553C5.17157 6.24264 5.17157 5.75736 5.46447 5.46447C5.75736 5.17157 6.24264 5.17157 6.53553 5.46447L9 7.92893L11.4645 5.46447C11.7574 5.17157 12.2426 5.17157 12.5355 5.46447C12.8284 5.75736 12.8284 6.24264 12.5355 6.53553L10.0711 9L12.5355 11.4645C12.8284 11.7574 12.8284 12.2426 12.5355 12.5355Z" fill={color} />
+    </svg>
+  )
+}
+
+/** Circle with diagonal slash — ban/cancel/no-entry symbol. Used for cancel actions. */
+export function BanIcon({ size = 14, color = 'currentColor', style }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 18" style={style}>
+      <path fillRule="evenodd" clipRule="evenodd" d="M9 0C4.02944 0 0 4.02944 0 9C0 13.9706 4.02944 18 9 18C13.9706 18 18 13.9706 18 9C18 4.02944 13.9706 0 9 0ZM2 9C2 5.13401 5.13401 2 9 2C10.6584 2 12.1924 2.57001 13.3995 3.51472L3.51472 13.3995C2.57001 12.1924 2 10.6584 2 9ZM4.6005 14.4853C5.80761 15.43 7.34164 16 9 16C12.866 16 16 12.866 16 9C16 7.34164 15.43 5.80761 14.4853 4.6005L4.6005 14.4853Z" fill={color} />
     </svg>
   )
 }

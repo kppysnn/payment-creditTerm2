@@ -23,3 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Reference / scratch folders (not part of the app)
+_prototype/
+_figma/
+
+# AI tooling
+.impeccable/
+.claude/
+
+# macOS
+**/.DS_Store
