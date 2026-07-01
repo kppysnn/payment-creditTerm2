@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useBreakpoint } from '../../../hooks/useBreakpoint'
 import type { Request } from '../types/request'
 import type { CurrentUser } from '../types/user'
 import type { Customer, CustomerType } from '../types/customer'
@@ -12,7 +13,8 @@ import { Modal } from '../../../components/ui/Modal'
 import { FormGroup, Input, Select } from '../../../components/ui/FormField'
 import { formatCurrency, calcInstallmentAmount, calcTotalInstallmentPercent } from '../utils/calculations'
 import { searchCustomers } from '../services/customerService'
-import { FiSave, FiX } from 'react-icons/fi'
+import { FaFloppyDisk } from 'react-icons/fa6'
+import { XMarkIcon } from '../../../components/icons/FigmaIcons'
 
 interface InstRow { installmentPercent: number | ''; creditTermDays: number | ''; paymentCondition: PaymentCondition | '' }
 
@@ -27,9 +29,9 @@ interface Props {
 }
 
 const SALE_TYPES = [
-  { value: 'hardware', label: 'Quotation เดียว' },
-  { value: 'hardware_software_installation', label: 'แยก Quotation' },
-  { value: 'lump_sum', label: 'Lump Sum' },
+  { value: 'hardware', label: 'Quotation เดียว', desc: 'Hardware หรือ Software ในใบเดียว' },
+  { value: 'hardware_software_installation', label: 'แยก Quotation', desc: 'Hardware แยกจาก Software & Installation' },
+  { value: 'lump_sum', label: 'Lump Sum', desc: 'รวมทุกรายการ ไม่แยกใบ' },
 ]
 const CUSTOMER_TYPES: CustomerType[] = ['new', 'existing', 'reseller']
 const CREDIT_TERM_PRESETS = [7, 15, 30, 60, 90, 120]
@@ -138,6 +140,7 @@ export function RequestFormStepper({
   initialRequest, currentUser, onSaveDraft, onSubmit, onResubmit, isResubmit = false, isPendingEdit = false,
 }: Props) {
   const req = initialRequest
+  const { isMobile } = useBreakpoint()
 
   const [formData, setFormData] = useState<Record<string, unknown>>(
     req ? flattenRequest(req) : getDefaults(currentUser),
@@ -150,6 +153,8 @@ export function RequestFormStepper({
   // rejection" and ask for one extra confirmation before sending.
   const initialSnapshotRef = useRef<string | null>(null)
   const [noChangeConfirmOpen, setNoChangeConfirmOpen] = useState(false)
+  const [activeStep, setActiveStep] = useState(0)
+  const isDirtyRef = useRef(false)
 
   const [existingDropdownOpen, setExistingDropdownOpen] = useState(false)
   const [existingResults, setExistingResults] = useState<Customer[]>([])
@@ -251,6 +256,7 @@ export function RequestFormStepper({
   const totalCost      = hwCost + serviceCost
 
   function update(patch: Record<string, unknown>) {
+    isDirtyRef.current = true
     setFormData(prev => ({ ...prev, ...patch }))
   }
 
@@ -293,6 +299,35 @@ export function RequestFormStepper({
   useEffect(() => {
     if (isResubmit) initialSnapshotRef.current = JSON.stringify(collectData())
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const STEP_LABELS = ['ข้อมูลคำขอ', 'ข้อมูลลูกค้า', 'ใบเสนอราคา', 'สรุปและยืนยัน']
+  const STEP_IDS = ['section-info', 'section-customer', 'section-quotation', 'section-summary']
+
+  useEffect(() => {
+    function onScroll() {
+      const mid = window.scrollY + window.innerHeight * 0.4
+      let current = 0
+      STEP_IDS.forEach((id, i) => {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top + window.scrollY <= mid) current = i
+      })
+      setActiveStep(current)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      if (!isDirtyRef.current) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
   }, [])
 
   function validate(): boolean {
@@ -339,7 +374,7 @@ export function RequestFormStepper({
 
   async function handleDraft() {
     setDraftLoading(true); setSubmitError('')
-    try { await onSaveDraft(collectData()) } catch (err: unknown) { setSubmitError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด') }
+    try { await onSaveDraft(collectData()); isDirtyRef.current = false } catch (err: unknown) { setSubmitError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด') }
     finally { setDraftLoading(false) }
   }
 
@@ -348,6 +383,7 @@ export function RequestFormStepper({
     try {
       if (isResubmit && onResubmit) await onResubmit(collectData())
       else await onSubmit(collectData())
+      isDirtyRef.current = false
     } catch (err: unknown) { setSubmitError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด') }
     finally { setSubmitLoading(false) }
   }
@@ -377,7 +413,7 @@ export function RequestFormStepper({
 
   const comboDropdown = (results: Customer[], visible: boolean, onSelect: (c: Customer) => void) =>
     visible && (
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflowY: 'auto', maxHeight: 220, marginTop: 6 }}>
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflowY: 'auto', maxHeight: 220, marginTop: 6 }}>
         {results.length > 0 ? results.map(c => (
           <button key={c.id}
             onMouseDown={e => { e.preventDefault(); onSelect(c) }}
@@ -581,7 +617,7 @@ export function RequestFormStepper({
                   onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                   aria-label="เลือกจากรายการแทน">
-                  <FiX size={13} />
+                  <XMarkIcon size={13} />
                 </button>
               </div>
             </div>
@@ -600,7 +636,7 @@ export function RequestFormStepper({
               onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
               aria-label="เลือกจากรายการแทน">
-              <FiX size={16} />
+              <XMarkIcon size={16} />
             </button>
           </div>
         )
@@ -628,7 +664,7 @@ export function RequestFormStepper({
 
         {/* Credit Term + Count */}
         <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <FormGroup label="Credit Term" required={ctUniform} error={errors[ctErrKey]} style={{ width: 200 }}>
+          <FormGroup label="Credit Term" required={ctUniform} error={errors[ctErrKey]} style={{ width: 200 }} hint={ctUniform ? 'จำนวนวันที่ลูกค้าชำระหลังรับสินค้า/บริการ' : undefined}>
             {!ctUniform ? (
               <div style={{ height: 38, display: 'flex', alignItems: 'center', fontSize: 13, color: '#929EB4', fontStyle: 'italic' }}>
                 กำหนดแยกต่องวด
@@ -649,7 +685,7 @@ export function RequestFormStepper({
                   onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                   aria-label="เลือกจากรายการแทน">
-                  <FiX size={16} />
+                  <XMarkIcon size={16} />
                 </button>
               </div>
             ) : (
@@ -703,7 +739,7 @@ export function RequestFormStepper({
                   onMouseEnter={e => { e.currentTarget.style.background = '#F2F6F8' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                   aria-label="เลือกจากรายการแทน">
-                  <FiX size={16} />
+                  <XMarkIcon size={16} />
                 </button>
               </div>
             ) : (
@@ -914,6 +950,29 @@ export function RequestFormStepper({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 760, margin: '0 auto' }}>
 
+      {/* Step progress indicator — on mobile only the number + abbreviated
+          label show to prevent wrapping. The full label appears on ≥640px. */}
+      <div style={{ display: 'flex', gap: 0 }}>
+        {STEP_LABELS.map((label, i) => (
+          <div
+            key={i}
+            role="button"
+            tabIndex={0}
+            aria-label={`ไปยัง ${label}`}
+            onClick={() => document.getElementById(STEP_IDS[i])?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById(STEP_IDS[i])?.scrollIntoView({ behavior: 'smooth', block: 'start' }) } }}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '0 4px', minWidth: 0, cursor: 'pointer' }}
+          >
+            <div style={{ width: '100%', height: 3, borderRadius: 2, background: i < activeStep ? '#66C5C5' : i === activeStep ? '#004081' : '#D0D6DF', transition: 'background 0.3s' }} />
+            {isMobile ? (
+              <span style={{ fontSize: 11, fontWeight: i === activeStep ? 600 : 400, color: i < activeStep ? '#66C5C5' : i === activeStep ? '#004081' : '#929EB4', transition: 'color 0.3s' }}>{i + 1}</span>
+            ) : (
+              <span style={{ fontSize: 11, fontWeight: i === activeStep ? 600 : 400, color: i < activeStep ? '#66C5C5' : i === activeStep ? '#004081' : '#929EB4', transition: 'color 0.3s', whiteSpace: 'nowrap' }}>{i + 1}. {label}</span>
+            )}
+          </div>
+        ))}
+      </div>
+
       {/* One white panel for the whole form, matching WorkX's own assembled
           form (Exzy_WorkX "Edit My work", 1190:5406) — a single continuous
           white surface, not a borderless page bg with each field floating
@@ -922,12 +981,13 @@ export function RequestFormStepper({
           per-section <Card> boxes were first removed. 32px gap, not 20 —
           without a Card border to mark each section's boundary, the gap
           itself has to carry more of that signal. */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, padding: 32 }}>
+      <div className="content-panel" style={{ display: 'flex', flexDirection: 'column', gap: 32, background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, padding: 32 }}>
 
       {/* ─── 1. ข้อมูลคำขอ ─── */}
+      <div id="section-info">
       <Section title="1. ข้อมูลคำขอ">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <FormGroup label="Proposal No." required error={errors.proposalNo}>
+          <FormGroup label="Proposal No." required error={errors.proposalNo} hint="เลขใบเสนอราคาจาก CRM เช่น PRO-2026-001">
             <Input value={String(fd.proposalNo || '')} onChange={e => update({ proposalNo: e.target.value })} placeholder="PRO-2026-001" error={errors.proposalNo} />
           </FormGroup>
 
@@ -939,11 +999,14 @@ export function RequestFormStepper({
             <div style={{ fontSize: 12, fontWeight: 400, color: '#586782', marginBottom: 8 }}>
               ประเภทการขาย <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, marginLeft: 3 }}>*</span>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {SALE_TYPES.map(t => (
-                <button key={t.value} type="button" onClick={() => update({ saleType: t.value })} style={segBtn(saleType === t.value)}>
+                <button key={t.value} type="button" onClick={() => update({ saleType: t.value })} style={{ ...segBtn(saleType === t.value), alignItems: 'flex-start', flex: isMobile ? '1 1 calc(50% - 4px)' : '1' }}>
                   <RadioDot active={saleType === t.value} />
-                  {t.label}
+                  <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span>{t.label}</span>
+                    <span style={{ fontSize: 11, fontWeight: 400, color: saleType === t.value ? '#66C5C5' : '#929EB4', lineHeight: 1.3 }}>{t.desc}</span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -951,8 +1014,10 @@ export function RequestFormStepper({
           </div>
         </div>
       </Section>
+      </div>
 
       {/* ─── 2. ข้อมูลลูกค้า ─── */}
+      <div id="section-customer">
       <Section title="2. ข้อมูลลูกค้า">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {rejectionQuote(initialRequest?.approvalResult?.customerComment)}
@@ -960,11 +1025,11 @@ export function RequestFormStepper({
             <div style={{ fontSize: 12, fontWeight: 400, color: '#586782', marginBottom: 8 }}>
               ประเภทลูกค้า <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, marginLeft: 3 }}>*</span>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {CUSTOMER_TYPES.map(type => (
                 <button key={type} type="button"
                   onClick={() => { update({ customerType: type }); setExistingDropdownOpen(false); setResellerDropdownOpen(false) }}
-                  style={segBtn(customerType === type)}>
+                  style={{ ...segBtn(customerType === type), flex: isMobile ? '1 1 calc(50% - 4px)' : '1' }}>
                   <RadioDot active={customerType === type} />
                   {CUSTOMER_TYPE_LABELS[type]}
                 </button>
@@ -1003,7 +1068,7 @@ export function RequestFormStepper({
                     {!!ec.companyName && (
                       <button onClick={() => update({ existingCustomerId: '', existingCustomer: { companyName: '', defaultCreditTerm: 0 } })}
                         style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#586782', padding: 2, display: 'flex' }}>
-                        <FiX size={16} />
+                        <XMarkIcon size={16} />
                       </button>
                     )}
                   </div>
@@ -1042,7 +1107,7 @@ export function RequestFormStepper({
                       {rs.resellerCompanyName && (
                         <button onClick={() => update({ reseller: { ...rs, resellerId: '', resellerCompanyName: '', defaultCreditTerm: 0, contactPerson: '', contactPhone: '' } })}
                           style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#586782', padding: 2, display: 'flex' }}>
-                          <FiX size={16} />
+                          <XMarkIcon size={16} />
                         </button>
                       )}
                     </div>
@@ -1068,8 +1133,10 @@ export function RequestFormStepper({
           )}
         </div>
       </Section>
+      </div>
 
       {/* ─── Quotation card(s) — one merged block for lump sum, two otherwise ─── */}
+      <div id="section-quotation">
       {isLumpSum ? (
         quotationCard(hwQuotationNo, 'รวมทุกรายการ', 'linear-gradient(135deg, #66C5C5 0%, #004081 100%)', (
           <>
@@ -1110,8 +1177,10 @@ export function RequestFormStepper({
           ))}
         </>
       )}
+      </div>
 
       {/* ─── สรุปรวมทั้งหมด ─── */}
+      <div id="section-summary">
       <Section title="สรุปรวมทั้งหมด">
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
@@ -1161,23 +1230,32 @@ export function RequestFormStepper({
           </tfoot>
         </table>
       </Section>
+      </div>
 
       {/* ─── Footer ─── */}
       <div style={{ paddingTop: 20, borderTop: '1px solid #D0D6DF' }}>
         {submitError && <div style={{ marginBottom: 12, fontSize: 12, color: '#F3554F' }}>{submitError}</div>}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'stretch' : 'center',
+          gap: 16,
+        }}>
           <Checkbox
             checked={confirmed}
             onChange={setConfirmed}
             label={<span style={{ fontSize: 13, color: '#586782', fontWeight: 400, lineHeight: 1.5 }}>ตรวจสอบแล้ว ข้อมูลถูกต้องครบถ้วน</span>}
           />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <div style={{ display: 'flex', justifyContent: isMobile ? 'stretch' : 'flex-end', gap: 10, flexDirection: isMobile ? 'column' : 'row' }}>
             {!isPendingEdit && (
-              <Button variant="ghost" icon={<FiSave size={15} />} onClick={handleDraft} loading={draftLoading} disabled={submitLoading}>
+              <Button variant="ghost" icon={<FaFloppyDisk size={15} />} onClick={handleDraft} loading={draftLoading} disabled={submitLoading}
+                style={isMobile ? { width: '100%', justifyContent: 'center' } : {}}>
                 บันทึกแบบร่าง
               </Button>
             )}
-            <Button onClick={handleSubmit} loading={submitLoading} disabled={draftLoading || !confirmed}>
+            <Button onClick={handleSubmit} loading={submitLoading} disabled={draftLoading || !confirmed}
+              style={isMobile ? { width: '100%', justifyContent: 'center' } : {}}>
               {isPendingEdit ? 'บันทึกการแก้ไข' : isResubmit ? 'ส่งคำขออนุมัติอีกครั้ง' : 'ส่งคำขออนุมัติ'}
             </Button>
           </div>

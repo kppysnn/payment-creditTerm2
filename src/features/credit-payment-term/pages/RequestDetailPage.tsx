@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom'
 import { useCurrentUser } from '../../../app/UserContext'
 import { getRequestById, approveRequest, rejectRequest, cancelRequest, submitRequest } from '../services/creditTermService'
 import { exportPDF } from '../services/exportService'
@@ -21,8 +21,8 @@ import { canApproveRequest, canRejectRequest, canEditRequest, canCancelRequest, 
 import { formatCurrency } from '../utils/calculations'
 import { formatDateTime, formatCreditTerm } from '../utils/formatters'
 import { BackButton } from '../../../components/ui/BackButton'
-import { FiSlash, FiCheckCircle, FiXCircle } from 'react-icons/fi'
-import { EditIcon, RefreshIcon, PrinterIcon } from '../../../components/icons/FigmaIcons'
+import { EditIcon, RefreshIcon, PrinterIcon, CheckCircleIcon, XCircleIcon, BanIcon } from '../../../components/icons/FigmaIcons'
+import { useBreakpoint } from '../../../hooks/useBreakpoint'
 
 // Strip fields that change on every resubmit *regardless* of what sales
 // actually edited, before comparing against previousSnapshot — otherwise
@@ -57,7 +57,9 @@ function normalizeCustomerInfoForCompare(ci: RequestCustomerInfo) {
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { currentUser } = useCurrentUser()
+  const { isMobile } = useBreakpoint()
   const [req, setReq] = useState<Request | null>(null)
   const [loading, setLoading] = useState(true)
   const [approveOpen, setApproveOpen] = useState(false)
@@ -67,6 +69,15 @@ export function RequestDetailPage() {
   const [customerComment, setCustomerComment] = useState('')
   const [hardwareComment, setHardwareComment] = useState('')
   const [swComment, setSwComment] = useState('')
+  const [toastMsg, setToastMsg] = useState<string | null>(
+    (location.state as Record<string, unknown>)?.toast as string ?? null
+  )
+
+  useEffect(() => {
+    if (!toastMsg) return
+    const t = setTimeout(() => setToastMsg(null), 4000)
+    return () => clearTimeout(t)
+  }, [toastMsg])
 
   async function loadReq() {
     if (!id) return
@@ -83,8 +94,38 @@ export function RequestDetailPage() {
 
   useEffect(() => { loadReq() }, [id, currentUser])
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 48, color: '#586782' }}>กำลังโหลด...</div>
+  if (loading) return (
+    <div style={{ maxWidth: 760, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'flex-start', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="skeleton" style={{ width: 200, height: 22 }} />
+          <div className="skeleton" style={{ width: 260, height: 14 }} />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div className="skeleton" style={{ width: 110, height: 32 }} />
+          <div className="skeleton" style={{ width: 90, height: 32 }} />
+        </div>
+      </div>
+      <div style={{ background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, padding: isMobile ? '20px 16px' : 32, display: 'flex', flexDirection: 'column', gap: 32 }}>
+        {[180, 220, 280, 160].map((w, i) => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="skeleton" style={{ width: w, height: 16 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 28px' }}>
+              {Array.from({ length: 6 }).map((_, j) => (
+                <div key={j} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="skeleton" style={{ width: 80, height: 10 }} />
+                  <div className="skeleton" style={{ width: '100%', height: 14 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
   if (!req) return <div style={{ textAlign: 'center', padding: 48, color: '#586782' }}>ไม่พบคำขอ</div>
+
+  // toast rendered after all guards so the Alert component is in the tree
 
   const customerName =
     req.customerInfo.type === 'existing' ? req.customerInfo.data.companyName :
@@ -206,7 +247,7 @@ export function RequestDetailPage() {
         {labeledBand(label, undefined, framed)}
         <div style={{ padding: framed ? '0 14px 18px' : '0 0 4px' }}>
           {priorComment && !value.trim() && (
-            <div style={{ marginBottom: 8, paddingLeft: 10, borderLeft: '2px solid #F3554F', fontSize: 12, color: '#7F1D1D', lineHeight: 1.5 }}>
+            <div style={{ marginBottom: 8, padding: '8px 12px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, fontSize: 12, color: '#7F1D1D', lineHeight: 1.5 }}>
               <span style={{ fontWeight: 400 }}>ครั้งก่อนถูกปฏิเสธว่า:</span> <span style={{ fontStyle: 'italic' }}>"{priorComment}"</span>
             </div>
           )}
@@ -385,11 +426,17 @@ export function RequestDetailPage() {
       <div style={{ marginBottom: 20 }}>
         <BackButton to="/requests" label="กลับไปหน้ารายการคำขอ" />
       </div>
+      {toastMsg && (
+        <div style={{ maxWidth: 760, margin: '0 auto 16px' }}>
+          <Alert type="success">{toastMsg}</Alert>
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 760, margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        {/* Header — stacks on mobile so actions don't fight the request number
+            for horizontal space. On desktop, side-by-side as before. */}
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'flex-start', gap: 12 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 500, fontVariantNumeric: 'tabular-nums', color: '#586782' }}>{req.requestNo}</h1>
               <StatusBadge status={req.status} />
               {req.version > 1 && (
@@ -401,8 +448,8 @@ export function RequestDetailPage() {
             </p>
           </div>
 
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {/* Actions — full-width row on mobile */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: isMobile ? 'flex-start' : 'flex-end', width: isMobile ? '100%' : undefined }}>
             <Button variant="secondary" size="sm" icon={<PrinterIcon size={15} />} onClick={() => exportPDF(req)}>Print / PDF</Button>
 
             {currentUser.role === 'sales' && req.status === 'draft' && (
@@ -416,13 +463,13 @@ export function RequestDetailPage() {
               </Link>
             )}
             {canCancelRequest(currentUser, req) && (
-              <Button variant="danger" size="sm" icon={<FiSlash size={15} />} onClick={() => setCancelOpen(true)}>ยกเลิก</Button>
+              <Button variant="danger" size="sm" icon={<BanIcon size={15} />} onClick={() => setCancelOpen(true)}>ยกเลิก</Button>
             )}
             {canApproveRequest(currentUser, req) && (
-              <Button size="sm" icon={<FiCheckCircle size={15} />} onClick={() => setApproveOpen(true)}>อนุมัติ</Button>
+              <Button size="sm" icon={<CheckCircleIcon size={15} color="currentColor" />} onClick={() => setApproveOpen(true)}>อนุมัติ</Button>
             )}
             {canRejectRequest(currentUser, req) && (
-              <Button variant="danger" size="sm" icon={<FiXCircle size={15} />} onClick={() => setRejectOpen(true)}>ไม่อนุมัติ</Button>
+              <Button variant="danger" size="sm" icon={<XCircleIcon size={15} color="currentColor" />} onClick={() => setRejectOpen(true)}>ไม่อนุมัติ</Button>
             )}
           </div>
         </div>
@@ -446,7 +493,7 @@ export function RequestDetailPage() {
             each field floating loose on it. <Section> divides *inside* this
             one surface (title + thin rule); the surface itself is what was
             missing when the per-section <Card> boxes were first removed. */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 32, background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, padding: 32 }}>
+        <div className="content-panel" style={{ display: 'flex', flexDirection: 'column', gap: 32, background: '#fff', border: '1px solid #D0D6DF', borderRadius: 4, padding: 32 }}>
             {/* Request Info */}
             <Section title="ข้อมูลคำขอ">
               <FieldGrid cols={3}>

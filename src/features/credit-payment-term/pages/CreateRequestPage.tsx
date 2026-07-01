@@ -114,14 +114,14 @@ export function CreateRequestPage() {
   async function handleSaveDraft(data: Record<string, unknown>) {
     const payload = buildRequestFromFormData(data, currentUser)
     const req = await createRequest(payload)
-    navigate(`/requests/${req.id}`, { replace: true })
+    navigate(`/requests/${req.id}`, { replace: true, state: { toast: 'บันทึกแบบร่างเรียบร้อยแล้ว' } })
   }
 
   async function handleSubmit(data: Record<string, unknown>) {
     const payload = buildRequestFromFormData(data, currentUser)
     const req = await createRequest(payload)
     await submitRequest(req.id, currentUser)
-    navigate(`/requests/${req.id}`, { replace: true })
+    navigate(`/requests/${req.id}`, { replace: true, state: { toast: 'ส่งคำขออนุมัติเรียบร้อยแล้ว' } })
   }
 
   return (

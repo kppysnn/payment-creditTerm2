@@ -119,21 +119,23 @@ export function EditRequestPage() {
     if (!id) return
     const patch = buildPatch(data, currentUser)
     await saveDraft(id, patch, currentUser)
-    navigate(`/requests/${id}`, { replace: true })
+    navigate(`/requests/${id}`, { replace: true, state: { toast: 'บันทึกแบบร่างเรียบร้อยแล้ว' } })
   }
 
   async function handleSubmit(data: Record<string, unknown>) {
     if (!id) return
     const patch = buildPatch(data, currentUser)
+    let toastMsg = 'ส่งคำขออนุมัติเรียบร้อยแล้ว'
     if (isResubmit) {
       await resubmitRequest(id, patch, currentUser)
     } else if (isPendingEdit) {
       await updatePendingRequest(id, patch, currentUser)
+      toastMsg = 'บันทึกการแก้ไขเรียบร้อยแล้ว'
     } else {
       await saveDraft(id, patch, currentUser)
       await submitRequest(id, currentUser)
     }
-    navigate(`/requests/${id}`, { replace: true })
+    navigate(`/requests/${id}`, { replace: true, state: { toast: toastMsg } })
   }
 
   return (
