@@ -205,6 +205,21 @@ export function RefreshIcon({ size = 15, color = 'currentColor', style }: IconPr
   )
 }
 
+/** Hamburger — three stacked bars, standard mobile-nav toggle glyph (no
+ * matching node in the Figma file since the desktop module-tabs row has no
+ * mobile equivalent there yet). */
+export function MenuIcon({ size = 18, color = 'currentColor', style }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 14" style={style}>
+      <g stroke={color} strokeWidth={1.8} strokeLinecap="round">
+        <line x1="0" y1="1" x2="18" y2="1" />
+        <line x1="0" y1="7" x2="18" y2="7" />
+        <line x1="0" y1="13" x2="18" y2="13" />
+      </g>
+    </svg>
+  )
+}
+
 /** Mail-send (envelope + badge arrow) — Figma's "icon_Mail_send" (937:1093),
  * composited from its 3 exact layers (envelope, badge circle, mirrored arrow)
  * at their original relative positions within the 32px icon box. */

@@ -391,9 +391,15 @@ export function RequestFormStepper({
   /* ── Shared helpers ── */
   const selectStyle: React.CSSProperties = { width: '100%', height: 38 }
 
+  // Absolutely positioned (relative to the input wrapper, which sets
+  // position: relative around this) — an earlier position: relative version
+  // sat in normal flow and pushed everything below it down the moment
+  // results appeared, growing/shrinking the whole form as the user typed.
+  // Floating it over the layout instead means only the dropdown itself
+  // shows up; nothing else on the page shifts.
   const comboDropdown = (results: Customer[], visible: boolean, onSelect: (c: Customer) => void) =>
     visible && (
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflowY: 'auto', maxHeight: 220, marginTop: 6 }}>
+      <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, background: '#fff', border: '1px solid #D0D6DF', borderRadius: 6, boxShadow: '0 4px 14px rgba(0,64,129,0.10)', overflowY: 'auto', maxHeight: 220, marginTop: 6 }}>
         {results.length > 0 ? results.map(c => (
           <button key={c.id}
             onMouseDown={e => { e.preventDefault(); onSelect(c) }}
@@ -402,7 +408,11 @@ export function RequestFormStepper({
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
           >
             <div style={{ fontWeight: 400, color: '#586782' }}>{c.companyName}</div>
-            <div style={{ color: '#586782', fontSize: 12, marginTop: 2 }}>Net {c.defaultCreditTerm ?? 0} วัน · {c.contactPerson}</div>
+            {/* Contact person intentionally left out — it must be re-entered
+                by hand on every request regardless of what's on file here,
+                so showing it in the picker doesn't help the user decide and
+                just adds noise. */}
+            <div style={{ color: '#586782', fontSize: 12, marginTop: 2 }}>Net {c.defaultCreditTerm ?? 0} วัน</div>
           </button>
         )) : (
           <div style={{ padding: '10px 14px', color: '#586782', fontSize: 13 }}>ไม่พบข้อมูลลูกค้า</div>

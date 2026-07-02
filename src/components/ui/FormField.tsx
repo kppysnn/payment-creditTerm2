@@ -22,7 +22,14 @@ export function FormGroup({ label, error, hint, required, children, style }: Bas
         // is Poppins Regular, not semibold.
         <label style={{ fontSize: 12, fontWeight: 400, color: error ? '#FF3028' : '#586782' }}>
           {label}
-          {required && <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, marginLeft: 3 }}>*</span>}
+          {/* lineHeight: 1 — the ':lang(th)' global rule (line-height: 1.75)
+              scales with each element's own font-size, so at this span's
+              larger 14px it would otherwise stand 24.5px tall vs. the label
+              text's own 21px (12px × 1.75), pushing the field below it down
+              a few px on every required row. Fixing this span's line-height
+              keeps its box within the label text's own, so required and
+              non-required labels sit at the same height. */}
+          {required && <span style={{ color: '#F3554F', fontWeight: 700, fontSize: 14, lineHeight: 1, marginLeft: 3 }}>*</span>}
         </label>
       )}
       {children}
